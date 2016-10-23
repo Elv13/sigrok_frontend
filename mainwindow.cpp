@@ -23,6 +23,7 @@
 #include "nodes/meternode.h"
 #include "nodes/columnnode.h"
 #include "nodes/colornode.h"
+#include "nodes/mementonode.h"
 
 #include "widgets/devicelist.h"
 #include "widgets/charttype.h"
@@ -81,16 +82,16 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     setCentralWidget(w);
 
-    m_pSession->registerType<ChartNode> ("Chart"          , "Widgets"   , "chart_node", QIcon::fromTheme( "document-edit"        ));
-    m_pSession->registerType<TableNode> ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
-    m_pSession->registerType<MeterNode> ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
-    m_pSession->registerType<ColumnNode>("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
-    m_pSession->registerType<ColorNode> ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
-    m_pSession->registerType<ColumnNode>("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
-    m_pSession->registerType<DeviceNode>("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<ChartNode>  ("Chart"          , "Widgets"   , "chart_node", QIcon::fromTheme( "document-edit"        ));
+    m_pSession->registerType<TableNode>  ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
+    m_pSession->registerType<MeterNode>  ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
+    m_pSession->registerType<ColumnNode> ("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
+    m_pSession->registerType<ColorNode>  ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
+    m_pSession->registerType<ColumnNode> ("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
+    m_pSession->registerType<DeviceNode> ("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
 
     //DUMMY
-    m_pSession->registerType<ColorNode> ("Memento"         , "Sources"  , " ", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
     m_pSession->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
     m_pSession->registerType<ColorNode> ("Chronometer"     , "Metadata" , " ", QIcon::fromTheme( "chronometer"        ));

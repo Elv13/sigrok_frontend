@@ -9,3 +9,8 @@ void AbstractNode::write(QJsonObject &parent) const
     parent[ "title" ] = title();
 
 }
+
+void AbstractNode::read(const QJsonObject &parent)
+{
+
+}

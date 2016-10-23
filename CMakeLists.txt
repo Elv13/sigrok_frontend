@@ -68,6 +68,7 @@ set(tutorial4_SRCS
     proxies/meterproxy.cpp
     proxies/rangeproxy.cpp
     proxies/coloredrangeproxy.cpp
+    proxies/mementoproxy.cpp
 
     # Business delegates
     ratesink.cpp
@@ -93,6 +94,7 @@ set(tutorial4_SRCS
     nodes/meternode.cpp
     nodes/columnnode.cpp
     nodes/colornode.cpp
+    nodes/mementonode.cpp
 
     # Delegates
     delegates/categorizeddelegate.cpp

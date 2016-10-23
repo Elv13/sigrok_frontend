@@ -176,6 +176,7 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
 
         if (m_hIdToType[type]) {
             auto pair = addToSceneFromMetaObject(m_hIdToType[type]->m_spMetaObj);
+            pair.second->read(data);
             pair.first->setPos({
                 widget["x"].toInt(),
                 widget["y"].toInt()

@@ -4,9 +4,6 @@
 
 #include <QtCore/QAbstractItemModel>
 
-Q_DECLARE_METATYPE(QAbstractItemModel*)
-// Q_DECLARE_METATYPE(QAbstractItemModel)
-
 #include "ui_mainwindow.h"
 
 class StatusBar2;

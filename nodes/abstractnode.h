@@ -4,7 +4,7 @@
 #include <QtCore/QJsonObject>
 
 class QWidget;
-class QAbstractItemModel;
+#include <QtCore/QAbstractItemModel>
 
 class AbstractNode : public QObject
 {
@@ -19,9 +19,11 @@ public:
     virtual QWidget* widget() const {return nullptr;}
 
     virtual void write(QJsonObject &parent) const;
+    virtual void read(const QJsonObject &parent);
 
 Q_SIGNALS:
     void titleChanged(const QString& title);
 
 };
 Q_DECLARE_METATYPE(AbstractNode*)
+Q_DECLARE_METATYPE(QAbstractItemModel*)
