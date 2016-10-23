@@ -41,6 +41,18 @@ QString TableNode::title() const
     return "Table";
 }
 
+QString TableNode::id() const
+{
+    return QStringLiteral("table_node");
+}
+
+void TableNode::write(QJsonObject &parent) const
+{
+    AbstractNode::write(parent);
+
+    
+}
+
 QWidget* TableNode::widget() const
 {
     return d_ptr->m_pTableW;

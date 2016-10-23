@@ -20,6 +20,10 @@ public:
 
     virtual QString title() const;
 
+    virtual QString id() const override;
+
+    virtual void write(QJsonObject &parent) const override;
+
     virtual QWidget* widget() const;
 
     bool test2() const;

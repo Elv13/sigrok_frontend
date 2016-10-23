@@ -10,6 +10,7 @@ Q_DECLARE_METATYPE(QAbstractItemModel*)
 #include "ui_mainwindow.h"
 
 class StatusBar2;
+class ProxyNodeFactoryAdapter;
 
 class KTextEdit;
 class QDockWidget;
@@ -27,6 +28,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
   private:
     KTextEdit* textArea;
     StatusBar2* m_pStatusBar;
+    ProxyNodeFactoryAdapter* m_pSession;
     void setupActions();
 
     QString fileName;

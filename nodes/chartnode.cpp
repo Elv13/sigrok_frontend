@@ -56,6 +56,18 @@ QString ChartNode::title() const
     return "Chart";
 }
 
+QString ChartNode::id() const
+{
+    return QStringLiteral("chart_node");
+}
+
+void ChartNode::write(QJsonObject &parent) const
+{
+    AbstractNode::write(parent);
+
+    
+}
+
 QWidget* ChartNode::widget() const
 {
     return d_ptr->m_pChartW;

@@ -1,6 +1,9 @@
 #include "proxynodefactory.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonDocument>
 
 class ProxyNodeFactoryAdapterPrivate
 {
@@ -32,11 +35,8 @@ void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
 
 }
 
-
-QPair<QObjectnode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QModelIndex& idx)
+QPair<QObjectnode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaObject(const QMetaObject& meta)
 {
-    auto meta = m_slCategory[idx.parent().row()]->m_lTypes[idx.row()]->m_spMetaObj;
-
     QObject* o = meta.newInstance();
     Q_ASSERT(o);
 
@@ -52,11 +52,21 @@ QPair<QObjectnode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QMo
 
     QPair<QObjectnode*, AbstractNode*> pair {n2, anode};
 
-    m_slCategory[idx.parent().row()]->m_lTypes[idx.row()]->m_lInstances << pair;
+    m_hIdToType[anode->id()]->m_lInstances << pair;
+
+    return pair;
+}
+
+QPair<QObjectnode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QModelIndex& idx)
+{
+    auto mi = m_slCategory[idx.parent().row()]->m_lTypes[idx.row()];
+    auto meta = mi->m_spMetaObj;
+
+    auto ret = addToSceneFromMetaObject(meta);
 
     Q_EMIT dataChanged(idx, idx);
 
-    return pair;
+    return ret;
 }
 
 QVariant ProxyNodeFactoryAdapter::data(const QModelIndex& idx, int role) const
@@ -110,4 +120,72 @@ QModelIndex ProxyNodeFactoryAdapter::parent(const QModelIndex& idx) const
 QModelIndex ProxyNodeFactoryAdapter::index(int row, int column, const QModelIndex& parent) const
 {
     return createIndex(row, column, parent.isValid() ? parent.row() : -1);
+}
+
+
+void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
+{
+    QJsonObject session;
+
+    const auto cats = m_slCategory;
+
+    QJsonArray levelArray;
+
+    for (const auto& cat : cats) {
+        const auto types = cat->m_lTypes;
+        for (const auto& type : types) {
+            const auto& elems = type->m_lInstances;
+            for (const auto& elem : elems) {
+                QJsonObject data;
+                elem.second->write(data);
+
+                QJsonObject node;
+                node["data"] = data;
+
+                const auto nodeW = elem.first;
+                QJsonObject widget;
+                widget["x"] = nodeW->pos().x();
+                widget["y"] = nodeW->pos().y();
+                node["widget"] = widget;
+
+                levelArray.append(node);
+            }
+        }
+    }
+
+    session["nodes"] = levelArray;
+
+    dev->write(QJsonDocument(session).toJson());
+}
+
+void ProxyNodeFactoryAdapter::load(const QByteArray& data)
+{
+    QJsonDocument loadDoc(QJsonDocument::fromJson(data));
+
+    const auto obj = loadDoc.object();
+
+    const auto nodes = obj["nodes"].toArray();
+
+    for (int nodeId = 0; nodeId < nodes.size(); ++nodeId) {
+        const QJsonObject node = nodes[nodeId].toObject();
+
+        const auto widget = node[ "widget" ].toObject();
+        const auto data   = node[ "data"   ].toObject();
+
+        const QString type = data["id"].toString();
+
+        if (m_hIdToType[type]) {
+            auto pair = addToSceneFromMetaObject(m_hIdToType[type]->m_spMetaObj);
+            pair.first->setPos({
+                widget["x"].toInt(),
+                widget["y"].toInt()
+            });
+        }
+    }
+}
+
+void ProxyNodeFactoryAdapter::load(QIODevice *dev)
+{
+    const QByteArray data = dev->readAll();
+    load(data);
 }

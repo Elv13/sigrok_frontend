@@ -15,6 +15,7 @@
 
 class QAbstractItemModel;
 class GraphicsNodeScene;
+class QIODevice;
 
 class ProxyNodeFactoryAdapter : public QAbstractItemModel
 {
@@ -23,7 +24,7 @@ public:
     void registerNode(AbstractNode* o);
 
     template<typename T>
-    void registerType(const QString& name, const QString& cat, const QIcon& icon = {});
+    void registerType(const QString& name, const QString& id, const QString& cat, const QIcon& icon = {});
 
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
@@ -31,6 +32,11 @@ public:
     virtual int columnCount(const QModelIndex& parent = {}) const override;
     virtual QModelIndex index(int row, int column, const QModelIndex& parent ={}) const override;
     virtual QModelIndex parent(const QModelIndex& idx) const override;
+
+    void serialize(QIODevice *dev) const;
+    void load(QIODevice *dev);
+    void load(const QByteArray& data);
+    QPair<QObjectnode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o);
 
 public Q_SLOTS:
     QPair<QObjectnode*, AbstractNode*> addToScene(const QModelIndex& idx);
@@ -50,10 +56,11 @@ private:
     };
 
     QVector<Category*> m_slCategory;
+    QHash<QString, MetaInfo*> m_hIdToType;
 };
 
 template<typename T>
-void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& category, const QIcon& icon )
+void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& category, const QString& id, const QIcon& icon )
 {
     // Look for the category
     Category* cat = nullptr;
@@ -72,7 +79,11 @@ void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& c
         m_slCategory << cat;
     }
 
-    cat->m_lTypes << new ProxyNodeFactoryAdapter::MetaInfo {
+    auto mi =  new ProxyNodeFactoryAdapter::MetaInfo {
         T::staticMetaObject, name, icon
     };
+
+    cat->m_lTypes << mi;
+
+    m_hIdToType[id] = mi;
 }

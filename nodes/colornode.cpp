@@ -55,6 +55,18 @@ QString ColorNode::title() const
     return "Color";
 }
 
+QString ColorNode::id() const
+{
+    return QStringLiteral("color_node");
+}
+
+void ColorNode::write(QJsonObject &parent) const
+{
+    AbstractNode::write(parent);
+
+    
+}
+
 QWidget* ColorNode::widget() const
 {
     return d_ptr->m_pTableView;

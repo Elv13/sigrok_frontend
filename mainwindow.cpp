@@ -41,6 +41,7 @@
 
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
+#include "qt5-node-editor/src/modelnode.hpp"
 
 #include <libsigrokcxx/libsigrokcxx.hpp>
 
@@ -71,61 +72,49 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     _scene->setSceneRect(-32000, -32000, 64000, 64000);
     m_pNode->setScene(_scene);
 
-    auto deviceAdapter = new NodeAdapter<DeviceNode>(
-        devm, _scene, 1, (int) DeviceModel::Role::DEVICE_NODE
-    );
+    auto devnode = new Modelnode(devm);
+    devnode->setObjectRole((int) DeviceModel::Role::DEVICE);
+    devnode->setIdRole((int) DeviceModel::Role::DEVICE);
+    _scene->addItem(devnode);
 
-    auto n = new GraphicsNode();
-    n->setTitle("Devices");
-    n->setCentralWidget(new DeviceList());
-    for (int j = 0; j < devm->rowCount(); j++) {
-        n->setPos(j * 25, j * 25);
-        n->add_source(devm->data(devm->index(j,0), Qt::DisplayRole).toString());
-    }
-    _scene->addItem(n);
-
-    //TODO do not hardcode
-//     auto chartType = new ChartType();
-
-
-    auto pna = new ProxyNodeFactoryAdapter(_scene);
+    m_pSession = new ProxyNodeFactoryAdapter(_scene);
 
     setCentralWidget(w);
 
-    pna->registerType<ChartNode> ("Chart"          , "Widgets", QIcon::fromTheme( "document-edit"        ));
-    pna->registerType<TableNode> ("Table"          , "Widgets", QIcon::fromTheme( "configure-shortcuts"  ));
-    pna->registerType<MeterNode> ("Meter"          , "Widgets", QIcon::fromTheme( "bookmark-new"         ));
-    pna->registerType<ColumnNode>("Range filter"   , "Filters", QIcon::fromTheme( "view-filter"          ));
-    pna->registerType<ColorNode> ("Range Colorizer", "Metadata", QIcon::fromTheme( "colors-chromablue"   ));
-    pna->registerType<ColumnNode>("Column filter"  , "Filters", QIcon::fromTheme( "view-filter"          ));
+    m_pSession->registerType<ChartNode> ("Chart"          , "Widgets"   , "chart_node", QIcon::fromTheme( "document-edit"        ));
+    m_pSession->registerType<TableNode> ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
+    m_pSession->registerType<MeterNode> ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
+    m_pSession->registerType<ColumnNode>("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
+    m_pSession->registerType<ColorNode> ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
+    m_pSession->registerType<ColumnNode>("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
+    m_pSession->registerType<DeviceNode>("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
 
     //DUMMY
-    pna->registerType<ColorNode> ("Memento"         , "Sources", QIcon::fromTheme( "view-calendar-timeline"          ));
-    pna->registerType<ColorNode> ("Live aquisition" , "Sources", QIcon::fromTheme( "view-calendar-timeline"          ));
-    pna->registerType<ColorNode> ("File"            , "Sources", QIcon::fromTheme( "document-open"          ));
-    pna->registerType<ColorNode> ("Statistics"      , "Metadata", QIcon::fromTheme( "format-number-percent"        ));
-    pna->registerType<ColorNode> ("Chronometer"     , "Metadata", QIcon::fromTheme( "chronometer"        ));
-    pna->registerType<ColorNode> ("Copy"            , "Multipler",QIcon::fromTheme( "edit-copy"          ));
-    pna->registerType<ColorNode> ("CSV"             , "Exporter", QIcon::fromTheme( "document-save"      ));
-    pna->registerType<ColorNode> ("XLSX"            , "Exporter", QIcon::fromTheme( "document-share"     ));
-    pna->registerType<ColorNode> ("ODS"             , "Exporter", QIcon::fromTheme( "document-save-all"  ));
-    pna->registerType<ColorNode> ("PCAP (WireShark)", "Exporter", QIcon::fromTheme( "document-save-as"   ));
+    m_pSession->registerType<ColorNode> ("Memento"         , "Sources"  , " ", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
+    m_pSession->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
+    m_pSession->registerType<ColorNode> ("Chronometer"     , "Metadata" , " ", QIcon::fromTheme( "chronometer"        ));
+    m_pSession->registerType<ColorNode> ("Copy"            , "Multipler", " ",QIcon::fromTheme( "edit-copy"          ));
+    m_pSession->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
+    m_pSession->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
+    m_pSession->registerType<ColorNode> ("ODS"             , "Exporter" , " ", QIcon::fromTheme( "document-save-all"  ));
+    m_pSession->registerType<ColorNode> ("PCAP (WireShark)", "Exporter" , " ", QIcon::fromTheme( "document-save-as"   ));
 
-    pna->registerType<ColorNode> ("Rate watchdog"   , "Sinks"     , QIcon::fromTheme( "mail-forward"     ));
-    pna->registerType<ColorNode> ("Tail filter"     , "Filters"   , QIcon::fromTheme( "kt-add-filters"   ));
-    pna->registerType<ColorNode> ("Head filter"     , "Filters"   , QIcon::fromTheme( "kt-remove-filters"));
+    m_pSession->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
+    m_pSession->registerType<ColorNode> ("Tail filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-add-filters"   ));
+    m_pSession->registerType<ColorNode> ("Head filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
 
     //Create the node creator dock
     auto dock = new QDockWidget    ( instance );
     auto tab  = new CategorizedTree( dock     );
-    tab->setModel(pna);
+    tab->setModel(m_pSession);
     auto del = new CategorizedDelegate(tab);
     del->setChildDelegate(new AutoCompletionDelegate());
     tab->setItemDelegate(del);
     tab->setIndentation(5);
     tab->expandAll();
-    QObject::connect(tab, &QTreeView::doubleClicked, [pna](const QModelIndex& idx) {
-        pna->addToScene(idx);
+    QObject::connect(tab, &QTreeView::doubleClicked, [this](const QModelIndex& idx) {
+        m_pSession->addToScene(idx);
     });
 
     dock->setWidget(tab);
@@ -165,14 +154,14 @@ void MainWindow::newFile()
 
 void MainWindow::saveFileAs(const QString &outputFileName)
 {
-    if (!outputFileName.isNull())
-    {
+    if (!outputFileName.isNull()) {
         QSaveFile file(outputFileName);
         file.open(QIODevice::WriteOnly);
 
-        QByteArray outputByteArray;
-        outputByteArray.append(textArea->toPlainText().toUtf8());
-        file.write(outputByteArray);
+//         QByteArray outputByteArray;
+//         outputByteArray.append(textArea->toPlainText().toUtf8());
+//         file.write(outputByteArray);
+        m_pSession->serialize(&file);
         file.commit();
 
         fileName = outputFileName;
@@ -186,12 +175,10 @@ void MainWindow::saveFileAs()
 
 void MainWindow::saveFile()
 {
-    if (!fileName.isEmpty())
-    {
+    if (!fileName.isEmpty()) {
         saveFileAs(fileName);
     }
-    else
-    {
+    else {
         saveFileAs();
     }
 }
@@ -201,8 +188,7 @@ void MainWindow::openFile()
 {
     QUrl fileNameFromDialog = QFileDialog::getOpenFileUrl(this, i18n("Open File"));
 
-    if (!fileNameFromDialog.isEmpty())
-    {
+    if (!fileNameFromDialog.isEmpty()) {
         KIO::Job* job = KIO::storedGet(fileNameFromDialog);
         fileName = fileNameFromDialog.toLocalFile();
 
@@ -214,13 +200,14 @@ void MainWindow::openFile()
 
 void MainWindow::downloadFinished(KJob* job)
 {
-    if (job->error())
-    {
+    if (job->error()) {
         KMessageBox::error(this, job->errorString());
         fileName.clear();
         return;
     }
 
     KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
-    textArea->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+//     textArea->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
+
+    m_pSession->load(storedJob->data());
 }

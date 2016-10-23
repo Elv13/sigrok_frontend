@@ -58,6 +58,18 @@ QString ColumnNode::title() const
     return "Column";
 }
 
+void ColumnNode::write(QJsonObject &parent) const
+{
+    AbstractNode::write(parent);
+
+    
+}
+
+QString ColumnNode::id() const
+{
+    return QStringLiteral("column_node");
+}
+
 QWidget* ColumnNode::widget() const
 {
     return d_ptr->m_pColumnW;

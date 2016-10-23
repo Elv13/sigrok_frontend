@@ -18,7 +18,7 @@ class DeviceModel : public QAbstractListModel
 
 public:
     enum class Role {
-        DEVICE_NODE = Qt::UserRole+1
+        DEVICE = Qt::UserRole+1,
     };
 
     static DeviceModel* instance();
@@ -30,6 +30,7 @@ public:
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     std::shared_ptr<sigrok::HardwareDevice> currentDevice() const;
 

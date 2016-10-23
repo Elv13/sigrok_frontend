@@ -75,6 +75,18 @@ QString MeterNode::title() const
     return "Meter";
 }
 
+QString MeterNode::id() const
+{
+    return QStringLiteral("meter_node");
+}
+
+void MeterNode::write(QJsonObject &parent) const
+{
+    AbstractNode::write(parent);
+
+    
+}
+
 QWidget* MeterNode::widget() const
 {
     return d_ptr->m_pMeterW;

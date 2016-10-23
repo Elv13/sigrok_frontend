@@ -28,6 +28,11 @@ QString ProxyNode::title() const
     return "Aquisition";
 }
 
+QString ProxyNode::id() const
+{
+    return QStringLiteral("proxy_node");
+}
+
 QWidget* ProxyNode::widget() const
 {
     return new Aquisition();

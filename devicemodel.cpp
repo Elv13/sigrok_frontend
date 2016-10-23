@@ -5,14 +5,14 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
 
-#include "nodes/devicenode.h"
+// #include "nodes/devicenode.h"
 
 /* Avoid converting string between std and QtCore */
 struct QSigRokDevice
 {
     QString m_Name;
     std::shared_ptr<sigrok::HardwareDevice> m_pDevice;
-    DeviceNode* m_pNode;
+//     DeviceNode* m_pNode;
 };
 
 class DeviceModelPrivate
@@ -111,7 +111,7 @@ void DeviceModel::scan()
         for (const auto& dev : devs) {
             beginInsertRows(QModelIndex(), d_ptr->m_lDevices.size(), d_ptr->m_lDevices.size());
             d_ptr->m_lDevices << new QSigRokDevice {
-                name, dev, nullptr
+                name, dev
             };
             endInsertRows();
         }
@@ -131,18 +131,27 @@ QVariant DeviceModel::data(const QModelIndex& idx, int role) const
     switch (role) {
         case Qt::DisplayRole:
             return d_ptr->m_lDevices[idx.row()]->m_Name;
-        case (int) DeviceModel::Role::DEVICE_NODE:
+        case (int) DeviceModel::Role::DEVICE:
             const auto n = d_ptr->m_lDevices[idx.row()];
-            if (!n->m_pNode) {
-                n->m_pNode = new DeviceNode(
-                    n->m_Name,
-                    n->m_pDevice,
-                    const_cast<DeviceModel*>(this)
-                );
-            }
+//             if (!n->m_pNode) {
+//                 n->m_pNode = new DeviceNode(
+// //                     n->m_Name,
+// //                     n->m_pDevice,
+//                     const_cast<DeviceModel*>(this)
+//                 );
+//                 n->m_pNode->setDevice(n->m_pDevice);
+//             }
 
-            return QVariant::fromValue(n->m_pNode);
+            return QVariant::fromValue(n->m_pDevice);
     }
+
+    return {};
+}
+
+QVariant DeviceModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if ((!section) && orientation == Qt::Horizontal && role == Qt::DisplayRole)
+        return tr("Devices");
 
     return {};
 }

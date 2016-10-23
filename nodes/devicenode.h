@@ -22,19 +22,24 @@ class DeviceNode : public AbstractNode
 
 public:
     Q_PROPERTY(QAbstractItemModel* model READ model NOTIFY modelChanged USER true);
+    Q_PROPERTY(std::shared_ptr<sigrok::HardwareDevice> device WRITE setDevice USER true);
 
-    explicit DeviceNode(QObject* parent = nullptr);
-    DeviceNode(const QString &name, std::shared_ptr<sigrok::HardwareDevice> dev, QObject* parent = nullptr);
+    Q_INVOKABLE explicit DeviceNode(QObject* parent = nullptr);
+//     DeviceNode(QObject* parent = nullptr);
     virtual ~DeviceNode();
 
     virtual QString title() const;
+
+    virtual QString id() const override;
+
+    virtual void write(QJsonObject &parent) const override;
 
     void setModel(AquisitionModel* m);
 
     virtual QAbstractItemModel* model() const;
 
-//     std::shared_ptr<sigrok::HardwareDevice> device() const;
-//     void setDevice(std::shared_ptr<sigrok::HardwareDevice> dev);
+    std::shared_ptr<sigrok::HardwareDevice> device() const;
+    void setDevice(std::shared_ptr<sigrok::HardwareDevice> dev);
 
     virtual QWidget* widget() const;
 

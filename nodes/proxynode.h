@@ -20,6 +20,8 @@ public:
 
     virtual QString title() const;
 
+    virtual QString id() const override;
+
     virtual QWidget* widget() const;
 
     void setModel(QAbstractItemModel* m);

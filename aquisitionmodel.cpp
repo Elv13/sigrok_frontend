@@ -175,18 +175,6 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
     if (role == Qt::ToolTipRole)
         return d_ptr->m_lRows[idx.row()]->m_lChans[0]->m_AnalogValue;
 
-//     if (role == KChart::DatasetBrushRole || role == Qt::BackgroundRole)
-//         return QColor("#ff00ff");
-// 
-//     if (role == KChart::DatasetPenRole || role == Qt::ForegroundRole)
-//         return QColor("#ff0000");
-//     if (role == KChart::LineAttributesRole) {
-//         static KChart::LineAttributes attributes;
-//         attributes.setDisplayArea(true);
-//         attributes.setTransparency(127);
-//         return QVariant::fromValue(attributes);
-//     }
-
     auto r = d_ptr->m_lRows[idx.row()];
 
     switch (idx.column()) {
@@ -291,3 +279,4 @@ void AquisitionModel::stop()
     d_ptr->m_pSess->stop();
     d_ptr->m_pDev->close();
 }
+
