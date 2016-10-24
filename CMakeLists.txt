@@ -58,6 +58,7 @@ set(tutorial4_SRCS
     # Application
     main.cpp
     mainwindow.cpp
+    remotemanager.cpp
 
     # Model
     devicemodel.cpp

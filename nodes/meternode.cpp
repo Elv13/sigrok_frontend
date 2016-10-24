@@ -17,6 +17,8 @@
 #include "meterdata_source.h"
 
 #include <QRemoteObjectHost>
+#include "../remotemanager.h"
+
 
 class MeterData final : public MeterDataSimpleSource
 {
@@ -39,7 +41,7 @@ public:
     QAbstractItemModel* m_pSource {nullptr};
 
     // Remote objects
-//     MeterData m_MeterData;
+    MeterData m_MeterData;
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -61,8 +63,10 @@ MeterNode::MeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new MeterNodePr
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &MeterNodePrivate::slotModelChanged);
     QObject::connect(d_ptr->m_pCheckProxy, &MeterProxy::columnEnabled, d_ptr, &MeterNodePrivate::slotColumnEnabled);
 
-//     auto srcNode = new QRemoteObjectHost(QUrl(QStringLiteral("tcp://10.10.10.136:2223")),QUrl(QStringLiteral("tcp://10.10.10.136:2223")));
-//     srcNode->enableRemoting(&d_ptr->m_MeterData, QStringLiteral("RemoteMeterData"));
+    auto host = RemoteManager::instance()->host();
+
+    bool worked = host->enableRemoting(&d_ptr->m_MeterData);
+    qDebug() << "REMOTE ENABLED" << worked;
 }
 
 MeterNode::~MeterNode()
@@ -121,7 +125,8 @@ void MeterNodePrivate::slotRowsInserted()
         idx.data().toString()
     );
 
-//     m_MeterData.setMainValue(idx.data().toFloat());
+    m_MeterData.setMainValue(idx.data().toFloat());
+    qDebug() << "SET" << m_MeterData.mainValue();
 }
 
 #include "meternode.moc"

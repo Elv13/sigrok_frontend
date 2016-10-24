@@ -8,6 +8,8 @@
 
 #include <QtCore/QDebug>
 
+#include "../remotemanager.h"
+
 #include "../widgets/table.h"
 
 #include "../mainwindow.h"
@@ -62,14 +64,12 @@ void TableNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractI
 {
     m_pTableView->setModel(newModel);
 
-    qDebug() << "\n\n\nDSFSFSD";
-    auto node = new QRemoteObjectRegistryHost(QUrl(QStringLiteral("tcp://10.10.10.136:2223")));
-
     QVector<int> roles;
     roles << Qt::DisplayRole << Qt::BackgroundRole;
 
-    auto node2 = new QRemoteObjectHost (QUrl(QStringLiteral("tcp://10.10.10.136:2224")), QUrl(QStringLiteral("tcp://10.10.10.136:2223")));
-    node2->enableRemoting(newModel, QStringLiteral("RemoteModel"), roles);
+    auto node2 = RemoteManager::instance()->host2();
+    bool worked = node2->enableRemoting(newModel, QStringLiteral("RemoteModel"), roles);
+    qDebug() << "MODEL WORKED" << worked;
 
     /* Scroll to the end */
     QObject::connect(newModel, &QAbstractItemModel::rowsInserted, [this]() {
