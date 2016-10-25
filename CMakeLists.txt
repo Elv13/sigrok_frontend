@@ -85,6 +85,7 @@ set(tutorial4_SRCS
     widgets/meter.cpp
     widgets/column.cpp
     widgets/table.cpp
+    widgets/memento.cpp
 
     # Processing nodes
     nodes/abstractnode.cpp
@@ -120,6 +121,7 @@ ki18n_wrap_ui(tutorial4_SRCS
     widgets/colorizer.ui
     widgets/devicelist.ui
     widgets/table.ui
+    widgets/memento.ui
     widgets/statusbar.ui
 )
 

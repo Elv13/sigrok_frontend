@@ -11,7 +11,9 @@ class MementoNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* mementoModel READ mementoModel NOTIFY mementoModelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* selectedMemento READ selectedMemento NOTIFY selectedMementoChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* lastestMemento READ lastestMemento NOTIFY mementoAdded USER true);
+    Q_PROPERTY(TRIGGER trigger WRITE takeMemento USER true);
 
     Q_INVOKABLE explicit MementoNode(QObject* parent = nullptr);
     virtual ~MementoNode();
@@ -24,10 +26,15 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
-    QAbstractItemModel* mementoModel() const;
+    QAbstractItemModel* selectedMemento() const;
+    QAbstractItemModel* lastestMemento() const;
+
+    //Mutator
+    void takeMemento(bool _);
 
 Q_SIGNALS:
-    void mementoModelChanged(const QAbstractItemModel* m);
+    void selectedMementoChanged(const QAbstractItemModel* m);
+    void mementoAdded(const QAbstractItemModel* m);
 
 private:
     MementoNodePrivate* d_ptr;
