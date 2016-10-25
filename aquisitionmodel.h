@@ -40,6 +40,7 @@ public:
 public Q_SLOTS:
     void start();
     void stop();
+    void clear();
 
 Q_SIGNALS:
     void currentValuesChanged(QList<float> values);

@@ -23,6 +23,8 @@ class DeviceNode : public AbstractNode
 public:
     Q_PROPERTY(QAbstractItemModel* model READ model NOTIFY modelChanged USER true);
     Q_PROPERTY(std::shared_ptr<sigrok::HardwareDevice> device WRITE setDevice USER true);
+    Q_PROPERTY(PULSE aboutToClear READ dummy NOTIFY aboutToClear USER true);
+    Q_PROPERTY(PULSE cleared READ dummy NOTIFY cleared USER true);
 
     Q_INVOKABLE explicit DeviceNode(QObject* parent = nullptr);
 //     DeviceNode(QObject* parent = nullptr);
@@ -38,6 +40,8 @@ public:
 
     virtual QAbstractItemModel* model() const;
 
+    bool dummy() const;
+
     std::shared_ptr<sigrok::HardwareDevice> device() const;
     void setDevice(std::shared_ptr<sigrok::HardwareDevice> dev);
 
@@ -45,6 +49,8 @@ public:
 
 Q_SIGNALS:
     void modelChanged(); //Dummy
+    void aboutToClear();
+    void cleared();
 
 private:
     DeviceNodePrivate* d_ptr;

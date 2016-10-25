@@ -6,6 +6,9 @@
 class QWidget;
 #include <QtCore/QAbstractItemModel>
 
+typedef bool TRIGGER;
+typedef bool PULSE;
+
 class AbstractNode : public QObject
 {
     Q_OBJECT
@@ -26,4 +29,6 @@ Q_SIGNALS:
 
 };
 Q_DECLARE_METATYPE(AbstractNode*)
+Q_DECLARE_METATYPE(TRIGGER)
+// Q_DECLARE_METATYPE(PULSE)
 Q_DECLARE_METATYPE(QAbstractItemModel*)

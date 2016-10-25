@@ -280,3 +280,10 @@ void AquisitionModel::stop()
     d_ptr->m_pDev->close();
 }
 
+void AquisitionModel::clear()
+{
+    beginResetModel();
+    d_ptr->m_lRows.clear(); //TODO leak
+    endResetModel();
+}
+

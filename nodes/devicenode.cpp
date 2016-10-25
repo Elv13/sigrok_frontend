@@ -8,20 +8,25 @@
 
 #include "devicemodel.h"
 
-class DeviceNodePrivate
+class DeviceNodePrivate : public QObject
 {
 public:
     AquisitionModel* m_pModel {nullptr};
     Aquisition* m_pWidget {nullptr};
     QString m_Title {QStringLiteral("Aquisition")};
     std::shared_ptr<sigrok::HardwareDevice> m_pDevice;
+
+    DeviceNode* q_ptr;
+
+public Q_SLOTS:
+    void slotClear();
 };
 
 DeviceNode::DeviceNode(QObject* parent) :
     AbstractNode(parent), d_ptr(new DeviceNodePrivate())
 {
 //     d_ptr->m_Title = name;
-
+    d_ptr->q_ptr = this;
 
 }
 
@@ -77,6 +82,8 @@ void DeviceNode::setModel(AquisitionModel* m)
             &AquisitionModel::start);
         QObject::connect(d_ptr->m_pWidget->m_pStop, &QPushButton::clicked, d_ptr->m_pModel,
             &AquisitionModel::stop);
+        QObject::connect(d_ptr->m_pWidget->m_pClear, &QPushButton::clicked, d_ptr,
+            &DeviceNodePrivate::slotClear);
     }
 }
 
@@ -101,11 +108,21 @@ void DeviceNode::setDevice(std::shared_ptr<sigrok::HardwareDevice> dev)
 
     Q_EMIT titleChanged(d_ptr->m_Title);
 
-    qDebug() << "\n\n\nSET DEVICE" << d_ptr->m_Title <<QString::fromStdString(dev->vendor());
-
     auto devm = DeviceModel::instance();
 
     auto ctx = devm->context();
 
     setModel(new AquisitionModel(ctx, dev));
+}
+
+bool DeviceNode::dummy() const{
+    // do nothing, the property is a trigger
+    return false;
+}
+
+void DeviceNodePrivate::slotClear()
+{
+    Q_EMIT q_ptr->aboutToClear();
+    m_pModel->clear();
+    Q_EMIT q_ptr->cleared();
 }
