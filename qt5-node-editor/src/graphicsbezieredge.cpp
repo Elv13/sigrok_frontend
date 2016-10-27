@@ -9,7 +9,6 @@
 #include <QGraphicsDropShadowEffect>
 #include <iostream>
 #include <QMetaProperty>
-#include <QDebug>
 
 #include "graphicsnode.hpp"
 #include "graphicsnodesocket.hpp"
@@ -94,9 +93,6 @@ void GraphicsDirectedEdge::onSourceDataChange()
 	const QMetaObject* mo2 = data2->metaObject();
 	QMetaProperty mp2 = mo2->property(_sink->m_index);
 	const char * name2 = mp2.name();
-
-	if(!data2->setProperty(name2,var))
-		qWarning() << "Error Writing QVariant "<< var << "[ " <<name1<<" -> " <<name2<<" ]";
 }
 
 
@@ -202,8 +198,6 @@ disconnect_source()
 	}
 }
 
-
-#include <QDebug>
 void GraphicsDirectedEdge::
 connect_sink(GraphicsNodeSocket *sink)
 {
@@ -246,12 +240,16 @@ connect_source(GraphicsNodeSocket *source)
 void GraphicsDirectedEdge::
 sinkDisconnected(GraphicsNode *node, GraphicsNodeSocket *sink)
 {
+    Q_UNUSED(node)
+    Q_UNUSED(sink)
 }
 
 
 void GraphicsDirectedEdge::
 sourceDisconnected(GraphicsNode *node, GraphicsNodeSocket *source)
 {
+    Q_UNUSED(node)
+    Q_UNUSED(source)
 }
 
 

@@ -26,6 +26,8 @@
 #include "nodes/colornode.h"
 #include "nodes/mementonode.h"
 #include "nodes/multiplexernode.h"
+#include "nodes/remote/remotetable.h"
+#include "nodes/remote/remotemeter.h"
 
 #include "widgets/devicelist.h"
 #include "widgets/charttype.h"
@@ -98,6 +100,9 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<DeviceNode> ("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
+
+    m_pSession->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
 
     //DUMMY
     m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));

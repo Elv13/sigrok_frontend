@@ -99,6 +99,8 @@ set(tutorial4_SRCS
     nodes/colornode.cpp
     nodes/mementonode.cpp
     nodes/multiplexernode.cpp
+    nodes/remote/remotetable.cpp
+    nodes/remote/remotemeter.cpp
 
     # Delegates
     delegates/categorizeddelegate.cpp

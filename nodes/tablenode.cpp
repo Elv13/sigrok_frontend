@@ -3,7 +3,6 @@
 #include "../widgets/aquisition.h"
 
 #include <QtWidgets/QScrollBar>
-#include <QRemoteObjectHost>
 #include <QtWidgets/QTableView>
 
 #include <QtCore/QDebug>
@@ -63,13 +62,6 @@ QWidget* TableNode::widget() const
 void TableNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     m_pTableView->setModel(newModel);
-
-    QVector<int> roles;
-    roles << Qt::DisplayRole << Qt::BackgroundRole;
-
-    auto node2 = RemoteManager::instance()->host2();
-    bool worked = node2->enableRemoting(newModel, QStringLiteral("RemoteModel"), roles);
-    qDebug() << "MODEL WORKED" << worked;
 
     /* Scroll to the end */
     QObject::connect(newModel, &QAbstractItemModel::rowsInserted, [this]() {
