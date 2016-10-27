@@ -98,6 +98,7 @@ set(tutorial4_SRCS
     nodes/columnnode.cpp
     nodes/colornode.cpp
     nodes/mementonode.cpp
+    nodes/multiplexernode.cpp
 
     # Delegates
     delegates/categorizeddelegate.cpp

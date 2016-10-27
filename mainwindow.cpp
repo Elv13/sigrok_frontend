@@ -25,6 +25,7 @@
 #include "nodes/columnnode.h"
 #include "nodes/colornode.h"
 #include "nodes/mementonode.h"
+#include "nodes/multiplexernode.h"
 
 #include "widgets/devicelist.h"
 #include "widgets/charttype.h"
@@ -96,13 +97,13 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<ColumnNode> ("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
     m_pSession->registerType<DeviceNode> ("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
 
     //DUMMY
     m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
     m_pSession->registerType<ColorNode> ("External device" , "Sources"  , " ", QIcon::fromTheme( "document-share"          )); //allow async memento transfer from other instances
     m_pSession->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
     m_pSession->registerType<ColorNode> ("Chronometer"     , "Metadata" , " ", QIcon::fromTheme( "chronometer"        ));
-    m_pSession->registerType<ColorNode> ("Multiplexer"     , "Tools"    , " ", QIcon::fromTheme( "edit-copy"          ));
     m_pSession->registerType<ColorNode> ("Timer"           , "Tools"    , " ", QIcon::fromTheme( "edit-copy"          ));
     m_pSession->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
     m_pSession->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
