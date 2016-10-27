@@ -16,6 +16,7 @@
 #include "aquisitionmodel.h"
 #include "nodeadapter.h"
 #include "proxynodefactory.h"
+#include "models/remotewidgets.h"
 
 #include "nodes/devicenode.h"
 #include "nodes/chartnode.h"
@@ -78,6 +79,11 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     devnode->setIdRole((int) DeviceModel::Role::DEVICE);
     _scene->addItem(devnode);
 
+    auto remotenode = new Modelnode(new RemoteWidgets(this));
+    remotenode->setConnectedObjectRole(999);
+    remotenode->setConnectedPropertyRole(998);
+    _scene->addItem(remotenode);
+
     m_pSession = new ProxyNodeFactoryAdapter(_scene);
 
     setCentralWidget(w);
@@ -93,9 +99,11 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     //DUMMY
     m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
+    m_pSession->registerType<ColorNode> ("External device" , "Sources"  , " ", QIcon::fromTheme( "document-share"          )); //allow async memento transfer from other instances
     m_pSession->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
     m_pSession->registerType<ColorNode> ("Chronometer"     , "Metadata" , " ", QIcon::fromTheme( "chronometer"        ));
-    m_pSession->registerType<ColorNode> ("Copy"            , "Multipler", " ",QIcon::fromTheme( "edit-copy"          ));
+    m_pSession->registerType<ColorNode> ("Multiplexer"     , "Tools"    , " ", QIcon::fromTheme( "edit-copy"          ));
+    m_pSession->registerType<ColorNode> ("Timer"           , "Tools"    , " ", QIcon::fromTheme( "edit-copy"          ));
     m_pSession->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
     m_pSession->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
     m_pSession->registerType<ColorNode> ("ODS"             , "Exporter" , " ", QIcon::fromTheme( "document-save-all"  ));
@@ -104,6 +112,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
     m_pSession->registerType<ColorNode> ("Tail filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-add-filters"   ));
     m_pSession->registerType<ColorNode> ("Head filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
+    m_pSession->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
 
     //Create the node creator dock
     auto dock = new QDockWidget    ( instance );

@@ -10,6 +10,10 @@
 
 NodeAdapter::NodeAdapter(QAbstractItemModel* model, GraphicsNodeScene* scene, int column, int role)
 {
+    Q_UNUSED(model)
+    Q_UNUSED(scene)
+    Q_UNUSED(column)
+    Q_UNUSED(role)
     /*auto l = [model, scene, role](const QModelIndex& idx) {
 
         auto t1 = qvariant_cast<DeviceNode*>(idx.data(role));

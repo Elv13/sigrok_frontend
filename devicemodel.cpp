@@ -1,7 +1,5 @@
 #include "devicemodel.h"
 
-#include <libsigrokcxx/libsigrokcxx.hpp>
-
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
 
@@ -27,6 +25,8 @@ public:
 
 void DeviceModelPrivateslotIndexChanged(const QModelIndex& idx, const QModelIndex& previous)
 {
+    Q_UNUSED(idx)
+    Q_UNUSED(previous)
     //TODO
 }
 
@@ -89,7 +89,6 @@ std::shared_ptr<sigrok::HardwareDevice> DeviceModel::currentDevice() const
 {
     if (selectionModel()->currentIndex().isValid()) {
         const int row = d_ptr->m_pSelectionModel->currentIndex().row();
-        qDebug() << row;
         return d_ptr->m_lDevices[row]->m_pDevice;
     }
 
@@ -141,7 +140,6 @@ QVariant DeviceModel::data(const QModelIndex& idx, int role) const
 //                 );
 //                 n->m_pNode->setDevice(n->m_pDevice);
 //             }
-
             return QVariant::fromValue(n->m_pDevice);
     }
 

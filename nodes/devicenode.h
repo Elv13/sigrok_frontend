@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include "../devicemodel.h"
+
 #include <QtCore/QObject>
 
 #include <QtCore/QAbstractItemModel>

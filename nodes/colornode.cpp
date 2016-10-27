@@ -6,8 +6,6 @@
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QTableView>
 
-#include <QtCore/QItemSelectionModel>
-
 #include <QDebug>
 
 #include "../mainwindow.h"

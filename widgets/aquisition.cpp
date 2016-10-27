@@ -17,6 +17,7 @@ Aquisition::~Aquisition()
 
 void Aquisition::setModel(const AquisitionModel* m)
 {
+    Q_UNUSED(m)
 //     auto sink = new RateSink(m); //FIXME leak
 
 //     QObject::connect(sink, &RateSink::rateChangedAsString, m_pRate, &QLabel::setText);

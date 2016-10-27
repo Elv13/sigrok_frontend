@@ -63,6 +63,7 @@ set(tutorial4_SRCS
     # Model
     devicemodel.cpp
     aquisitionmodel.cpp
+    models/remotewidgets.cpp
 
     # Proxy
     proxies/columnproxy.cpp
@@ -108,6 +109,10 @@ set(tutorial4_SRCS
 
 qt5_generate_repc(tutorial4_SRCS
     repc/meterdata.rep
+    SOURCE
+)
+qt5_generate_repc(tutorial4_SRCS
+    repc/remotewidgets.rep
     SOURCE
 )
 

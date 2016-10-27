@@ -12,5 +12,5 @@ void AbstractNode::write(QJsonObject &parent) const
 
 void AbstractNode::read(const QJsonObject &parent)
 {
-
+    Q_UNUSED(parent)
 }

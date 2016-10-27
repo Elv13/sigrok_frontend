@@ -5,10 +5,10 @@
 
 #include <memory>
 
-namespace sigrok {
-    class HardwareDevice;
-    class Context;
-}
+
+#include <libsigrokcxx/libsigrokcxx.hpp>
+
+Q_DECLARE_METATYPE(std::shared_ptr<sigrok::HardwareDevice>)
 
 class DeviceModelPrivate;
 
@@ -49,4 +49,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(DeviceModel*)
-Q_DECLARE_METATYPE(std::shared_ptr<sigrok::HardwareDevice>)
