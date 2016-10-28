@@ -84,8 +84,7 @@ void RemoteMeterPrivate::slotRowsInserted()
 //     const int main = m_pCheckProxy->mainColumn();
     const auto idx = q_ptr->model()->index(q_ptr->model()->rowCount()-1,0);
 
-    m_MeterData.setMainValue(idx.data().toInt());
-    qDebug() << "ROW INSERTED" << idx.data().toInt();
+    m_MeterData.setMainValue(idx.data().toFloat());
 }
 
 #include "remotemeter.moc"

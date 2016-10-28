@@ -71,6 +71,8 @@ set(tutorial4_SRCS
     proxies/rangeproxy.cpp
     proxies/coloredrangeproxy.cpp
     proxies/mementoproxy.cpp
+    proxies/tailproxy.cpp
+    proxies/headproxy.cpp
 
     # Business delegates
     ratesink.cpp
@@ -87,6 +89,7 @@ set(tutorial4_SRCS
     widgets/column.cpp
     widgets/table.cpp
     widgets/memento.cpp
+    widgets/rowsubset.cpp
 
     # Processing nodes
     nodes/abstractnode.cpp
@@ -99,6 +102,8 @@ set(tutorial4_SRCS
     nodes/colornode.cpp
     nodes/mementonode.cpp
     nodes/multiplexernode.cpp
+    nodes/tailnode.cpp
+    nodes/headnode.cpp
     nodes/remote/remotetable.cpp
     nodes/remote/remotemeter.cpp
 
@@ -131,6 +136,7 @@ ki18n_wrap_ui(tutorial4_SRCS
     widgets/table.ui
     widgets/memento.ui
     widgets/statusbar.ui
+    widgets/rowsubset.ui
 )
 
 add_executable(tutorial4 ${tutorial4_SRCS})

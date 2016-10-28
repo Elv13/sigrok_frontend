@@ -25,6 +25,8 @@
 #include "nodes/columnnode.h"
 #include "nodes/colornode.h"
 #include "nodes/mementonode.h"
+#include "nodes/tailnode.h"
+#include "nodes/headnode.h"
 #include "nodes/multiplexernode.h"
 #include "nodes/remote/remotetable.h"
 #include "nodes/remote/remotemeter.h"
@@ -100,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<DeviceNode> ("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
+    m_pSession->registerType<TailNode>   ("Tail filter"     , "Filters"  , "tail_node"  , QIcon::fromTheme( "kt-add-filters"   ));
+    m_pSession->registerType<HeadNode>   ("Head filter"     , "Filters"  , "head_node" , QIcon::fromTheme( "kt-remove-filters"));
 
     m_pSession->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
@@ -116,8 +120,6 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<ColorNode> ("PCAP (WireShark)", "Exporter" , " ", QIcon::fromTheme( "document-save-as"   ));
 
     m_pSession->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
-    m_pSession->registerType<ColorNode> ("Tail filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-add-filters"   ));
-    m_pSession->registerType<ColorNode> ("Head filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
     m_pSession->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
 
     //Create the node creator dock

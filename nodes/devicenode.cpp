@@ -125,3 +125,18 @@ void DeviceNodePrivate::slotClear()
     m_pModel->clear();
     Q_EMIT q_ptr->cleared();
 }
+
+void DeviceNode::clear(bool value)
+{
+    d_ptr->slotClear();
+}
+
+void DeviceNode::start(bool value)
+{
+    d_ptr->m_pModel->start();
+}
+
+void DeviceNode::stop(bool value)
+{
+    d_ptr->m_pModel->stop();
+}
