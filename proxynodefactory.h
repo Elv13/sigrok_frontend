@@ -36,10 +36,10 @@ public:
     void serialize(QIODevice *dev) const;
     void load(QIODevice *dev);
     void load(const QByteArray& data);
-    QPair<QObjectnode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o);
+    QPair<GraphicsNode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o);
 
 public Q_SLOTS:
-    QPair<QObjectnode*, AbstractNode*> addToScene(const QModelIndex& idx);
+    QPair<GraphicsNode*, AbstractNode*> addToScene(const QModelIndex& idx);
 
 private:
     GraphicsNodeScene* m_pScene;
@@ -47,7 +47,7 @@ private:
         const QMetaObject m_spMetaObj;
         QString m_Name;
         QIcon m_Icon;
-        QVector< QPair<QObjectnode*, AbstractNode*> > m_lInstances;
+        QVector< QPair<GraphicsNode*, AbstractNode*> > m_lInstances;
     } MetaInfo;
 
     typedef struct Category {

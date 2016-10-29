@@ -159,9 +159,9 @@ QModelIndex TailProxy::mapToSource(const QModelIndex& proxyIndex) const
     // don't ever **EVER** do this at home, **EXPECT** segfaults
     HackyDummy* srcModel = (HackyDummy*) sourceModel();
 
-        return srcModel->createIndex(
-            proxyIndex.row(), proxyIndex.column(), proxyIndex.internalPointer()
-        );
+    return srcModel->createIndex(
+        proxyIndex.row(), proxyIndex.column(), proxyIndex.internalPointer()
+    );
 }
 
 void TailProxy::setSourceModel(QAbstractItemModel *sm)

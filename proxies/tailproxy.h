@@ -4,6 +4,12 @@
 
 class TailProxyPrivate;
 
+/**
+ * Keep the last `n` rows of a model.
+ *
+ * Useful with models with a lot of irrelevant rows or models with high
+ * throughput.
+ */
 class TailProxy : public QAbstractProxyModel
 {
     Q_OBJECT
@@ -14,14 +20,12 @@ public:
     virtual ~TailProxy();
 
     virtual int rowCount(const QModelIndex& parent = {}) const override;
-//     virtual QModelIndex index(int row, int column, const QModelIndex& parent ={}) const override;
     virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
     virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
     virtual int columnCount(const QModelIndex& parent = {}) const override;
     virtual QModelIndex index(int row, int column, const QModelIndex& parent ={}) const override;
     virtual QModelIndex parent(const QModelIndex& idx) const override;
     virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
-
 
     bool isLimited() const;
 

@@ -73,6 +73,7 @@ set(tutorial4_SRCS
     proxies/mementoproxy.cpp
     proxies/tailproxy.cpp
     proxies/headproxy.cpp
+    proxies/lastrowtolistproxy.cpp
 
     # Business delegates
     ratesink.cpp
@@ -104,6 +105,7 @@ set(tutorial4_SRCS
     nodes/multiplexernode.cpp
     nodes/tailnode.cpp
     nodes/headnode.cpp
+    nodes/currentvalues.cpp
     nodes/remote/remotetable.cpp
     nodes/remote/remotemeter.cpp
 
