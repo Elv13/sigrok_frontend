@@ -91,6 +91,7 @@ set(tutorial4_SRCS
     widgets/table.cpp
     widgets/memento.cpp
     widgets/rowsubset.cpp
+    widgets/timer.cpp
 
     # Processing nodes
     nodes/abstractnode.cpp
@@ -106,6 +107,7 @@ set(tutorial4_SRCS
     nodes/tailnode.cpp
     nodes/headnode.cpp
     nodes/currentvalues.cpp
+    nodes/timernode.cpp
     nodes/remote/remotetable.cpp
     nodes/remote/remotemeter.cpp
 
@@ -139,6 +141,7 @@ ki18n_wrap_ui(tutorial4_SRCS
     widgets/memento.ui
     widgets/statusbar.ui
     widgets/rowsubset.ui
+    widgets/timer.ui
 )
 
 add_executable(tutorial4 ${tutorial4_SRCS})
