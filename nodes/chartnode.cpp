@@ -81,6 +81,5 @@ QWidget* ChartNode::widget() const
 void ChartNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     Q_UNUSED(old)
-    qDebug()<< "\n\n\nSET CHART MODEL";
     m_pPlotter->setModel(newModel);
 }

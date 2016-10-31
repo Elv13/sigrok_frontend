@@ -68,7 +68,7 @@ void ColoredRangeProxy::setForegroundColor(int row, const QVariant& color)
 
 QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
 {
-    if (idx.column() && d_ptr->m_llColors.size() > idx.column()) {
+    if (d_ptr->m_llColors.size() > idx.column()) {
         switch(role) {
             case KChart::DatasetBrushRole:
             case Qt::BackgroundRole:
@@ -81,7 +81,7 @@ QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
             case KChart::LineAttributesRole:
                 static KChart::LineAttributes attributes;
                 attributes.setDisplayArea(true);
-//                 attributes.setTransparency(127);
+                attributes.setTransparency(127);
                 return QVariant::fromValue(attributes);
         }
     }
