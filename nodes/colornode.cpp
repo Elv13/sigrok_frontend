@@ -4,7 +4,9 @@
 #include "../proxies/coloredrangeproxy.h"
 
 #include <QtWidgets/QScrollBar>
-#include <QtWidgets/QTableView>
+#include <KColorButton>
+
+#include "../widgets/range.h"
 
 #include <QDebug>
 
@@ -13,7 +15,7 @@
 class ColorNodePrivate : public QObject
 {
 public:
-    QTableView* m_pTableView {nullptr};
+    Range m_Widget;
 
     ColoredRangeProxy* m_pRangeProxy {new ColoredRangeProxy()};
 
@@ -25,27 +27,32 @@ public Q_SLOTS:
 
 ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePrivate())
 {
-    d_ptr->m_pTableView  = new QTableView(nullptr);
-
-    d_ptr->m_pRangeProxy->setWidget(d_ptr->m_pTableView);
-
-    d_ptr->m_pTableView->setModel(d_ptr->m_pRangeProxy);
+    d_ptr->m_Widget.setRangeProxy(d_ptr->m_pRangeProxy);
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ColorNodePrivate::slotModelChanged);
 //     QObject::connect(d_ptr->m_pCheckable, &QAbstractItemModel::dataChanged, d_ptr, &ColorNodePrivate::slotDataChanged);
 
-    if (d_ptr->m_pTableView->horizontalHeader()) {
-        d_ptr->m_pTableView->verticalHeader()->setHidden(true);
-        d_ptr->m_pTableView->horizontalHeader()->setHidden(true);
-        d_ptr->m_pTableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-        d_ptr->m_pTableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-        d_ptr->m_pTableView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    }
+    d_ptr->m_Widget.setColumnWidgetFactory(1, true, [this](int row) -> QWidget* {
+        auto w = new KColorButton();
+        w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+        QObject::connect(w, &KColorButton::changed, [this, row](const QColor& col) {
+            d_ptr->m_pRangeProxy->setBackgroundColor(row, col);
+        });
+        return w;
+    });
+    d_ptr->m_Widget.setColumnWidgetFactory(2, true, [this](int row) -> QWidget* {
+        auto w = new KColorButton();
+        w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+        QObject::connect(w, &KColorButton::changed, [this, row](const QColor& col) {
+            d_ptr->m_pRangeProxy->setForegroundColor(row, col);
+        });
+        return w;
+    });
 }
 
 ColorNode::~ColorNode()
 {
-    
+    delete d_ptr;
 }
 
 QString ColorNode::title() const
@@ -67,7 +74,7 @@ void ColorNode::write(QJsonObject &parent) const
 
 QWidget* ColorNode::widget() const
 {
-    return d_ptr->m_pTableView;
+    return &d_ptr->m_Widget;
 }
 
 QAbstractItemModel* ColorNode::filteredModel() const

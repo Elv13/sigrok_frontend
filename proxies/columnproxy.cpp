@@ -16,13 +16,13 @@ public Q_SLOTS:
 };
 
 ColumnProxy::ColumnProxy(QObject* parent) :
-    QAbstractListModel(parent), d_ptr(new ColumnProxyPrivate(this))
+    QAbstractItemModel(parent), d_ptr(new ColumnProxyPrivate(this))
 {
     
 }
 
 ColumnProxy::ColumnProxy(QAbstractItemModel* source) :
-    QAbstractListModel(source), d_ptr(new ColumnProxyPrivate(this))
+    QAbstractItemModel(source), d_ptr(new ColumnProxyPrivate(this))
 {
     setSourceModel(source);
 }
@@ -65,6 +65,28 @@ QVariant ColumnProxy::data(const QModelIndex& idx, int role) const
 int ColumnProxy::rowCount(const QModelIndex& parent) const
 {
     return sourceModel() && !parent.isValid() ? sourceModel()->columnCount() : 0;
+}
+
+int ColumnProxy::columnCount(const QModelIndex& parent) const
+{
+    return parent.isValid() ? 0 : 1;
+}
+
+QModelIndex ColumnProxy::index(int row, int column, const QModelIndex& parent) const
+{
+    if (
+        (!sourceModel()) ||
+        column ||
+        parent.isValid() ||
+        row < sourceModel()->columnCount()
+    ) return {};
+
+    return createIndex(row, column, nullptr);
+}
+
+QModelIndex ColumnProxy::parent(const QModelIndex& idx) const
+{
+    return {};
 }
 
 void ColumnProxyPrivate::slotColumnChanged()

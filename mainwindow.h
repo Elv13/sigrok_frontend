@@ -21,12 +21,14 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     MainWindow(QWidget *parent=0);
 
     static QDockWidget* addDock(QWidget* w, const QString& title);
+    static MainWindow* instance();
 
   private:
     KTextEdit* textArea;
     StatusBar2* m_pStatusBar;
     ProxyNodeFactoryAdapter* m_pSession;
     void setupActions();
+
 
     QString fileName;
 

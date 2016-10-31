@@ -28,6 +28,7 @@
 #include "nodes/tailnode.h"
 #include "nodes/headnode.h"
 #include "nodes/timernode.h"
+#include "nodes/chrononode.h"
 #include "nodes/currentvalues.h"
 #include "nodes/multiplexernode.h"
 #include "nodes/remote/remotetable.h"
@@ -54,20 +55,20 @@
 
 #include <libsigrokcxx/libsigrokcxx.hpp>
 
-static MainWindow* instance; //FIXME
+static MainWindow* ins; //FIXME
 
 QDockWidget* MainWindow::addDock(QWidget* w, const QString& title)
 {
-    auto dock = new QDockWidget(instance);
+    auto dock = new QDockWidget(ins);
     dock->setWidget(w);
-    instance->addDockWidget(Qt::TopDockWidgetArea, dock);
+    ins->addDockWidget(Qt::TopDockWidgetArea, dock);
 
     return dock;
 }
 
 MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QString())
 {
-    instance = this;
+    ins = this;
 
     m_pStatusBar = new StatusBar2(this);
     setStatusBar(m_pStatusBar);
@@ -108,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<HeadNode>   ("Head filter"     , "Filters"  , "head_node" , QIcon::fromTheme( "kt-remove-filters"));
     m_pSession->registerType<CurrentValues>("Current Values", "Sinks"    , "currentvalues_node" , QIcon::fromTheme( "kt-remove-filters"));
     m_pSession->registerType<TimerNode>  ("Timer"           , "Tools"    , "timer_node", QIcon::fromTheme( "chronometer"          ));
+    m_pSession->registerType<ChronoNode> ("Chronometer"     , "Metadata" , "chrono_node", QIcon::fromTheme( "chronometer"        ));
 
     m_pSession->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
@@ -116,7 +118,6 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
     m_pSession->registerType<ColorNode> ("External device" , "Sources"  , " ", QIcon::fromTheme( "document-share"          )); //allow async memento transfer from other instances
     m_pSession->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
-    m_pSession->registerType<ColorNode> ("Chronometer"     , "Metadata" , " ", QIcon::fromTheme( "chronometer"        ));
     m_pSession->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
     m_pSession->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
     m_pSession->registerType<ColorNode> ("ODS"             , "Exporter" , " ", QIcon::fromTheme( "document-save-all"  ));
@@ -126,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
 
     //Create the node creator dock
-    auto dock = new QDockWidget    ( instance );
+    auto dock = new QDockWidget    ( ins );
     auto tab  = new CategorizedTree( dock     );
     tab->setModel(m_pSession);
     auto del = new CategorizedDelegate(tab);
@@ -139,10 +140,15 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     });
 
     dock->setWidget(tab);
-    instance->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    ins->addDockWidget(Qt::LeftDockWidgetArea, dock);
 
     setupActions();
 
+}
+
+MainWindow* MainWindow::instance()
+{
+    return ins;
 }
 
 void MainWindow::setupActions()

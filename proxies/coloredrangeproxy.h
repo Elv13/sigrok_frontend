@@ -13,6 +13,9 @@ public:
 
     virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
 
+    void setBackgroundColor(int row, const QVariant& color);
+    void setForegroundColor(int row, const QVariant& color);
+
     QAbstractItemModel* filteredModel() const;
 
 private:

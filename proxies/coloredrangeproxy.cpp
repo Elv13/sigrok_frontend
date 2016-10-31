@@ -1,22 +1,21 @@
 #include "coloredrangeproxy.h"
 
-#include <KColorButton>
+#include <QtCore/QDebug>
 
-#include <QtWidgets/QWidget>
-
-#include <QtGui/QColor>
 #include <KChart/KChartGlobal.h>
 #include <KChartLineAttributes.h>
 
 #include "../proxies/columnproxy.h"
+
+#include <QtCore/QIdentityProxyModel>
 
 class ColoredProxy;
 
 class ColoredRangeProxyPrivate
 {
 public:
-    QVector< QVector<QColor> > m_llColors {{}, {}};
-    ColumnProxy* m_pColumnProxy {new ColumnProxy()};
+    QVector< QVector<QVariant> > m_llColors {{}, {}};
+//     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
     ColoredProxy* m_pProxy;
 };
 
@@ -33,30 +32,12 @@ public:
 ColoredRangeProxy::ColoredRangeProxy(QObject* parent) : RangeProxy(parent),
     d_ptr(new ColoredRangeProxyPrivate())
 {
-    RangeProxy::setSourceModel(d_ptr->m_pColumnProxy);
+//     RangeProxy::setSourceModel();
 
     d_ptr->m_pProxy = new ColoredProxy(parent);
     d_ptr->m_pProxy->d_ptr = d_ptr;
 
     setExtraColumnCount(2);
-    setColumnWidgetFactory(1, [this](int row) -> QWidget* {
-        auto w = new KColorButton();
-        QObject::connect(w, &KColorButton::changed, [this, row](const QColor& col) {
-            d_ptr->m_llColors[0].resize(columnCount());
-            d_ptr->m_llColors[1].resize(columnCount());
-            d_ptr->m_llColors[0][row] = col;
-        });
-        return w;
-    });
-    setColumnWidgetFactory(2, [this](int row) -> QWidget* {
-        auto w = new KColorButton();
-        QObject::connect(w, &KColorButton::changed, [this, row](const QColor& col) {
-            d_ptr->m_llColors[0].resize(columnCount());
-            d_ptr->m_llColors[1].resize(columnCount());
-            d_ptr->m_llColors[1][row] = col;
-        });
-        return w;
-    });
 }
 
 ColoredRangeProxy::~ColoredRangeProxy()
@@ -65,18 +46,37 @@ ColoredRangeProxy::~ColoredRangeProxy()
     delete d_ptr;
 }
 
+void ColoredRangeProxy::setBackgroundColor(int row, const QVariant& color)
+{
+    if (row >= d_ptr->m_llColors.size())
+        d_ptr->m_llColors.resize(row+1);
+
+    d_ptr->m_llColors[row].resize(2);
+
+    d_ptr->m_llColors[row][0] = color;
+}
+
+void ColoredRangeProxy::setForegroundColor(int row, const QVariant& color)
+{
+    if (row >= d_ptr->m_llColors.size())
+        d_ptr->m_llColors.resize(row+1);
+
+    d_ptr->m_llColors[row].resize(2);
+
+    d_ptr->m_llColors[row][1] = color;
+}
+
 QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
 {
-    if (idx.column() && d_ptr->m_llColors.size() > 1
-      && d_ptr->m_llColors[0].size() > idx.column()) {
+    if (idx.column() && d_ptr->m_llColors.size() > idx.column()) {
         switch(role) {
             case KChart::DatasetBrushRole:
             case Qt::BackgroundRole:
-                return d_ptr->m_llColors[0][idx.column()];
+                return d_ptr->m_llColors[idx.column()][0];
                 break;
             case KChart::DatasetPenRole:
             case Qt::ForegroundRole:
-                return d_ptr->m_llColors[1][idx.column()];
+                return d_ptr->m_llColors[idx.column()][1];
                 break;
             case KChart::LineAttributesRole:
                 static KChart::LineAttributes attributes;
@@ -91,7 +91,10 @@ QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
 
 void ColoredRangeProxy::setSourceModel(QAbstractItemModel *sourceModel)
 {
-    d_ptr->m_pColumnProxy->setSourceModel(sourceModel);
+//     d_ptr->m_pColumnProxy->setSourceModel(sourceModel);
+
+    RangeProxy::setSourceModel(sourceModel);
+
     d_ptr->m_pProxy->setSourceModel(sourceModel);
 }
 

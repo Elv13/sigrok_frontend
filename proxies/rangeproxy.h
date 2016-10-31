@@ -1,17 +1,38 @@
 #pragma once
 
-#include <functional>
 
-#include <QtCore/QIdentityProxyModel>
+#include "columnproxy.h"
 
 class QAbstractItemView;
 
 class RangeProxyPrivate;
 
-class RangeProxy : public QIdentityProxyModel
+/**
+ * Convert the original model into a tree with the source columns as root
+ * indexes and configurable ranges for each column as children.
+ * 
+ * This is useful to configure a filter or modifier proxy acting on the
+ * original values.
+ */
+class RangeProxy : public ColumnProxy
 {
     Q_OBJECT
 public:
+    enum class Role {
+        RANGE_DELIMITER = ColumnProxy::Role::USER_ROLE,
+        RANGE_VALUE
+    };
+
+    enum class Delimiter {
+        ANY,
+        EQUAL,
+        NOT_EQUAL,
+        LESSER,
+        GREATER,
+        LESSER_EQUAL,
+        GREATER_EQUAL,
+    };
+
     explicit RangeProxy(QObject* parent = nullptr);
 
     virtual int columnCount(const QModelIndex& parent = {}) const override;
@@ -20,13 +41,18 @@ public:
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual QModelIndex parent(const QModelIndex& idx) const override;
+    virtual int rowCount(const QModelIndex& parent = {}) const override;
+    virtual void setSourceModel(QAbstractItemModel* source) override;
 
     int extraColumnCount() const;
     void setExtraColumnCount(int value);
 
-    void setColumnWidgetFactory(int col, std::function<QWidget*(int)> w);
+//     void setColumnWidgetFactory(int col, bool isRange, std::function<QWidget*(int)> w);
 
-    void setWidget(QAbstractItemView* widget);
+//     void setWidget(QAbstractItemView* widget);
+
+    QAbstractItemModel* delimiterModel() const;
 
 Q_SIGNALS:
     void mainChanged(int main);
@@ -36,3 +62,6 @@ private:
     RangeProxyPrivate* d_ptr;
     Q_DECLARE_PRIVATE(RangeProxy)
 };
+
+Q_ENUMS(RangeProxy::Delimiter)
+Q_DECLARE_METATYPE(RangeProxy::Delimiter)

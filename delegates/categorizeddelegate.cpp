@@ -70,6 +70,7 @@ void CategorizedDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
    if (!option.rect.height())
       return;
+
    if (!index.parent().isValid()) {
       QStyleOptionViewItem opt(option);
       const QRegion cl = painter->clipRegion();
@@ -113,6 +114,9 @@ void CategorizedDelegate::drawSimpleCategory(const QModelIndex &index, int sortR
    painter->setOpacity(0.3);
    const int topMargin2 = index.row()==0?metric:TOP_MARGIN;
    painter->drawLine(0,option.rect.y()+(topMargin2),option.rect.x()+option.rect.width()+option.rect.x(),option.rect.y()+(topMargin2));
+
+   if (index.column()) return;
+
    painter->setOpacity(1);
    painter->drawText(QRect(metric?1.5*metric:4,option.rect.y()+1+(topMargin2),option.rect.width(),option.rect.height()-1),Qt::AlignLeft | Qt::AlignTop,category);
 }

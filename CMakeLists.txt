@@ -74,6 +74,7 @@ set(tutorial4_SRCS
     proxies/tailproxy.cpp
     proxies/headproxy.cpp
     proxies/lastrowtolistproxy.cpp
+    proxies/chronometerproxy.cpp
 
     # Business delegates
     ratesink.cpp
@@ -92,6 +93,7 @@ set(tutorial4_SRCS
     widgets/memento.cpp
     widgets/rowsubset.cpp
     widgets/timer.cpp
+    widgets/range.cpp
 
     # Processing nodes
     nodes/abstractnode.cpp
@@ -108,6 +110,7 @@ set(tutorial4_SRCS
     nodes/headnode.cpp
     nodes/currentvalues.cpp
     nodes/timernode.cpp
+    nodes/chrononode.cpp
     nodes/remote/remotetable.cpp
     nodes/remote/remotemeter.cpp
 
@@ -142,6 +145,8 @@ ki18n_wrap_ui(tutorial4_SRCS
     widgets/statusbar.ui
     widgets/rowsubset.ui
     widgets/timer.ui
+    widgets/rangeselection.ui
+    widgets/range.ui
 )
 
 add_executable(tutorial4 ${tutorial4_SRCS})
