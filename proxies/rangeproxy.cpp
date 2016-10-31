@@ -176,10 +176,18 @@ bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
 
     switch(role) {
         case (int) Role::RANGE_DELIMITER:
-            node->m_Delim = qvariant_cast<RangeProxy::Delimiter>(value);
-            return true;
+            if (value.canConvert<RangeProxy::Delimiter>()) {
+                node->m_Delim = qvariant_cast<RangeProxy::Delimiter>(value);
+                return true;
+            }
+            else if (value.canConvert<int>()) {
+                node->m_Delim = static_cast<RangeProxy::Delimiter>(value.toInt());
+            qDebug() << "SET delim" << d_ptr->DELIMITERNAMES[(int)node->m_Delim];
+                return true;
+            }
         case Qt::EditRole:
         case (int) Role::RANGE_VALUE:
+            qDebug() << "SET RANGE" << value;
             node->m_RangeValue = value;
             return true;
     }
@@ -233,6 +241,51 @@ void RangeProxy::setSourceModel(QAbstractItemModel* source)
                 d_ptr, &RangeProxyPrivate::slotLayoutChanged);
 }
 
+QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
+{
+    if ((!srcIdx.isValid()) || srcIdx.model() != sourceModel())
+        return {};
+
+    if (srcIdx.column() >= d_ptr->m_lRows.size())
+        return {};
+
+    const auto colNode = d_ptr->m_lRows[srcIdx.column()];
+
+    for (int i = 0; i < colNode->m_lChildren.size(); i++) {
+        const auto rule = colNode->m_lChildren[i];
+
+        bool match = false;
+        switch(rule->m_Delim) {
+            case RangeProxy::Delimiter::ANY:
+                match = true;
+                break;
+            case RangeProxy::Delimiter::EQUAL:
+                match = srcIdx.data() == rule->m_RangeValue;
+                break;
+            case RangeProxy::Delimiter::NOT_EQUAL:
+                match = srcIdx.data() != rule->m_RangeValue;
+                break;
+            case RangeProxy::Delimiter::LESSER:
+                match = srcIdx.data() < rule->m_RangeValue;
+                break;
+            case RangeProxy::Delimiter::GREATER:
+                match = srcIdx.data() > rule->m_RangeValue;
+                break;
+            case RangeProxy::Delimiter::LESSER_EQUAL:
+                match = srcIdx.data() <= rule->m_RangeValue;
+                break;
+            case RangeProxy::Delimiter::GREATER_EQUAL:
+                match = srcIdx.data() >= rule->m_RangeValue;
+                break;
+        };
+
+        if (match)
+            return createIndex(i, 0, colNode);
+    }
+
+    return {};
+}
+
 void RangeProxyPrivate::slotLayoutChanged()
 {
     const int delta = q_ptr->rowCount() - m_lRows.size();
@@ -268,7 +321,7 @@ void RangeProxyPrivate::slotRowsAboutToBeInserted(const QModelIndex &parent, int
     for (int i = first; i <= last;i++) {
         const auto parent = q_ptr->index(i, 0);
         q_ptr->beginInsertRows(parent, 0,1);
-        for (int j=0; j < 2; j++) {
+        for (int j=0; j < 1; j++) {
             Node* nc = new Node;
             nc->m_Mode = Node::Mode::CHILD;
             nc->m_Index = j;

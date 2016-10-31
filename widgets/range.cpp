@@ -40,8 +40,22 @@ void Range::setRangeProxy(RangeProxy* p)
         ui->setupUi(w);
         ui->comboBox->setModel(m_pProxy->delimiterModel());
         connect(ui->comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged)
-            , [this, ui]() {
+            , [this, ui, row]() {
                 ui->doubleSpinBox->setEnabled(ui->comboBox->currentIndex());
+                m_pProxy->setData(
+                    m_pProxy->index(0,0, m_pProxy->index(row,0)),
+                    ui->comboBox->currentIndex(),
+                    (int)RangeProxy::Role::RANGE_DELIMITER
+                );
+            }
+        );
+        connect(ui->doubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [this, ui, row](double v) {
+                m_pProxy->setData(
+                    m_pProxy->index(0,0, m_pProxy->index(row,0)),
+                    v,
+                    (int)RangeProxy::Role::RANGE_VALUE
+                );
             }
         );
 
@@ -69,7 +83,6 @@ void Range::slotAjustColumns()
     // Let the layout some time to adjust
     QTimer::singleShot(0, [this](){treeView->expandAll();});
 }
-
 
 void Range::setColumnWidgetFactory(int col, bool isRange, std::function<QWidget*(int)> w)
 {

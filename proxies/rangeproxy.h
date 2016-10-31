@@ -45,6 +45,8 @@ public:
     virtual int rowCount(const QModelIndex& parent = {}) const override;
     virtual void setSourceModel(QAbstractItemModel* source) override;
 
+    QModelIndex matchSourceIndex(const QModelIndex& srcIdx) const;
+
     int extraColumnCount() const;
     void setExtraColumnCount(int value);
 
