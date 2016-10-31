@@ -78,7 +78,7 @@ QModelIndex ColumnProxy::index(int row, int column, const QModelIndex& parent) c
         (!sourceModel()) ||
         column ||
         parent.isValid() ||
-        row < sourceModel()->columnCount()
+        row >= sourceModel()->columnCount()
     ) return {};
 
     return createIndex(row, column, nullptr);
@@ -92,7 +92,6 @@ QModelIndex ColumnProxy::parent(const QModelIndex& idx) const
 void ColumnProxyPrivate::slotColumnChanged()
 {
     //TODO be more granular
-    qDebug() << "ICI";
     Q_EMIT q_ptr->layoutChanged();
 }
 
