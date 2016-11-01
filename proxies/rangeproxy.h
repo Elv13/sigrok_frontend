@@ -52,9 +52,10 @@ public:
     int extraColumnCount() const;
     void setExtraColumnCount(int value);
 
-//     void setColumnWidgetFactory(int col, bool isRange, std::function<QWidget*(int)> w);
+    bool matchAllFilters() const;
+    void setMatchAllFilters(bool value);
 
-//     void setWidget(QAbstractItemView* widget);
+    void addFilter(const QModelIndex& idx, Delimiter delim = Delimiter::ANY);
 
     QAbstractItemModel* delimiterModel() const;
 

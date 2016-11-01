@@ -75,6 +75,7 @@ set(tutorial4_SRCS
     proxies/headproxy.cpp
     proxies/lastrowtolistproxy.cpp
     proxies/chronometerproxy.cpp
+    proxies/filtertoplevelproxy.cpp
 
     # Business delegates
     ratesink.cpp

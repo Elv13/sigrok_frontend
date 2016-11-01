@@ -6,6 +6,7 @@
 #include "ui_range.h"
 
 class RangeProxy;
+class FilterTopLevelProxy;
 
 class Range : public QWidget, public Ui_Range
 {
@@ -25,6 +26,7 @@ public:
 
 private:
     RangeProxy* m_pProxy {nullptr};
+    FilterTopLevelProxy* m_pFiltered;
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactories; //FIXME deadcode
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactoriesChild;
 
@@ -33,4 +35,6 @@ private:
 
 private Q_SLOTS:
     void slotAjustColumns();
+    void slotAddClicked();
+    void slotAllColumns(bool);
 };

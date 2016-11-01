@@ -7,6 +7,7 @@
 #include "delegates/categorizeddelegate.h"
 
 #include "../proxies/rangeproxy.h"
+#include "../proxies/filtertoplevelproxy.h"
 
 Range::Range(QWidget* parent) : QWidget(parent)
 {
@@ -14,6 +15,8 @@ Range::Range(QWidget* parent) : QWidget(parent)
     auto del = new CategorizedDelegate(treeView);
     treeView->setItemDelegate(del);
     treeView->setIndentation(0);
+    m_pFiltered = new FilterTopLevelProxy(nullptr);
+    treeView->setModel(m_pFiltered);
 }
 
 Range::~Range()
@@ -29,8 +32,9 @@ RangeProxy* Range::rangeProxy() const
 void Range::setRangeProxy(RangeProxy* p)
 {
     m_pProxy = p;
-    treeView->setModel(p);
-//     p->setWidget(treeView);
+    m_pFiltered->setSourceModel(p);
+    comboBox->setModel(p);
+    comboBox->setCurrentIndex(p->rowCount()-1);
 
     setColumnWidgetFactory(0, [this](const QPersistentModelIndex& idx) -> QWidget* {
 
@@ -105,17 +109,29 @@ void Range::setColumnWidgetFactory(int col, std::function<QWidget*(const QPersis
     applyWidget({}, m_lWidgetFactories);
 }
 
+void Range::slotAddClicked()
+{
+    if (!m_pProxy) return;
+    m_pProxy->addFilter(m_pProxy->index(comboBox->currentIndex(),0));
+}
+
+void Range::slotAllColumns(bool val)
+{
+    if (!m_pProxy) return;
+    m_pProxy->setMatchAllFilters(val);
+}
+
 void Range::applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(const QPersistentModelIndex& idx)> >& f)
 {
     qDebug() << "RELOAD";
     // Create all missing widgets
-    for (int i=0; i < m_pProxy->rowCount(root); i++) {
-        for (int j = 0; j < m_pProxy->columnCount(root); j++) {
-            const QModelIndex idx = m_pProxy->index(i,j, root);
+    for (int i=0; i < m_pFiltered->rowCount(root); i++) {
+        for (int j = 0; j < m_pFiltered->columnCount(root); j++) {
+            const QModelIndex idx = m_pFiltered->index(i,j, root);
             auto w = treeView->indexWidget(idx);
 
             if ((!w) && f.size() > j && f[j]) {
-                w = f[j](idx);
+                w = f[j](m_pFiltered->mapToSource(idx));
                 treeView->setIndexWidget(idx, w);
             }
 

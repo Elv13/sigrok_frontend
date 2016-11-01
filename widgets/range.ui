@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>259</width>
-    <height>217</height>
+    <width>232</width>
+    <height>213</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true">background-color:transparent;</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -29,7 +29,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
+   <item row="1" column="0" colspan="2">
     <widget class="QTreeView" name="treeView">
      <property name="styleSheet">
       <string notr="true">QTreeView {
@@ -44,8 +44,65 @@
      </attribute>
     </widget>
    </item>
+   <item row="0" column="0">
+    <widget class="QComboBox" name="comboBox"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QToolButton" name="toolButton">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset theme="list-add"/>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string>Apply to all columns</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>toolButton</sender>
+   <signal>clicked()</signal>
+   <receiver>Range</receiver>
+   <slot>slotAddClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>230</x>
+     <y>18</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>237</x>
+     <y>14</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>Range</receiver>
+   <slot>slotAllColumns(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>203</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotAddClicked()</slot>
+  <slot>slotAllColumns(bool)</slot>
+ </slots>
 </ui>

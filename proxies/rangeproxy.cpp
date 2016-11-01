@@ -144,16 +144,7 @@ void RangeProxyPrivate::slotAutoAddRows(const QModelIndex& parent)
 
     const int index = node->m_lChildren.size();
 
-    q_ptr->beginInsertRows(parent, index, index);
-
-    Node* nc      = new Node;
-    nc->m_Mode    = Node::Mode::CHILD;
-    nc->m_Index   = index;
-    nc->m_Delim   = RangeProxy::Delimiter::NONE;
-    nc->m_pParent = node;
-    node->m_lChildren << nc;
-
-    q_ptr->endInsertRows();
+    q_ptr->addFilter(parent, RangeProxy::Delimiter::NONE);
 }
 
 bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
@@ -200,6 +191,16 @@ void RangeProxy::setExtraColumnCount(int value)
     Q_EMIT layoutChanged();
 }
 
+bool RangeProxy::matchAllFilters() const
+{
+    return d_ptr->m_MatchAllColumns;
+}
+
+void RangeProxy::setMatchAllFilters(bool value)
+{
+    d_ptr->m_MatchAllColumns = value;
+}
+
 QAbstractItemModel* RangeProxy::delimiterModel() const
 {
     if (!d_ptr->s_pDelimiterModel) {
@@ -233,15 +234,15 @@ void RangeProxy::setSourceModel(QAbstractItemModel* source)
                 d_ptr, &RangeProxyPrivate::slotLayoutChanged);
 }
 
-QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
+QModelIndex RangeProxyPrivate::matchSourceIndex(const QModelIndex& srcIdx) const
 {
-    if ((!srcIdx.isValid()) || srcIdx.model() != sourceModel())
+    if ((!srcIdx.isValid()) || srcIdx.model() != q_ptr->sourceModel())
         return {};
 
-    if (srcIdx.column() >= d_ptr->m_lRows.size())
+    if (srcIdx.column() >= m_lRows.size())
         return {};
 
-    const auto colNode = d_ptr->m_lRows[srcIdx.column()];
+    const auto colNode = m_lRows[srcIdx.column()];
 
     for (int i = 0; i < colNode->m_lChildren.size(); i++) {
         const auto rule = colNode->m_lChildren[i];
@@ -277,10 +278,47 @@ QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
         };
 
         if (match)
-            return createIndex(i, 0, rule);
+            return q_ptr->createIndex(i, 0, rule);
     }
 
     return {};
+}
+
+QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
+{
+    if (d_ptr->m_MatchAllColumns) {
+        for (int i = 0; i < rowCount(); i++) {
+            auto idx = d_ptr->matchSourceIndex( sourceModel()->index(srcIdx.row(), i));
+            if (idx.isValid())
+                return idx;
+        }
+    }
+
+    return d_ptr->matchSourceIndex(srcIdx);
+}
+
+
+void RangeProxy::addFilter(const QModelIndex& idx, RangeProxy::Delimiter delim)
+{
+    if ((!idx.isValid()) || (idx.model() != this))
+        return;
+
+    auto i = idx.parent().isValid() ? idx.parent() : idx;
+
+    const auto node = static_cast<Node*>(i.internalPointer());
+
+    const int index = node->m_lChildren.size();
+
+    beginInsertRows(i, index, index);
+
+    Node* nc      = new Node;
+    nc->m_Mode    = Node::Mode::CHILD;
+    nc->m_Index   = index;
+    nc->m_Delim   = delim;
+    nc->m_pParent = node;
+    node->m_lChildren << nc;
+
+    endInsertRows();
 }
 
 void RangeProxyPrivate::slotLayoutChanged()
@@ -314,14 +352,4 @@ void RangeProxyPrivate::slotRowsAboutToBeInserted(const QModelIndex &parent, int
     }
 
     Q_EMIT q_ptr->dataChanged(q_ptr->index(0,0), q_ptr->index(q_ptr->rowCount(),0));
-
-    for (int i = first; i <= last;i++) {
-        const auto parent = q_ptr->index(i, 0);
-        q_ptr->beginInsertRows(parent, 0,0);
-        Node* nc = new Node;
-        nc->m_Mode = Node::Mode::CHILD;
-        nc->m_pParent = m_lRows[i];
-        m_lRows[i]->m_lChildren << nc;
-        q_ptr->endInsertRows();
-    }
 };

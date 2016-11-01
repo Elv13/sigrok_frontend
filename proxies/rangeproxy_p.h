@@ -33,11 +33,15 @@ public:
     QVector<bool> m_lShow;
     int m_ExtraColumnCount {0};
     QVector<Node*> m_lRows;
+    bool m_MatchAllColumns{false};
 
     static QStringListModel* s_pDelimiterModel;
     static QStringList DELIMITERNAMES;
 
     RangeProxy* q_ptr;
+
+    //Helpers
+    QModelIndex matchSourceIndex(const QModelIndex& srcIdx) const;
 
 public Q_SLOTS:
     void slotLayoutChanged();
