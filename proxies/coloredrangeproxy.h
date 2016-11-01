@@ -12,9 +12,8 @@ public:
     virtual ~ColoredRangeProxy();
 
     virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
-
-    void setBackgroundColor(int row, const QVariant& color);
-    void setForegroundColor(int row, const QVariant& color);
+    virtual QVariant data(const QModelIndex& idx, int role) const override;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     QAbstractItemModel* filteredModel() const;
 

@@ -1,45 +1,9 @@
 #include "rangeproxy.h"
 
 #include <QtCore/QDebug>
-#include <QtCore/QStringListModel>
 #include <QtCore/QCoreApplication>
 
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QAbstractItemView>
-
-struct Node
-{
-    enum class Mode {
-        ROOT,
-        CHILD
-    };
-
-    int  m_Index {0};
-    Mode m_Mode {Mode::ROOT};
-    Node* m_pParent {nullptr};
-    RangeProxy::Delimiter m_Delim {RangeProxy::Delimiter::ANY};
-    QVariant m_RangeValue {QString()};
-    QVector<Node*> m_lChildren;
-};
-
-class RangeProxyPrivate : public QObject
-{
-public:
-    QVector<bool> m_lShow;
-    int m_ExtraColumnCount {0};
-//     QAbstractItemView* m_pWidget {nullptr};
-    QVector<Node*> m_lRows;
-
-    static QStringListModel* s_pDelimiterModel;
-    static QStringList DELIMITERNAMES;
-
-    RangeProxy* q_ptr;
-
-
-public Q_SLOTS:
-    void slotLayoutChanged();
-    void slotRowsAboutToBeInserted(const QModelIndex &parent, int first, int last);
-};
+#include "rangeproxy_p.h"
 
 QStringListModel* RangeProxyPrivate::s_pDelimiterModel = nullptr;
 
@@ -47,13 +11,14 @@ QStringList RangeProxyPrivate::DELIMITERNAMES = ([]() -> QStringList {
     QVector<QString> ret;
     ret.resize((int) RangeProxy::Delimiter::GREATER_EQUAL+1);
 
-    ret[(int) RangeProxy::Delimiter::ANY           ] = QStringLiteral("Any");
-    ret[(int) RangeProxy::Delimiter::EQUAL         ] = QStringLiteral("==");
-    ret[(int) RangeProxy::Delimiter::NOT_EQUAL     ] = QStringLiteral("!=");
-    ret[(int) RangeProxy::Delimiter::LESSER        ] = QStringLiteral("<" );
-    ret[(int) RangeProxy::Delimiter::GREATER       ] = QStringLiteral(">" );
-    ret[(int) RangeProxy::Delimiter::LESSER_EQUAL  ] = QStringLiteral("<=");
-    ret[(int) RangeProxy::Delimiter::GREATER_EQUAL ] = QStringLiteral(">=");
+    ret[(int) RangeProxy::Delimiter::ANY           ] = QStringLiteral( "Any"  );
+    ret[(int) RangeProxy::Delimiter::NONE          ] = QStringLiteral( "None" );
+    ret[(int) RangeProxy::Delimiter::EQUAL         ] = QStringLiteral( "=="   );
+    ret[(int) RangeProxy::Delimiter::NOT_EQUAL     ] = QStringLiteral( "!="   );
+    ret[(int) RangeProxy::Delimiter::LESSER        ] = QStringLiteral( "<"    );
+    ret[(int) RangeProxy::Delimiter::GREATER       ] = QStringLiteral( ">"    );
+    ret[(int) RangeProxy::Delimiter::LESSER_EQUAL  ] = QStringLiteral( "<="   );
+    ret[(int) RangeProxy::Delimiter::GREATER_EQUAL ] = QStringLiteral( ">="   );
 
     return ret.toList();
 })();
@@ -164,6 +129,33 @@ QModelIndex RangeProxy::parent(const QModelIndex& idx) const
     return {};
 }
 
+void RangeProxyPrivate::slotAutoAddRows(const QModelIndex& parent)
+{
+    if ((!parent.isValid()) || parent.parent().isValid())
+        return;
+
+    const auto node = static_cast<Node*>(parent.internalPointer());
+
+    // Each source column need a "NONE" or every row will always match.
+    // This is fine for some use case, but breaks many more. Has it hurts,
+    // it is done here.
+    for (auto n : *const_cast<const QVector<Node*>*>(&node->m_lChildren))
+        if (n->m_Delim == RangeProxy::Delimiter::NONE) return;
+
+    const int index = node->m_lChildren.size();
+
+    q_ptr->beginInsertRows(parent, index, index);
+
+    Node* nc      = new Node;
+    nc->m_Mode    = Node::Mode::CHILD;
+    nc->m_Index   = index;
+    nc->m_Delim   = RangeProxy::Delimiter::NONE;
+    nc->m_pParent = node;
+    node->m_lChildren << nc;
+
+    q_ptr->endInsertRows();
+}
+
 bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
 {
     if (!i.isValid())
@@ -178,17 +170,18 @@ bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
         case (int) Role::RANGE_DELIMITER:
             if (value.canConvert<RangeProxy::Delimiter>()) {
                 node->m_Delim = qvariant_cast<RangeProxy::Delimiter>(value);
+                d_ptr->slotAutoAddRows(i.parent());
                 return true;
             }
             else if (value.canConvert<int>()) {
                 node->m_Delim = static_cast<RangeProxy::Delimiter>(value.toInt());
-            qDebug() << "SET delim" << d_ptr->DELIMITERNAMES[(int)node->m_Delim];
+                d_ptr->slotAutoAddRows(i.parent());
                 return true;
             }
         case Qt::EditRole:
         case (int) Role::RANGE_VALUE:
-            qDebug() << "SET RANGE" << value;
             node->m_RangeValue = value;
+            d_ptr->slotAutoAddRows(i.parent());
             return true;
     }
 
@@ -228,7 +221,6 @@ void RangeProxy::setSourceModel(QAbstractItemModel* source)
                    d_ptr, &RangeProxyPrivate::slotLayoutChanged);
     }
 
-
     // It assumes the old and new columns represent the same thing.
 
     ColumnProxy::setSourceModel(source);
@@ -255,6 +247,9 @@ QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
         const auto rule = colNode->m_lChildren[i];
 
         bool match = false;
+
+        // C++14 has a cooler and more functional way to do this, but it ain't
+        // supported by all compilers yet
         switch(rule->m_Delim) {
             case RangeProxy::Delimiter::ANY:
                 match = true;
@@ -277,10 +272,12 @@ QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
             case RangeProxy::Delimiter::GREATER_EQUAL:
                 match = srcIdx.data() >= rule->m_RangeValue;
                 break;
+            case RangeProxy::Delimiter::NONE:
+                break;
         };
 
         if (match)
-            return createIndex(i, 0, colNode);
+            return createIndex(i, 0, rule);
     }
 
     return {};
@@ -320,14 +317,11 @@ void RangeProxyPrivate::slotRowsAboutToBeInserted(const QModelIndex &parent, int
 
     for (int i = first; i <= last;i++) {
         const auto parent = q_ptr->index(i, 0);
-        q_ptr->beginInsertRows(parent, 0,1);
-        for (int j=0; j < 1; j++) {
-            Node* nc = new Node;
-            nc->m_Mode = Node::Mode::CHILD;
-            nc->m_Index = j;
-            nc->m_pParent = m_lRows[i];
-            m_lRows[i]->m_lChildren << nc;
-        }
+        q_ptr->beginInsertRows(parent, 0,0);
+        Node* nc = new Node;
+        nc->m_Mode = Node::Mode::CHILD;
+        nc->m_pParent = m_lRows[i];
+        m_lRows[i]->m_lChildren << nc;
         q_ptr->endInsertRows();
     }
 };

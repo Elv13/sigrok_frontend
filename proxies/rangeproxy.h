@@ -20,11 +20,13 @@ class RangeProxy : public ColumnProxy
 public:
     enum class Role {
         RANGE_DELIMITER = ColumnProxy::Role::USER_ROLE,
-        RANGE_VALUE
+        RANGE_VALUE,
+        USER_ROLE
     };
 
     enum class Delimiter {
         ANY,
+        NONE,
         EQUAL,
         NOT_EQUAL,
         LESSER,
@@ -60,7 +62,7 @@ Q_SIGNALS:
     void mainChanged(int main);
     void columnEnabled(int col, bool value);
 
-private:
+protected:
     RangeProxyPrivate* d_ptr;
     Q_DECLARE_PRIVATE(RangeProxy)
 };

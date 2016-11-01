@@ -32,27 +32,33 @@ void Range::setRangeProxy(RangeProxy* p)
     treeView->setModel(p);
 //     p->setWidget(treeView);
 
-    setColumnWidgetFactory(0, true, [this](int row) -> QWidget* {
+    setColumnWidgetFactory(0, [this](const QPersistentModelIndex& idx) -> QWidget* {
 
         auto w = new QWidget();
 
         auto ui = new Ui_RangeSelection();
         ui->setupUi(w);
         ui->comboBox->setModel(m_pProxy->delimiterModel());
+        ui->comboBox->setCurrentIndex(
+            (int) qvariant_cast<RangeProxy::Delimiter>(
+                idx.data((int)RangeProxy::Role::RANGE_DELIMITER)
+            )
+        );
         connect(ui->comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged)
-            , [this, ui, row]() {
+            , [this, ui, idx]() {
                 ui->doubleSpinBox->setEnabled(ui->comboBox->currentIndex());
+
                 m_pProxy->setData(
-                    m_pProxy->index(0,0, m_pProxy->index(row,0)),
+                    idx,
                     ui->comboBox->currentIndex(),
                     (int)RangeProxy::Role::RANGE_DELIMITER
                 );
             }
         );
         connect(ui->doubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-            [this, ui, row](double v) {
+            [this, ui, idx](double v) {
                 m_pProxy->setData(
-                    m_pProxy->index(0,0, m_pProxy->index(row,0)),
+                    idx,
                     v,
                     (int)RangeProxy::Role::RANGE_VALUE
                 );
@@ -64,19 +70,20 @@ void Range::setRangeProxy(RangeProxy* p)
 
     slotAjustColumns();
     treeView->expandAll();
-    connect(p, &RangeProxy::layoutChanged, this, &Range::slotAjustColumns);
+    connect(p, &RangeProxy::layoutChanged  , this, &Range::slotAjustColumns);
     connect(p, &RangeProxy::columnsInserted, this, &Range::slotAjustColumns);
-    connect(p, &RangeProxy::rowsInserted, this, &Range::slotAjustColumns);
+    connect(p, &RangeProxy::rowsInserted   , this, &Range::slotAjustColumns);
 }
 
 void Range::slotAjustColumns()
 {
-    if (treeView->header()) {
-        treeView->header()->setHidden(true);
-        treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-        treeView->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-        treeView->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    }
+    if (!treeView->header())
+        return;
+
+    treeView->header()->setHidden(true);
+    treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch         );
+    treeView->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    treeView->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 
     applyWidget({}, m_lWidgetFactories);
 
@@ -84,13 +91,13 @@ void Range::slotAjustColumns()
     QTimer::singleShot(0, [this](){treeView->expandAll();});
 }
 
-void Range::setColumnWidgetFactory(int col, bool isRange, std::function<QWidget*(int)> w)
+void Range::setColumnWidgetFactory(int col, std::function<QWidget*(const QPersistentModelIndex& idx)> w)
 {
     const int cc = m_pProxy->columnCount();
     if (col > cc) return;
 
     //FIXME hack
-    auto list = &(isRange ? m_lWidgetFactoriesChild : m_lWidgetFactories);
+    auto list = &(true ? m_lWidgetFactoriesChild : m_lWidgetFactories);
 
     list->resize(cc);
 
@@ -98,7 +105,7 @@ void Range::setColumnWidgetFactory(int col, bool isRange, std::function<QWidget*
     applyWidget({}, m_lWidgetFactories);
 }
 
-void Range::applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(int)> >& f)
+void Range::applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(const QPersistentModelIndex& idx)> >& f)
 {
     qDebug() << "RELOAD";
     // Create all missing widgets
@@ -108,7 +115,7 @@ void Range::applyWidget(const QModelIndex& root, QVector< std::function<QWidget*
             auto w = treeView->indexWidget(idx);
 
             if ((!w) && f.size() > j && f[j]) {
-                w = f[j](root.row());
+                w = f[j](idx);
                 treeView->setIndexWidget(idx, w);
             }
 

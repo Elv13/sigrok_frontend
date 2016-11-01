@@ -6,6 +6,7 @@
 #include <KChartLineAttributes.h>
 
 #include "../proxies/columnproxy.h"
+#include "rangeproxy_p.h"
 
 #include <QtCore/QIdentityProxyModel>
 
@@ -14,8 +15,6 @@ class ColoredProxy;
 class ColoredRangeProxyPrivate
 {
 public:
-    QVector< QVector<QVariant> > m_llColors {{}, {}};
-//     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
     ColoredProxy* m_pProxy;
     ColoredRangeProxy* q_ptr;
 };
@@ -33,7 +32,6 @@ public:
 ColoredRangeProxy::ColoredRangeProxy(QObject* parent) : RangeProxy(parent),
     d_ptr(new ColoredRangeProxyPrivate())
 {
-//     RangeProxy::setSourceModel();
     d_ptr->q_ptr = this;
 
     d_ptr->m_pProxy = new ColoredProxy(parent);
@@ -48,51 +46,60 @@ ColoredRangeProxy::~ColoredRangeProxy()
     delete d_ptr;
 }
 
-void ColoredRangeProxy::setBackgroundColor(int row, const QVariant& color)
+QVariant ColoredRangeProxy::data(const QModelIndex& idx, int role) const
 {
-    if (row >= d_ptr->m_llColors.size())
-        d_ptr->m_llColors.resize(row+1);
+    if (!idx.isValid())
+        return {};
 
-    d_ptr->m_llColors[row].resize(2);
+    const auto n = static_cast<Node*>(idx.internalPointer());
 
-    d_ptr->m_llColors[row][0] = color;
+    switch (role) {
+        case Qt::BackgroundRole:
+        case Qt::ForegroundRole:
+            return (*n->m_hExtraValues)[role];
+    };
+
+    return RangeProxy::data(idx, role);
 }
 
-void ColoredRangeProxy::setForegroundColor(int row, const QVariant& color)
+bool ColoredRangeProxy::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (row >= d_ptr->m_llColors.size())
-        d_ptr->m_llColors.resize(row+1);
+    if (!index.isValid())
+        return {};
 
-    d_ptr->m_llColors[row].resize(2);
+    const auto n = static_cast<Node*>(index.internalPointer());
 
-    d_ptr->m_llColors[row][1] = color;
+    switch (role) {
+        case Qt::BackgroundRole:
+        case Qt::ForegroundRole:
+            (*n->m_hExtraValues)[role] = value;
+            return true;
+    };
+
+    return RangeProxy::setData(index, value, role);
 }
 
 QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
 {
-    if (d_ptr->m_llColors.size() > idx.column()) {
+    if (!idx.isValid())
+        return {};
 
-        bool match = false;
-
-        switch(role) {
-            case KChart::DatasetBrushRole:
-            case Qt::BackgroundRole:
-                match = d_ptr->q_ptr->matchSourceIndex(mapToSource(idx)).isValid();
-                if (!match) return {};//HACK
-                return d_ptr->m_llColors[idx.column()][0];
-                break;
-            case KChart::DatasetPenRole:
-            case Qt::ForegroundRole:
-                match = d_ptr->q_ptr->matchSourceIndex(mapToSource(idx)).isValid();
-                if (!match) return {};//HACK
-                return d_ptr->m_llColors[idx.column()][1];
-                break;
-            case KChart::LineAttributesRole:
-                static KChart::LineAttributes attributes;
-                attributes.setDisplayArea(true);
-                attributes.setTransparency(127);
-                return QVariant::fromValue(attributes);
-        }
+    // Technically, the source index could hold its own Bg/Fg roles, but then
+    // it would make this proxy less useful. So it is ignored on purpose.
+    switch(role) {
+        case KChart::DatasetBrushRole:
+        case Qt::BackgroundRole:
+            return d_ptr->q_ptr->matchSourceIndex(mapToSource(idx))
+                .data(Qt::BackgroundRole);
+        case KChart::DatasetPenRole:
+        case Qt::ForegroundRole:
+            return d_ptr->q_ptr->matchSourceIndex(mapToSource(idx))
+                .data(Qt::ForegroundRole);
+        case KChart::LineAttributesRole:
+            static KChart::LineAttributes attributes;
+            attributes.setDisplayArea(true);
+            attributes.setTransparency(127);
+            return QVariant::fromValue(attributes);
     }
 
     return QIdentityProxyModel::data(idx, role);
@@ -100,10 +107,7 @@ QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
 
 void ColoredRangeProxy::setSourceModel(QAbstractItemModel *sourceModel)
 {
-//     d_ptr->m_pColumnProxy->setSourceModel(sourceModel);
-
     RangeProxy::setSourceModel(sourceModel);
-
     d_ptr->m_pProxy->setSourceModel(sourceModel);
 }
 

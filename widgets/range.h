@@ -18,15 +18,18 @@ public:
     RangeProxy* rangeProxy() const;
     void setRangeProxy(RangeProxy* p);
 
-    void setColumnWidgetFactory(int col, bool isRange, std::function<QWidget*(int)> w);
+    void setColumnWidgetFactory(
+        int col,
+        std::function<QWidget*(const QPersistentModelIndex& idx)> w
+    );
 
 private:
     RangeProxy* m_pProxy {nullptr};
-    QVector< std::function<QWidget*(int)> > m_lWidgetFactories; //FIXME deadcode
-    QVector< std::function<QWidget*(int)> > m_lWidgetFactoriesChild;
+    QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactories; //FIXME deadcode
+    QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactoriesChild;
 
     // Helpers
-    void applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(int)> >& f);
+    void applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(const QPersistentModelIndex&)> >& f);
 
 private Q_SLOTS:
     void slotAjustColumns();

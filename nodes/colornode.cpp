@@ -32,19 +32,21 @@ ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePr
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ColorNodePrivate::slotModelChanged);
 //     QObject::connect(d_ptr->m_pCheckable, &QAbstractItemModel::dataChanged, d_ptr, &ColorNodePrivate::slotDataChanged);
 
-    d_ptr->m_Widget.setColumnWidgetFactory(1, true, [this](int row) -> QWidget* {
+    d_ptr->m_Widget.setColumnWidgetFactory(1, [this](const QPersistentModelIndex& idx) -> QWidget* {
         auto w = new KColorButton();
         w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-        QObject::connect(w, &KColorButton::changed, [this, row](const QColor& col) {
-            d_ptr->m_pRangeProxy->setBackgroundColor(row, col);
+        QObject::connect(w, &KColorButton::changed, [this, idx](const QColor& col) {
+//             d_ptr->m_pRangeProxy->setBackgroundColor(row, col);
+            d_ptr->m_pRangeProxy->setData(idx, col, Qt::BackgroundRole);
         });
         return w;
     });
-    d_ptr->m_Widget.setColumnWidgetFactory(2, true, [this](int row) -> QWidget* {
+    d_ptr->m_Widget.setColumnWidgetFactory(2, [this](const QPersistentModelIndex& idx) -> QWidget* {
         auto w = new KColorButton();
         w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-        QObject::connect(w, &KColorButton::changed, [this, row](const QColor& col) {
-            d_ptr->m_pRangeProxy->setForegroundColor(row, col);
+        QObject::connect(w, &KColorButton::changed, [this, idx](const QColor& col) {
+            d_ptr->m_pRangeProxy->setData(idx, col, Qt::ForegroundRole);
+//             d_ptr->m_pRangeProxy->setForegroundColor(row, col);
         });
         return w;
     });
