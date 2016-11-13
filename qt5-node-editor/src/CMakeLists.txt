@@ -11,29 +11,27 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt5Widgets REQUIRED)
 
 set(SRC
-	node.cpp
-	edge.cpp
-	graphicsbezieredge.cpp
-	graphicsnode.cpp
-	graphicsnodeview.cpp
-	graphicsnodescene.cpp
-	graphicsnodesocket.cpp
-        qobjectnode.cpp
-        modelnode.cpp
-
-	connectmapper_p.cpp
+    graphicsbezieredge.cpp
+    graphicsnode.cpp
+    graphicsnodeview.cpp
+    graphicsnodescene.cpp
+    graphicsnodesocket.cpp
+    qobjectmodel.cpp
+    qmultimodeltree.cpp
+    qreactiveproxymodel.cpp
+    qnodeview.cpp
+    qnodewidget.cpp
+    qnodeeditorsocketmodel.cpp
+    qmodeldatalistdecoder.cpp
+    qtypecoloriserproxy.cpp
 )
 set(HEADERS
-	node.hpp
-	edge.hpp
-	graphicsbezieredge.hpp
-	graphicsnode.hpp
-	graphicsnodeview.hpp
-	graphicsnodescene.hpp
-	graphicsnodesocket.hpp
-	graphicsnodedefs.hpp
-        qobjectnode.hpp
-        modelnode.hpp
+    graphicsbezieredge.hpp
+    graphicsnode.hpp
+    graphicsnodeview.hpp
+    graphicsnodescene.hpp
+    graphicsnodesocket.hpp
+    graphicsnodedefs.hpp
 )
 
 add_library(qnodeeditor SHARED ${SRC} ${HEADERS_MOC} ${HEADERS})
