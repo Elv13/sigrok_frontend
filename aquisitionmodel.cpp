@@ -182,6 +182,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
 
             switch(role) {
                 case Qt::DisplayRole:
+                case Qt::EditRole:
                     return idx.row();
             };
             return r->commonRole(role);
@@ -190,6 +191,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
 
             switch(role) {
                 case Qt::DisplayRole:
+                case Qt::EditRole:
                     return r->m_Time;
             };
             return r->commonRole(role);
@@ -198,6 +200,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
 
             switch(role) {
                 case Qt::DisplayRole:
+                case Qt::EditRole:
                     return r->m_TimeStamp;
             };
             return r->commonRole(role);
@@ -206,6 +209,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
 
             switch(role) {
                 case Qt::DisplayRole:
+                case Qt::EditRole:
                     return r->m_Unit;
             };
             return r->commonRole(role);
@@ -214,6 +218,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
 
             switch(role) {
                 case Qt::DisplayRole:
+                case Qt::EditRole:
                     return r->m_Quantity;
             };
             return r->commonRole(role);
@@ -222,6 +227,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
 
             switch(role) {
                 case Qt::DisplayRole:
+                case Qt::EditRole:
                     return r->m_lChans[0]->m_AnalogValue;
                 case (int) AquisitionModel::Role::IS_CHANNEL:
                     return true;
@@ -269,7 +275,14 @@ QVariant AquisitionModel::headerData(int sec, Qt::Orientation ori, int role) con
 void AquisitionModel::start()
 {
     d_ptr->initialize(this);
-    d_ptr->m_pSess->add_device(d_ptr->m_pDev);
+
+    try {
+        d_ptr->m_pSess->add_device(d_ptr->m_pDev);
+    }
+    catch (const sigrok::Error& e) {
+        qWarning() << "Starting device failed because:" << e.what();
+    }
+
     d_ptr->m_pDev->open();
     d_ptr->m_pSess->start();
 }

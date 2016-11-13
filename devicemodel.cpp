@@ -118,6 +118,14 @@ void DeviceModel::scan()
     }
 }
 
+Qt::ItemFlags DeviceModel::flags(const QModelIndex &idx) const
+{
+    return idx.isValid() ?
+        Qt::ItemIsEnabled | Qt::ItemIsSelectable |Qt::ItemIsDragEnabled :
+        Qt::NoItemFlags;
+}
+
+
 int DeviceModel::rowCount(const QModelIndex& parent) const
 {
     return parent.isValid()?0:d_ptr->m_lDevices.size();
@@ -130,6 +138,7 @@ QVariant DeviceModel::data(const QModelIndex& idx, int role) const
     switch (role) {
         case Qt::DisplayRole:
             return d_ptr->m_lDevices[idx.row()]->m_Name;
+        case Qt::EditRole:
         case (int) DeviceModel::Role::DEVICE:
             const auto n = d_ptr->m_lDevices[idx.row()];
 //             if (!n->m_pNode) {
@@ -144,6 +153,17 @@ QVariant DeviceModel::data(const QModelIndex& idx, int role) const
     }
 
     return {};
+}
+
+QHash<int, QByteArray> DeviceModel::roleNames() const
+{
+    static QHash<int, QByteArray> ret;
+
+    if (ret.isEmpty()) {
+        ret[ (int) Role::DEVICE ] = "device";
+    }
+
+    return ret;
 }
 
 QVariant DeviceModel::headerData(int section, Qt::Orientation orientation, int role) const

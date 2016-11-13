@@ -4,11 +4,13 @@ class LastRowToListProxyPrivate : public QObject
 {
 public:
     QAbstractItemModel* m_pSourceModel {nullptr};
+    bool m_UseHeaderDR {false};
 
     LastRowToListProxy* q_ptr;
 
 public Q_SLOTS:
     void slotRowsInserted();
+    void slotLayoutChanged();
 };
 
 LastRowToListProxy::LastRowToListProxy(QObject* parent) : QAbstractListModel(parent),
@@ -51,14 +53,22 @@ QModelIndex LastRowToListProxy::mapToSource(const QModelIndex& proxyIndex) const
 QVariant LastRowToListProxy::data(const QModelIndex& idx, int role) const
 {
     if (!idx.isValid()) return {};
+
+    if (role == Qt::DisplayRole && d_ptr->m_UseHeaderDR)
+        return headerData(idx.row(), Qt::Vertical, Qt::DisplayRole);
+
     return mapToSource(idx).data(role);
 }
 
 int LastRowToListProxy::rowCount(const QModelIndex& parent) const
 {
-    return (
-        (!parent.isValid()) && d_ptr->m_pSourceModel && d_ptr->m_pSourceModel->rowCount()
-    ) ? 1 : 0;
+    return ((!parent.isValid()) && d_ptr->m_pSourceModel) ?
+        d_ptr->m_pSourceModel->columnCount() : 0;
+}
+
+Qt::ItemFlags LastRowToListProxy::flags(const QModelIndex &idx) const
+{
+    return mapToSource(idx).flags() | Qt::ItemIsDragEnabled;
 }
 
 QVariant LastRowToListProxy::headerData(int section, Qt::Orientation o, int role) const
@@ -79,21 +89,70 @@ void LastRowToListProxyPrivate::slotRowsInserted()
 
 void LastRowToListProxy::setSourceModel(QAbstractItemModel* src)
 {
-    if (sourceModel())
+    if (sourceModel()) {
         disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsInserted,
-                   d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+            d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
         );
+
+        disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsInserted,
+            d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+        );
+
+        disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsMoved,
+            d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+        );
+
+        disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsRemoved,
+            d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+        );
+
+        disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::layoutChanged,
+            d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+        );
+    }
 
     d_ptr->m_pSourceModel = src;
 
     connect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsInserted,
-            d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+        d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+    );
+
+    connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsInserted,
+        d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+    );
+
+    connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsMoved,
+        d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+    );
+
+    connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsRemoved,
+        d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
+    );
+
+    connect(d_ptr->m_pSourceModel, &QAbstractItemModel::layoutChanged,
+        d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
     );
 
     Q_EMIT layoutChanged();
 }
 
+
+bool LastRowToListProxy::isUsingHeaderAsDisplayRole() const
+{
+    return d_ptr->m_UseHeaderDR;
+}
+
+void LastRowToListProxy::setUsingHeaderAsDisplayRole(bool value)
+{
+    d_ptr->m_UseHeaderDR = value;
+}
+
 QAbstractItemModel* LastRowToListProxy::sourceModel() const
 {
     return d_ptr->m_pSourceModel;
+}
+
+void LastRowToListProxyPrivate::slotLayoutChanged()
+{
+    Q_EMIT q_ptr->layoutChanged();
 }

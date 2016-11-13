@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 set(QT_MIN_VERSION "5.3.0")
 set(KF5_MIN_VERSION "5.2.0")
 
+set(CMAKE_BUILD_TYPE DEBUG)
+
 find_package(ECM 1.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -20,6 +22,8 @@ add_subdirectory(qt5-node-editor)
 include_directories(${SIGROK_INCLUDE_DIRS})
 link_directories(${SIGROK_LIBRARY_DIRS})
 add_definitions(${SIGROK_CFLAGS})
+
+add_definitions(-fexceptions)
 
 include_directories(${SIGROKCXX_INCLUDE_DIRS})
 link_directories(${SIGROKCXX_LIBRARY_DIRS})
@@ -112,8 +116,10 @@ set(tutorial4_SRCS
     nodes/currentvalues.cpp
     nodes/timernode.cpp
     nodes/chrononode.cpp
+    nodes/devicelistnode.cpp
     nodes/remote/remotetable.cpp
     nodes/remote/remotemeter.cpp
+    nodes/remote/remotecontrols.cpp
 
     # Delegates
     delegates/categorizeddelegate.cpp

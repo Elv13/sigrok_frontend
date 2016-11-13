@@ -25,21 +25,8 @@ public Q_SLOTS:
 DeviceNode::DeviceNode(QObject* parent) :
     AbstractNode(parent), d_ptr(new DeviceNodePrivate())
 {
-//     d_ptr->m_Title = name;
     d_ptr->q_ptr = this;
-
 }
-
-// DeviceNode::DeviceNode(QObject* parent) :
-//     AbstractNode(parent), d_ptr(new DeviceNodePrivate())
-// {
-//     auto devm = DeviceModel::instance();
-// 
-//     auto ctx = devm->context();
-//     auto dev = devm->currentDevice();
-// 
-//     setModel(new AquisitionModel(ctx, dev));
-// }
 
 DeviceNode::~DeviceNode()
 {
@@ -59,8 +46,6 @@ QString DeviceNode::id() const
 void DeviceNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
-
-    
 }
 
 QWidget* DeviceNode::widget() const
@@ -99,6 +84,9 @@ std::shared_ptr<sigrok::HardwareDevice> DeviceNode::device() const
 
 void DeviceNode::setDevice(std::shared_ptr<sigrok::HardwareDevice> dev)
 {
+    if (d_ptr->m_pDevice == dev)
+        return;
+
     //TODO if device and running, ask to stop
 
     d_ptr->m_pDevice = dev;

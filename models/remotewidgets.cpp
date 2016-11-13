@@ -10,8 +10,9 @@
 struct DataHolder
 {
     QString    name {QStringLiteral("[ADD NEW]")};
-    QByteArray property;
-    QObject*   object {nullptr};
+//     int        role;
+    quint32    m_TypeId {0};
+    QPersistentModelIndex m_Index;
     int        id;
 };
 
@@ -57,7 +58,8 @@ void RemoteWidgetsExport::activated(int index, QVariant value)
     if (index < d_ptr->m_lRows.size()) {
         auto dh = d_ptr->m_lRows[index];
 
-        dh->object->setProperty(dh->property, value);
+        if (auto m = const_cast<QAbstractItemModel*>(dh->m_Index.model()))
+            m->setData(dh->m_Index, true, Qt::EditRole);
     }
 }
 
@@ -70,6 +72,8 @@ QVariant RemoteWidgets::data(const QModelIndex& idx, int role) const
     switch(role) {
         case Qt::DisplayRole:
             return dh->name;
+        case Qt::EditRole:
+            return false;
     }
 
     return {};
@@ -77,10 +81,10 @@ QVariant RemoteWidgets::data(const QModelIndex& idx, int role) const
 
 bool RemoteWidgets::setData(const QModelIndex& idx, const QVariant& value, int role)
 {
+    if (idx.isValid() && role == 999 && value.canConvert<QModelIndex>()) {
+        d_ptr->m_lRows[idx.row()]->m_Index = value.toPersistentModelIndex();
 
-    if (idx.isValid() && role == 999 && value.canConvert<QObject*>()) {
-        d_ptr->m_lRows[idx.row()]->object = qvariant_cast<QObject*>(value);
-        d_ptr->m_lRows[idx.row()]->name = d_ptr->m_lRows[idx.row()]->object->objectName();
+        d_ptr->m_lRows[idx.row()]->name = d_ptr->m_lRows[idx.row()]->m_Index.data().toString();
         Q_EMIT dataChanged(idx, idx);
 
         // Always add more rows when the last once is used
@@ -91,18 +95,12 @@ bool RemoteWidgets::setData(const QModelIndex& idx, const QVariant& value, int r
             endInsertRows();
         }
 
-
-        return true;
-    }
-    if (idx.isValid() && role == 998 && d_ptr->m_lRows[idx.row()]->object) {
-        d_ptr->m_lRows[idx.row()]->property =  qvariant_cast<QByteArray>(value);
-        d_ptr->m_lRows[idx.row()]->name += "."+value.toString();
         Q_EMIT dataChanged(idx, idx);
 
         // Add it to the remote control
         auto names = d_ptr->m_Exported.names();
         auto types = d_ptr->m_Exported.types();
-        names << value.toString();
+        names << d_ptr->m_lRows[idx.row()]->name;
         d_ptr->m_Exported.setNames(names);
 
         return true;
@@ -114,6 +112,13 @@ bool RemoteWidgets::setData(const QModelIndex& idx, const QVariant& value, int r
 int RemoteWidgets::rowCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : d_ptr->m_lRows.size();
+}
+
+Qt::ItemFlags RemoteWidgets::flags(const QModelIndex &idx) const
+{
+    return idx.isValid() ?
+        Qt::ItemIsEnabled | Qt::ItemIsSelectable |Qt::ItemIsDragEnabled :
+        Qt::NoItemFlags;
 }
 
 #include <remotewidgets.moc>

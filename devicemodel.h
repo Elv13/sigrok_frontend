@@ -30,7 +30,9 @@ public:
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
+    virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    virtual QHash<int, QByteArray> roleNames() const override;
 
     std::shared_ptr<sigrok::HardwareDevice> currentDevice() const;
 

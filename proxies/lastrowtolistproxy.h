@@ -22,6 +22,10 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const;
     virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const;
+    virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
+
+    bool isUsingHeaderAsDisplayRole() const;
+    void setUsingHeaderAsDisplayRole(bool value);
 
     void setSourceModel(QAbstractItemModel* src);
     QAbstractItemModel* sourceModel() const;

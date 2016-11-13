@@ -104,7 +104,7 @@ QModelIndex TailProxy::mapFromSource(const QModelIndex& sourceIndex) const
     if (!sourceIndex.isValid())
         return {};
 
-    if ((!isLimited()) || sourceIndex.parent().isValid() ||  sourceIndex.row() < maximum())
+    if ((!isLimited()) || sourceIndex.parent().isValid() || sourceIndex.row() < maximum())
         return createIndex(
             sourceIndex.row(),
             sourceIndex.column(),

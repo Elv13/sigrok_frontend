@@ -3,7 +3,6 @@
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 #include "qt5-node-editor/src/graphicsbezieredge.hpp"
-#include "qt5-node-editor/src/qobjectnode.hpp"
 #include "qt5-node-editor/src/graphicsnodesocket.hpp"
 
 #include <QtCore/QDebug>
@@ -13,6 +12,7 @@
 
 #include "nodes/abstractnode.h"
 
+class QNodeWidget;
 class QAbstractItemModel;
 class GraphicsNodeScene;
 class QIODevice;
@@ -20,7 +20,7 @@ class QIODevice;
 class ProxyNodeFactoryAdapter : public QAbstractItemModel
 {
 public:
-    explicit ProxyNodeFactoryAdapter(GraphicsNodeScene* scene);
+    explicit ProxyNodeFactoryAdapter(QNodeWidget* w);
     void registerNode(AbstractNode* o);
 
     template<typename T>
@@ -42,7 +42,7 @@ public Q_SLOTS:
     QPair<GraphicsNode*, AbstractNode*> addToScene(const QModelIndex& idx);
 
 private:
-    GraphicsNodeScene* m_pScene;
+    QNodeWidget* m_pNodeW;
     typedef struct MetaInfo {
         const QMetaObject m_spMetaObj;
         QString m_Name;

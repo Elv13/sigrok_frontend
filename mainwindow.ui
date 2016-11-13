@@ -30,7 +30,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="GraphicsNodeView" name="m_pNode" native="true">
+     <widget class="QNodeWidget" name="m_pNode" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -44,9 +44,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GraphicsNodeView</class>
+   <class>QNodeWidget</class>
    <extends>QWidget</extends>
-   <header>../qt5-node-editor/src/graphicsnodeview.hpp</header>
+   <header>../qt5-node-editor/src/qnodewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

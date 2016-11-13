@@ -25,8 +25,8 @@ class DeviceNode : public AbstractNode
 public:
     Q_PROPERTY(QAbstractItemModel* model READ model NOTIFY modelChanged USER true);
     Q_PROPERTY(std::shared_ptr<sigrok::HardwareDevice> device WRITE setDevice USER true);
-    Q_PROPERTY(PULSE aboutToClear READ dummy NOTIFY aboutToClear USER true);
-    Q_PROPERTY(PULSE cleared READ dummy NOTIFY cleared USER true);
+    Q_PROPERTY(bool aboutToClear READ dummy NOTIFY aboutToClear USER true);
+    Q_PROPERTY(bool cleared READ dummy NOTIFY cleared USER true);
     Q_PROPERTY(bool clear WRITE clear USER true);
     Q_PROPERTY(bool start WRITE start USER true);
     Q_PROPERTY(bool stop WRITE stop USER true);

@@ -30,9 +30,11 @@
 #include "nodes/timernode.h"
 #include "nodes/chrononode.h"
 #include "nodes/currentvalues.h"
+#include "nodes/devicelistnode.h"
 #include "nodes/multiplexernode.h"
 #include "nodes/remote/remotetable.h"
 #include "nodes/remote/remotemeter.h"
+#include "nodes/remote/remotecontrols.h"
 
 #include "widgets/devicelist.h"
 #include "widgets/charttype.h"
@@ -51,7 +53,6 @@
 
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
-#include "qt5-node-editor/src/modelnode.hpp"
 
 #include <libsigrokcxx/libsigrokcxx.hpp>
 
@@ -78,21 +79,12 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     auto devm = DeviceModel::instance();
 
-    auto _scene = new GraphicsNodeScene(this);
-    _scene->setSceneRect(-32000, -32000, 64000, 64000);
-    m_pNode->setScene(_scene);
+//     auto remotenode = new Modelnode(new RemoteWidgets(this));
+//     remotenode->setConnectedObjectRole(999);
+//     remotenode->setConnectedPropertyRole(998);
+//     m_pNode->scene()->addItem(remotenode->graphicsItem());
 
-    auto devnode = new Modelnode(devm);
-    devnode->setObjectRole((int) DeviceModel::Role::DEVICE);
-    devnode->setIdRole((int) DeviceModel::Role::DEVICE);
-    _scene->addItem(devnode);
-
-    auto remotenode = new Modelnode(new RemoteWidgets(this));
-    remotenode->setConnectedObjectRole(999);
-    remotenode->setConnectedPropertyRole(998);
-    _scene->addItem(remotenode);
-
-    m_pSession = new ProxyNodeFactoryAdapter(_scene);
+    m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
 
     setCentralWidget(w);
 
@@ -110,9 +102,11 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<CurrentValues>("Current Values", "Sinks"    , "currentvalues_node" , QIcon::fromTheme( "kt-remove-filters"));
     m_pSession->registerType<TimerNode>  ("Timer"           , "Tools"    , "timer_node", QIcon::fromTheme( "chronometer"          ));
     m_pSession->registerType<ChronoNode> ("Chronometer"     , "Metadata" , "chrono_node", QIcon::fromTheme( "chronometer"        ));
+    m_pSession->registerType<DeviceListNode> ("Device List"      , "Sources"  , "devicelist_node", QIcon::fromTheme( "document-open"          ));
 
     m_pSession->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<RemoteControls>("Controls"      , "Remote widgets"  , "remotecontrols_node", QIcon::fromTheme( "view-calendar-timeline"          ));
 
     //DUMMY
     m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));

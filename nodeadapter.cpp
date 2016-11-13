@@ -4,7 +4,6 @@
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 #include "qt5-node-editor/src/graphicsbezieredge.hpp"
-#include "qt5-node-editor/src/qobjectnode.hpp"
 #include "nodes/devicenode.h"
 #include <QtCore/QAbstractItemModel>
 

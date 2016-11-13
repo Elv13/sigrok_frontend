@@ -5,7 +5,8 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 
-#include "qt5-node-editor/src/modelnode.hpp"
+#include "qt5-node-editor/src/qnodewidget.h"
+#include "qt5-node-editor/src/qreactiveproxymodel.h"
 
 class ProxyNodeFactoryAdapterPrivate
 {
@@ -13,10 +14,15 @@ public:
     
 };
 
-ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(GraphicsNodeScene* scene) :
-    m_pScene(scene)
+ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
+    m_pNodeW(w)
 {
-
+    m_pNodeW->reactiveModel()->setExtraRole(
+        QReactiveProxyModel::ExtraRoles::SourceConnectionNotificationRole, 999
+    );
+    m_pNodeW->reactiveModel()->setExtraRole(
+        QReactiveProxyModel::ExtraRoles::DestinationConnectionNotificationRole, 998
+    );
 }
 
 void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
@@ -26,20 +32,21 @@ void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
 
     switch (o->mode()) {
     case AbstractNode::Mode::PROPERTY:
-        n2 = new QObjectnode(o);
+        n2 = m_pNodeW->addObject(o);
         break;
     case AbstractNode::Mode::MODEL:
-        n2 = new Modelnode(o->sourceModel());
+        n2 = m_pNodeW->addModel(o->sourceModel());
         break;
     }
+    Q_ASSERT(n2 != nullptr);
 
     n2->setTitle(o->title());
 
     auto w = o->widget();
     n2->setCentralWidget(w);
 
-    m_pScene->addItem(n2);
-    n2->setPos(0,0);
+    m_pNodeW->scene()->addItem(n2->graphicsItem());
+    n2->graphicsItem()->setPos(0,0);
 
 }
 
@@ -47,6 +54,7 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
 {
     QObject* o = meta.newInstance();
     Q_ASSERT(o);
+    o->setParent(this);
 
     AbstractNode* anode = qobject_cast<AbstractNode*>(o);
 
@@ -54,19 +62,23 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
 
     switch (anode->mode()) {
     case AbstractNode::Mode::PROPERTY:
-        n2 = new QObjectnode(anode);
+        n2 = m_pNodeW->addObject(anode);
         break;
     case AbstractNode::Mode::MODEL:
-        n2 = new Modelnode(anode->sourceModel());
+        n2 = m_pNodeW->addModel(anode->sourceModel());
         break;
     }
+
+    Q_ASSERT(n2 != nullptr);
+
+    qDebug() << "\n\n\nHERE!!!!" << n2;
 
     n2->setTitle(anode->title());
     auto w = anode->widget();
     n2->setCentralWidget(w);
 
-    m_pScene->addItem(n2);
-    n2->setPos(0,0);
+    m_pNodeW->scene()->addItem(n2->graphicsItem());
+    n2->graphicsItem()->setPos(0,0);
 
     QPair<GraphicsNode*, AbstractNode*> pair {n2, anode};
 
@@ -77,6 +89,9 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
 
 QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QModelIndex& idx)
 {
+    if ((!idx.isValid()) || !idx.parent().isValid())
+        return {};
+
     auto mi = m_slCategory[idx.parent().row()]->m_lTypes[idx.row()];
     auto meta = mi->m_spMetaObj;
 
@@ -162,8 +177,8 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
 
                 const auto nodeW = elem.first;
                 QJsonObject widget;
-                widget["x"] = nodeW->pos().x();
-                widget["y"] = nodeW->pos().y();
+                widget["x"] = nodeW->graphicsItem()->pos().x();
+                widget["y"] = nodeW->graphicsItem()->pos().y();
                 node["widget"] = widget;
 
                 levelArray.append(node);
@@ -195,7 +210,7 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
         if (m_hIdToType[type]) {
             auto pair = addToSceneFromMetaObject(m_hIdToType[type]->m_spMetaObj);
             pair.second->read(data);
-            pair.first->setPos({
+            pair.first->graphicsItem()->setPos({
                 widget["x"].toInt(),
                 widget["y"].toInt()
             });
