@@ -17,6 +17,10 @@ Range::Range(QWidget* parent) : QWidget(parent)
     treeView->setIndentation(0);
     m_pFiltered = new FilterTopLevelProxy(nullptr);
     treeView->setModel(m_pFiltered);
+
+    connect(m_pFiltered, &FilterTopLevelProxy::layoutChanged  , this, &Range::slotAjustColumns);
+    connect(m_pFiltered, &FilterTopLevelProxy::columnsInserted, this, &Range::slotAjustColumns);
+    connect(m_pFiltered, &FilterTopLevelProxy::rowsInserted   , this, &Range::slotAjustColumns);
 }
 
 Range::~Range()
@@ -74,9 +78,6 @@ void Range::setRangeProxy(RangeProxy* p)
 
     slotAjustColumns();
     treeView->expandAll();
-    connect(p, &RangeProxy::layoutChanged  , this, &Range::slotAjustColumns);
-    connect(p, &RangeProxy::columnsInserted, this, &Range::slotAjustColumns);
-    connect(p, &RangeProxy::rowsInserted   , this, &Range::slotAjustColumns);
 }
 
 void Range::slotAjustColumns()

@@ -7,6 +7,16 @@
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QItemSelectionModel>
 #include <QtCore/QDateTime>
+#include <QtCore/QJsonArray>
+
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
 
 class MementosList : public QAbstractListModel
 {
@@ -18,7 +28,7 @@ public:
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
 
-    QVector<QAbstractItemModel*> m_lMementos;
+    QVector<MementoProxy*> m_lMementos;
     QVector<QDateTime> m_lAddedTime;
 
     MementoProxy* takeMemento(QAbstractItemModel* model);
@@ -99,18 +109,32 @@ QString MementoNode::id() const
 
 void MementoNode::read(const QJsonObject &parent)
 {
-    auto proxy = new MementoProxy(parent["memento"].toObject(), this);
+    const auto mementos = parent["mementos"].toArray();
 
-    d_ptr->m_pMementoList->m_lMementos << proxy;
-    d_ptr->m_pMementoList->m_lAddedTime << QDateTime::currentDateTime();
+    d_ptr->m_pMementoList->beginInsertRows({}, 0, mementos.size()-1);
+    for (int i = 0; i < mementos.size(); ++i) {
+        const QJsonObject memento = mementos[i].toObject();
+        auto proxy = new MementoProxy(memento, this);
 
-    Q_EMIT selectedMementoChanged(proxy); //FIXME don't
+        d_ptr->m_pMementoList->m_lMementos << proxy;
+        d_ptr->m_pMementoList->m_lAddedTime << QDateTime::currentDateTime();
+
+        Q_EMIT selectedMementoChanged(proxy); //FIXME don't
+    }
+    d_ptr->m_pMementoList->endInsertRows();
+
 }
 
 void MementoNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
-    //parent["memento"] = d_ptr->m_pProxy->toJson();
+
+    QJsonArray mementos;
+
+    for (auto m : qAsConst(d_ptr->m_pMementoList->m_lMementos))
+        mementos.append(m->toJson());
+
+    parent["mementos"] = mementos;
 }
 
 QWidget* MementoNode::widget() const

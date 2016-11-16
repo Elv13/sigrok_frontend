@@ -15,9 +15,11 @@
 class ColorNodePrivate : public QObject
 {
 public:
+    ColorNodePrivate(ColorNode* p) : QObject(p) {}
+
     Range m_Widget;
 
-    ColoredRangeProxy* m_pRangeProxy {new ColoredRangeProxy()};
+    ColoredRangeProxy* m_pRangeProxy {new ColoredRangeProxy(this)};
 
 
 public Q_SLOTS:
@@ -25,7 +27,7 @@ public Q_SLOTS:
     void slotDataChanged();
 };
 
-ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePrivate())
+ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePrivate(this))
 {
     d_ptr->m_Widget.setRangeProxy(d_ptr->m_pRangeProxy);
 

@@ -71,8 +71,6 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
 
     Q_ASSERT(n2 != nullptr);
 
-    qDebug() << "\n\n\nHERE!!!!" << n2;
-
     n2->setTitle(anode->title());
     auto w = anode->widget();
     n2->setCentralWidget(w);
@@ -176,9 +174,14 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
                 node["data"] = data;
 
                 const auto nodeW = elem.first;
+
+                const auto sinkModel   = nodeW->sinkModel();
+                const auto sourceModel = nodeW->sinkModel();
+
                 QJsonObject widget;
-                widget["x"] = nodeW->graphicsItem()->pos().x();
-                widget["y"] = nodeW->graphicsItem()->pos().y();
+                widget["x"    ] = nodeW->graphicsItem()->pos().x();
+                widget["y"    ] = nodeW->graphicsItem()->pos().y();
+                widget["title"] = nodeW->title();
                 node["widget"] = widget;
 
                 levelArray.append(node);
@@ -210,10 +213,17 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
         if (m_hIdToType[type]) {
             auto pair = addToSceneFromMetaObject(m_hIdToType[type]->m_spMetaObj);
             pair.second->read(data);
-            pair.first->graphicsItem()->setPos({
+
+            const auto nodeW = pair.first;
+
+            const auto sinkModel   = nodeW->sinkModel();
+            const auto sourceModel = nodeW->sinkModel();
+
+            nodeW->graphicsItem()->setPos({
                 widget["x"].toInt(),
                 widget["y"].toInt()
             });
+            nodeW->setTitle(widget["title"].toString());
         }
     }
 }

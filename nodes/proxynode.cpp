@@ -45,8 +45,11 @@ QAbstractItemModel* ProxyNode::model() const
 
 void ProxyNode::setModel(QAbstractItemModel* m)
 {
-    qDebug() << "IN SET MODEL" << m;
     auto old = d_ptr->m_pModel;
+
+    if (m == old)
+        return;
+
     d_ptr->m_pModel = m;
     Q_EMIT modelChanged(m, old);
 }

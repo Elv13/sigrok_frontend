@@ -26,7 +26,7 @@ public:
 
 private:
     RangeProxy* m_pProxy {nullptr};
-    FilterTopLevelProxy* m_pFiltered;
+    FilterTopLevelProxy* m_pFiltered {nullptr};
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactories; //FIXME deadcode
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactoriesChild;
 

@@ -64,7 +64,7 @@ QVariant ColumnProxy::data(const QModelIndex& idx, int role) const
 
 int ColumnProxy::rowCount(const QModelIndex& parent) const
 {
-    return sourceModel() && !parent.isValid() ? sourceModel()->columnCount() : 0;
+    return sourceModel() && (!parent.isValid()) ? sourceModel()->columnCount() : 0;
 }
 
 int ColumnProxy::columnCount(const QModelIndex& parent) const
