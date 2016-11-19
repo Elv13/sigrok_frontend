@@ -22,7 +22,7 @@ class QObjectModelPrivate;
  *
  * It also supports introspection filters to control the content of the model
  */
-class QObjectModel : public QAbstractItemModel
+class Q_DECL_EXPORT QObjectModel : public QAbstractItemModel
 {
     Q_OBJECT
     friend class PropertyChangeReceiver; // for createIndex()

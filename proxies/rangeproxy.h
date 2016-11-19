@@ -14,7 +14,7 @@ class RangeProxyPrivate;
  * This is useful to configure a filter or modifier proxy acting on the
  * original values.
  */
-class RangeProxy : public ColumnProxy
+class Q_DECL_EXPORT RangeProxy : public ColumnProxy
 {
     Q_OBJECT
 public:

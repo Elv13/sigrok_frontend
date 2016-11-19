@@ -2,11 +2,10 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_current.h"
-
+class QLabel;
 class QAbstractItemModel;
 
-class Current : public QWidget, public Ui_Current
+class Current : public QWidget
 {
     Q_OBJECT
 
@@ -14,6 +13,10 @@ public:
     explicit Current(QWidget* parent = nullptr);
 
     void setModel(const QAbstractItemModel* m);
+    void setText(const QString& text);
 
     virtual ~Current();
+
+private:
+    QLabel* m_pValue;
 };

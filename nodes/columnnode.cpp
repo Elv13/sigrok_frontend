@@ -1,10 +1,10 @@
 #include "columnnode.h"
 
-#include "../proxies/columnproxy.h"
+#include "proxies/columnproxy.h"
 
 #include <QtWidgets/QScrollBar>
 
-#include "../widgets/column.h"
+#include "widgets/column.h"
 
 #include <QtCore/QItemSelectionModel>
 
@@ -12,8 +12,6 @@
 #include <KCheckableProxyModel>
 
 #include <QDebug>
-
-#include "../mainwindow.h"
 
 class ColumnNodePrivate : public QObject
 {
@@ -40,7 +38,7 @@ ColumnNode::ColumnNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColumnNod
 
     d_ptr->m_pCheckable->setSourceModel(d_ptr->m_pColumnProxy);
 
-    d_ptr->m_pColumnW->m_pListView->setModel(d_ptr->m_pCheckable);
+    d_ptr->m_pColumnW->setModel(d_ptr->m_pCheckable);
 
     d_ptr->m_pFilteredModel->setObjectName("FOOPROXY");
 

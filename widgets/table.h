@@ -2,9 +2,8 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_table.h"
 
-class Table : public QWidget, public Ui_Table
+class Table : public QWidget
 {
     Q_OBJECT
 

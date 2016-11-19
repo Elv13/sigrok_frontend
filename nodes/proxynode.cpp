@@ -3,7 +3,7 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDebug>
 
-#include "../widgets/aquisition.h"
+#include "widgets/aquisition.h"
 
 class ProxyNodePrivate : public QObject
 {

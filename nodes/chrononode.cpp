@@ -1,6 +1,6 @@
 #include "chrononode.h"
 
-#include "../proxies/chronometerproxy.h"
+#include "proxies/chronometerproxy.h"
 
 class ChronoNodePrivate final : public QObject
 {

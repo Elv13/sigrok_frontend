@@ -2,9 +2,7 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_charttype.h"
-
-class ChartType : public QWidget, public Ui_ChartType
+class ChartType : public QWidget
 {
     Q_OBJECT
 

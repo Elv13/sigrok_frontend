@@ -1,8 +1,8 @@
 #include "tailnode.h"
 
-#include "../proxies/tailproxy.h"
+#include "proxies/tailproxy.h"
 
-#include "../widgets/rowsubset.h"
+#include "widgets/rowsubset.h"
 
 class TailNodePrivate final : public QObject
 {
@@ -21,8 +21,8 @@ TailNode::TailNode(QObject* parent) : ProxyNode(parent), d_ptr(new TailNodePriva
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &TailNodePrivate::slotModelChanged);
-    QObject::connect(d_ptr->m_Widget.spinBox, SIGNAL(valueChanged(int)), &d_ptr->m_Proxy, SLOT(setMaximum(int)));
-    QObject::connect(d_ptr->m_Widget.checkBox, &QCheckBox::toggled, &d_ptr->m_Proxy, &TailProxy::setLimited);
+    QObject::connect(&d_ptr->m_Widget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &TailProxy::setMaximum);
+    QObject::connect(&d_ptr->m_Widget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &TailProxy::setLimited);
 }
 
 TailNode::~TailNode()

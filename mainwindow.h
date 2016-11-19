@@ -3,6 +3,7 @@
 #include <KXmlGuiWindow>
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QUrl>
 
 #include "ui_mainwindow.h"
 
@@ -20,7 +21,6 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
   public:
     MainWindow(QWidget *parent=0);
 
-    static QDockWidget* addDock(QWidget* w, const QString& title);
     static MainWindow* instance();
 
   private:
@@ -29,15 +29,17 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     ProxyNodeFactoryAdapter* m_pSession;
     void setupActions();
 
-
-    QString fileName;
+    QUrl fileName;
 
   private Q_SLOTS:
+    QDockWidget* addDock(QWidget* w, const QString& title);
+    void settingsConfigure();
     void newFile();
     void openFile();
+    void openFile(const QUrl &name);
     void saveFile();
     void saveFileAs();
-    void saveFileAs(const QString &outputFileName);
+    void saveFileAs(const QUrl &outputFileName);
 
     void downloadFinished(KJob* job);
 };

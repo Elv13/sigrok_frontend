@@ -3,7 +3,7 @@
 #include <QtCore/QTimer>
 #include <QtCore/QDebug>
 
-#include "../widgets/timer.h"
+#include "widgets/timer.h"
 
 class TimerNodePrivate final : public QObject
 {
@@ -21,9 +21,9 @@ public Q_SLOTS:
 TimerNode::TimerNode(QObject* parent) : AbstractNode(parent), d_ptr(new TimerNodePrivate())
 {
     d_ptr->q_ptr = this;
-    QObject::connect(d_ptr->m_Widget.spinBox, SIGNAL(valueChanged(int)), this, SLOT(setSeconds(int)));
-    QObject::connect(d_ptr->m_Widget.spinBox_2, SIGNAL(valueChanged(int)),this, SLOT(setMilliseconds(int)));
-    connect(d_ptr->m_Widget.toolButton, &QCheckBox::clicked, this, &TimerNode::setActive);
+    QObject::connect(&d_ptr->m_Widget, &Timer::secondChanged, this, &TimerNode::setSeconds);
+    QObject::connect(&d_ptr->m_Widget, &Timer::millisecondChanged, this, &TimerNode::setMilliseconds);
+    connect(&d_ptr->m_Widget, &Timer::activated, this, &TimerNode::setActive);
     connect(&d_ptr->m_Timer, &QTimer::timeout, d_ptr, &TimerNodePrivate::timeout);
 
 }
@@ -93,7 +93,7 @@ void TimerNode::setActive(bool value)
     else
         d_ptr->m_Timer.stop();
 
-    d_ptr->m_Widget.toolButton->setChecked(isActive());
+    d_ptr->m_Widget.setActive(isActive());
 
     Q_EMIT activated(isActive());
 }

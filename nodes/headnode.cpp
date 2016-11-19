@@ -1,8 +1,8 @@
 #include "headnode.h"
 
-#include "../proxies/headproxy.h"
+#include "proxies/headproxy.h"
 
-#include "../widgets/rowsubset.h"
+#include "widgets/rowsubset.h"
 
 class HeadNodePrivate final : public QObject
 {
@@ -21,8 +21,8 @@ HeadNode::HeadNode(QObject* parent) : ProxyNode(parent), d_ptr(new HeadNodePriva
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &HeadNodePrivate::slotModelChanged);
-    QObject::connect(d_ptr->m_Widget.spinBox, SIGNAL(valueChanged(int)), &d_ptr->m_Proxy, SLOT(setMaximum(int)));
-    QObject::connect(d_ptr->m_Widget.checkBox, &QCheckBox::toggled, &d_ptr->m_Proxy, &HeadProxy::setLimited);
+    QObject::connect(&d_ptr->m_Widget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &HeadProxy::setMaximum);
+    QObject::connect(&d_ptr->m_Widget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &HeadProxy::setLimited);
 }
 
 HeadNode::~HeadNode()

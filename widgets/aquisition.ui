@@ -83,15 +83,62 @@
    <item row="1" column="1">
     <widget class="QComboBox" name="comboBox"/>
    </item>
-   <item row="4" column="1">
-    <widget class="QPushButton" name="pushButton_5">
-     <property name="text">
-      <string>Mark</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_pStart</sender>
+   <signal>clicked()</signal>
+   <receiver>Aquisition</receiver>
+   <slot>slotStarted()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>97</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pStop</sender>
+   <signal>clicked()</signal>
+   <receiver>Aquisition</receiver>
+   <slot>slotStopped()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>166</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>194</x>
+     <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pClear</sender>
+   <signal>clicked()</signal>
+   <receiver>Aquisition</receiver>
+   <slot>slotStopped()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotStarted()</slot>
+  <slot>slotStopped()</slot>
+  <slot>slotCleared()</slot>
+ </slots>
 </ui>

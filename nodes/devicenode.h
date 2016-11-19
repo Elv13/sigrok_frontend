@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "../devicemodel.h"
+//#include "devicemodel.h"
 
 #include <QtCore/QObject>
 

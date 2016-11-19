@@ -1,12 +1,15 @@
 #include "current.h"
 
-#include "../ratesink.h"
+// #include "ratesink.h"
+#include "ui_current.h"
 
 #include <QtCore/QDebug>
 
 Current::Current(QWidget* parent) : QWidget(parent)
 {
-    setupUi(this);
+    Ui_Current ui;
+    ui.setupUi(this);
+    m_pValue = ui.m_pValue;
 }
 
 Current::~Current()
@@ -24,4 +27,9 @@ void Current::setModel(const QAbstractItemModel* m)
         m_pValue->setText(idx.data().toString());
     });
 
+}
+
+void Current::setText(const QString& text)
+{
+    m_pValue->setText(text);
 }

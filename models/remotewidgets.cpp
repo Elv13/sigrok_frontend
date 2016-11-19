@@ -3,7 +3,7 @@
 #include <QtCore/QDebug>
 
 #include <QRemoteObjectHost>
-#include "../remotemanager.h"
+#include "common/remotemanager.h"
 
 #include "remotewidgets_source.h"
 

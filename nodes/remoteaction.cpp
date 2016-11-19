@@ -1,7 +1,7 @@
 #include "remoteaction.h"
 
-#include "../widgets/aquisition.h"
-#include "../aquisitionmodel.h"
+#include "widgets/aquisition.h"
+#include "aquisitionmodel.h"
 
 #include <QDebug>
 #include <libsigrokcxx/libsigrokcxx.hpp>

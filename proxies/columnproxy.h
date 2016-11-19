@@ -10,7 +10,7 @@ class ColumnProxyPrivate;
  * This is useful in combination with the KRearrangeColumnsProxyModel to select
  * and KCheckableProxyModel visible columns.
  */
-class ColumnProxy : public QAbstractItemModel
+class Q_DECL_EXPORT ColumnProxy : public QAbstractItemModel
 {
     Q_OBJECT
 public:

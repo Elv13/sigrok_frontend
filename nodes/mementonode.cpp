@@ -1,7 +1,7 @@
 #include "mementonode.h"
 
-#include "../proxies/mementoproxy.h"
-#include "../widgets/memento.h"
+#include "proxies/mementoproxy.h"
+#include "widgets/memento.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QAbstractListModel>
@@ -78,16 +78,10 @@ int MementosList::rowCount(const QModelIndex& parent) const
 MementoNode::MementoNode(QObject* parent) : ProxyNode(parent), d_ptr(new MementoNodePrivate())
 {
     d_ptr->q_ptr = this;
-    d_ptr->m_pWidgets->tableView->setModel(d_ptr->m_pMementoList);
-    d_ptr->m_pWidgets->tableView->setSelectionModel(d_ptr->m_pSelection);
-
-    d_ptr->m_pWidgets->tableView->verticalHeader()->setHidden(true);
-    d_ptr->m_pWidgets->tableView->horizontalHeader()->setHidden(true);
-    d_ptr->m_pWidgets->tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    //d_ptr->m_pTableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    d_ptr->m_pWidgets->setModel(d_ptr->m_pMementoList, d_ptr->m_pSelection);
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &MementoNodePrivate::slotModelChanged);
-    QObject::connect(d_ptr->m_pWidgets->m_pMementoPB, &QPushButton::clicked, this, &MementoNode::takeMemento);
+    QObject::connect(d_ptr->m_pWidgets, &Memento::takeMemento, this, &MementoNode::takeMemento);
 
     connect(d_ptr->m_pSelection, &QItemSelectionModel::currentChanged, d_ptr, &MementoNodePrivate::slotSelectionChanged);
 }

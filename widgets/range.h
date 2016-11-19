@@ -3,12 +3,12 @@
 #include <QtWidgets/QWidget>
 #include <functional>
 
-#include "ui_range.h"
-
+class QTreeView;
+class QComboBox;
 class RangeProxy;
 class FilterTopLevelProxy;
 
-class Range : public QWidget, public Ui_Range
+class Range : public QWidget
 {
     Q_OBJECT
 
@@ -29,6 +29,8 @@ private:
     FilterTopLevelProxy* m_pFiltered {nullptr};
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactories; //FIXME deadcode
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactoriesChild;
+    QTreeView* m_pTree;
+    QComboBox* m_pColumn;
 
     // Helpers
     void applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(const QPersistentModelIndex&)> >& f);

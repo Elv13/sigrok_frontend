@@ -94,6 +94,14 @@ void LastRowToListProxy::setSourceModel(QAbstractItemModel* src)
             d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
         );
 
+        disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsRemoved,
+            d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+        );
+
+        disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsMoved,
+            d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+        );
+
         disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsInserted,
             d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
         );
@@ -116,6 +124,15 @@ void LastRowToListProxy::setSourceModel(QAbstractItemModel* src)
     connect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsInserted,
         d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
     );
+
+    connect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsRemoved,
+        d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+    );
+
+    connect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsMoved,
+        d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
+    );
+
 
     connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsInserted,
         d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged

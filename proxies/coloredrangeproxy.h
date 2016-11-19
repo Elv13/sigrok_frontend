@@ -4,7 +4,7 @@
 
 class ColoredRangeProxyPrivate;
 
-class ColoredRangeProxy : public RangeProxy
+class Q_DECL_EXPORT ColoredRangeProxy : public RangeProxy
 {
     Q_OBJECT
 public:

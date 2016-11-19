@@ -5,7 +5,7 @@
 #include <KChart/KChartGlobal.h>
 #include <KChartLineAttributes.h>
 
-#include "../proxies/columnproxy.h"
+#include "columnproxy.h"
 #include "rangeproxy_p.h"
 
 #include <QtCore/QIdentityProxyModel>

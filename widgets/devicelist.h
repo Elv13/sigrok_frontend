@@ -2,9 +2,8 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_devicelist.h"
 
-class DeviceList : public QWidget, public Ui_DeviceList
+class DeviceList : public QWidget
 {
     Q_OBJECT
 

@@ -2,7 +2,7 @@
 
 #include <QRemoteObjectHost>
 
-#include "../../remotemanager.h"
+#include "common/remotemanager.h"
 
 class RemoteTablePrivate final : public QObject
 {

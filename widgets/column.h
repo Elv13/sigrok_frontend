@@ -2,14 +2,20 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_column.h"
+class QListView;
+class QAbstractItemModel;
 
-class Column : public QWidget, public Ui_Column
+class Column : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit Column(QWidget* parent = nullptr);
 
+    void setModel(QAbstractItemModel* m);
+
     virtual ~Column();
+
+private:
+    QListView* m_pListView;
 };

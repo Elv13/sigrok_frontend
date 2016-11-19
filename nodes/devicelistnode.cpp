@@ -2,7 +2,7 @@
 
 #include <QtCore/QDebug>
 
-#include "../devicemodel.h"
+#include "sigrokd/devicemodel.h"
 
 class DeviceListNodePrivate final
 {

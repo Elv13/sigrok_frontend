@@ -6,6 +6,7 @@
 #include "qt5-node-editor/src/graphicsnodesocket.hpp"
 
 #include <QtCore/QDebug>
+#include <QtCore/QJsonArray>
 #include <QtCore/QAbstractItemModel>
 
 #include <QtGui/QIcon>
@@ -36,21 +37,21 @@ public:
     void serialize(QIODevice *dev) const;
     void load(QIODevice *dev);
     void load(const QByteArray& data);
-    QPair<GraphicsNode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o);
+    QPair<GraphicsNode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});
 
 public Q_SLOTS:
     QPair<GraphicsNode*, AbstractNode*> addToScene(const QModelIndex& idx);
 
 private:
     QNodeWidget* m_pNodeW;
-    typedef struct MetaInfo {
+    struct MetaInfo {
         const QMetaObject m_spMetaObj;
         QString m_Name;
         QIcon m_Icon;
         QVector< QPair<GraphicsNode*, AbstractNode*> > m_lInstances;
-    } MetaInfo;
+    };
 
-    typedef struct Category {
+    struct Category {
         QString m_Name;
         QVector<MetaInfo*> m_lTypes;
     };
@@ -80,7 +81,7 @@ void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& c
     }
 
     auto mi =  new ProxyNodeFactoryAdapter::MetaInfo {
-        T::staticMetaObject, name, icon
+        T::staticMetaObject, name, icon, {}
     };
 
     cat->m_lTypes << mi;

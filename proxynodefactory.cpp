@@ -8,6 +8,15 @@
 #include "qt5-node-editor/src/qnodewidget.h"
 #include "qt5-node-editor/src/qreactiveproxymodel.h"
 
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
+
 class ProxyNodeFactoryAdapterPrivate
 {
 public:
@@ -25,6 +34,16 @@ ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
     );
 }
 
+QByteArray generateRandomHash()
+{
+    QByteArray ret(8, '\0');
+
+    for (int i=0; i < 8; i++)
+        ret[i] = (char) (qrand() % 42) + '0';
+
+    return ret;
+}
+
 void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
 {
 
@@ -32,10 +51,10 @@ void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
 
     switch (o->mode()) {
     case AbstractNode::Mode::PROPERTY:
-        n2 = m_pNodeW->addObject(o);
+        n2 = m_pNodeW->addObject(o, o->title(), {}, generateRandomHash());
         break;
     case AbstractNode::Mode::MODEL:
-        n2 = m_pNodeW->addModel(o->sourceModel());
+        n2 = m_pNodeW->addModel(o->sourceModel(), o->title(), generateRandomHash());
         break;
     }
     Q_ASSERT(n2 != nullptr);
@@ -50,7 +69,7 @@ void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
 
 }
 
-QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaObject(const QMetaObject& meta)
+QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaObject(const QMetaObject& meta, const QString& uid)
 {
     QObject* o = meta.newInstance();
     Q_ASSERT(o);
@@ -62,10 +81,10 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
 
     switch (anode->mode()) {
     case AbstractNode::Mode::PROPERTY:
-        n2 = m_pNodeW->addObject(anode);
+        n2 = m_pNodeW->addObject(anode, anode->title(), {}, uid.isEmpty() ? generateRandomHash() : uid);
         break;
     case AbstractNode::Mode::MODEL:
-        n2 = m_pNodeW->addModel(anode->sourceModel());
+        n2 = m_pNodeW->addModel(anode->sourceModel(), anode->title(), uid.isEmpty() ? generateRandomHash() : uid);
         break;
     }
 
@@ -138,7 +157,7 @@ int ProxyNodeFactoryAdapter::rowCount(const QModelIndex& parent) const
 
 int ProxyNodeFactoryAdapter::columnCount(const QModelIndex& parent) const
 {
-    return 1;
+    return parent.parent().isValid() ? 0 : 1;
 }
 
 QModelIndex ProxyNodeFactoryAdapter::parent(const QModelIndex& idx) const
@@ -153,12 +172,38 @@ QModelIndex ProxyNodeFactoryAdapter::index(int row, int column, const QModelInde
     return createIndex(row, column, parent.isValid() ? parent.row() : -1);
 }
 
-
 void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
 {
     QJsonObject session;
 
     const auto cats = m_slCategory;
+
+    auto sConn = [](QJsonArray& ret, QAbstractItemModel* m, const QString& name) {
+        for(int i =0; i < m->rowCount(); i++) {
+            const auto edgeI  = m->index(i,1);
+
+            // Only serialize when there is a connection
+            if ((!edgeI.data().canConvert<int>()) )
+                continue;
+
+            const auto sockI  = m->index(i,0);
+            const auto rsockI = m->index(i,2);
+            const auto rnode  = m->index(i,3);
+            const auto nodeid = rnode.data(Qt::UserRole).toString();
+
+            Q_ASSERT(!nodeid.isEmpty());
+
+            QJsonObject o;
+
+            o[ "direction"    ] = name;
+            o[ "own_socket"   ] = sockI.data ().toString();
+            o[ "other_socket" ] = rsockI.data().toString();
+            o[ "id"           ] = edgeI.data ().toInt();
+            o[ "other_node"   ] = nodeid;
+
+            ret.append(o);
+        }
+    };
 
     QJsonArray levelArray;
 
@@ -174,14 +219,20 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
                 node["data"] = data;
 
                 const auto nodeW = elem.first;
-
-                const auto sinkModel   = nodeW->sinkModel();
-                const auto sourceModel = nodeW->sinkModel();
+                const auto sinkModel   = m_pNodeW->sinkSocketModel(nodeW->index());
+                const auto sourceModel = m_pNodeW->sourceSocketModel(nodeW->index());
 
                 QJsonObject widget;
                 widget["x"    ] = nodeW->graphicsItem()->pos().x();
                 widget["y"    ] = nodeW->graphicsItem()->pos().y();
                 widget["title"] = nodeW->title();
+                widget["UID"  ] = nodeW->index().data(Qt::UserRole).toString();
+
+                QJsonArray conns;
+                sConn(conns, sourceModel, QStringLiteral("source"));
+                sConn(conns, sinkModel  , QStringLiteral("sink"  ));
+                widget["connections"] = conns;
+
                 node["widget"] = widget;
 
                 levelArray.append(node);
@@ -202,6 +253,41 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
 
     const auto nodes = obj["nodes"].toArray();
 
+    QHash<QString, GraphicsNode*> fromHash;
+    QHash<GraphicsNode*, QString> toHash;
+
+    typedef struct {
+        int           id;
+        bool          isSource;
+        GraphicsNode* node;
+        QString       ownS;
+        QString       otherS;
+        QString       otherN;
+    } Conn;
+
+    QMap<int, Conn*> connections;
+
+    auto loadConnections = [&connections](const QJsonArray& a, GraphicsNode* s) {
+        for (int cId = 0; cId < a.size(); ++cId) {
+            const auto c = a[cId].toObject();
+            bool isSource = c["direction"] == QLatin1String("source");
+            int connId = c["id"].toInt() * (isSource ? 1 : -1);
+
+            const auto nodeId = c["other_node"].toString();
+
+            connections.insert(connId, new Conn {
+                /* id;      */ connId,
+                /* isSource;*/ isSource,
+                /* node;    */ s,
+                /* ownS;    */ c["own_socket"  ].toString(),
+                /* otherS;  */ c["other_socket"].toString(),
+                /* otherN;  */ nodeId,
+            });
+
+            Q_ASSERT(nodeId.size()==8 && nodeId == connections[connId]->otherN);
+        }
+    };
+
     for (int nodeId = 0; nodeId < nodes.size(); ++nodeId) {
         const QJsonObject node = nodes[nodeId].toObject();
 
@@ -211,19 +297,76 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
         const QString type = data["id"].toString();
 
         if (m_hIdToType[type]) {
-            auto pair = addToSceneFromMetaObject(m_hIdToType[type]->m_spMetaObj);
+            const auto uid = widget["UID"].toString();
+
+            Q_ASSERT(uid.size() == 8);
+
+            auto pair = addToSceneFromMetaObject(m_hIdToType[type]->m_spMetaObj, uid);
             pair.second->read(data);
 
-            const auto nodeW = pair.first;
-
-            const auto sinkModel   = nodeW->sinkModel();
-            const auto sourceModel = nodeW->sinkModel();
+            auto nodeW = pair.first;
 
             nodeW->graphicsItem()->setPos({
                 widget["x"].toInt(),
                 widget["y"].toInt()
             });
-            nodeW->setTitle(widget["title"].toString());
+
+            if (!widget["title"].toString().isEmpty())
+                nodeW->setTitle(widget["title"].toString());
+
+            loadConnections(widget["connections"].toArray(), nodeW);
+
+
+            if (uid.isEmpty()) {
+                qWarning() << "Failed to properly load a node, some links may be missing";
+                continue;
+            }
+
+            fromHash[uid] = nodeW;
+            toHash[nodeW] = uid;
+
+            if (auto m = const_cast<QAbstractItemModel*>(nodeW->index().model()))
+                m->setData(nodeW->index(), uid, Qt::UserRole);
+        }
+    }
+
+    auto edgeM = m_pNodeW->edgeModel();
+
+    // Add the edges
+    for (auto i = connections.begin(); i != connections.end(); ++i) {
+        const auto conn = i.value();
+
+        if (conn->id >= 0) { // Sources
+            // Validate symmetry
+            auto otherconn = connections[-i.key()];
+            Q_ASSERT(otherconn && otherconn != conn);
+            Q_ASSERT(toHash[otherconn->node] == conn->otherN);
+            Q_ASSERT(toHash[conn->node ] == otherconn->otherN);
+
+            const int row = edgeM->rowCount() -1;
+            const auto srcSock  = conn->node->socketIndex(conn->ownS);
+            const auto sinkSock = otherconn->node->socketIndex(otherconn->ownS);
+
+            if ((!srcSock.isValid()) || (!sinkSock.isValid())) {
+                qWarning() << "Failed to restore the connection between"
+                    << conn->node->title() << ':' << conn->ownS << "and"
+                    << otherconn->node->title() << ':' << otherconn->ownS;
+                continue;
+            }
+
+            edgeM->setData(
+                edgeM->index(row, 0),
+                srcSock,
+                QReactiveProxyModel::ConnectionsRoles::SOURCE_INDEX
+            );
+            edgeM->setData(
+                edgeM->index(row, 2),
+                sinkSock,
+                QReactiveProxyModel::ConnectionsRoles::DESTINATION_INDEX
+            );
+
+            delete conn;
+            delete otherconn;
         }
     }
 }

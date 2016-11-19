@@ -1,10 +1,10 @@
 #include "currentvalues.h"
 
-#include "../proxies/lastrowtolistproxy.h"
+#include "proxies/lastrowtolistproxy.h"
 
 #include <kconcatenaterowsproxymodel.h>
 
-#include "../qt5-node-editor/src/qobjectmodel.h"
+#include "qt5-node-editor/src/qobjectmodel.h"
 
 class AdditionalProperties : public QObject
 {

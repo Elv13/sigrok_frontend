@@ -4,7 +4,7 @@
 
 class HeadProxyPrivate;
 
-class HeadProxy : public QIdentityProxyModel
+class Q_DECL_EXPORT HeadProxy : public QIdentityProxyModel
 {
     Q_OBJECT
 public:

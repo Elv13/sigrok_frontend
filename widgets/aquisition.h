@@ -2,18 +2,26 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_aquisition.h"
 
 class AquisitionModel;
 
-class Aquisition : public QWidget, public Ui_Aquisition
+class Aquisition : public QWidget
 {
     Q_OBJECT
-
 public:
     explicit Aquisition(QWidget* parent = nullptr);
 
     void setModel(const AquisitionModel* m);
 
     virtual ~Aquisition();
+
+public Q_SLOT:
+    void slotStarted();
+    void slotStopped();
+    void slotCleared();
+
+Q_SIGNALS:
+    void started();
+    void stopped();
+    void cleared();
 };

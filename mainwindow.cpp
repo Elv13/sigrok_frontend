@@ -10,6 +10,7 @@
 #include <KActionCollection>
 #include <KStandardAction>
 #include <KMessageBox>
+#include <KConfigDialog>
 #include <KIO/Job>
 
 #include "devicemodel.h"
@@ -40,6 +41,7 @@
 #include "widgets/charttype.h"
 #include "widgets/categorizedtree.h"
 #include "widgets/statusbar.h"
+#include "configdialog.h"
 
 #include "delegates/categorizeddelegate.h"
 #include "delegates/autocompletiondelegate.h"
@@ -51,10 +53,14 @@
 
 #include "mainwindow.h"
 
+#include "tutorial4Settings.h"
+
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 
 #include <libsigrokcxx/libsigrokcxx.hpp>
+
+#include "common/pagemanager.h"
 
 static MainWindow* ins; //FIXME
 
@@ -77,12 +83,9 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     auto w = new QWidget(this);
     setupUi(w);
 
-    auto devm = DeviceModel::instance();
+    connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
 
-//     auto remotenode = new Modelnode(new RemoteWidgets(this));
-//     remotenode->setConnectedObjectRole(999);
-//     remotenode->setConnectedPropertyRole(998);
-//     m_pNode->scene()->addItem(remotenode->graphicsItem());
+    auto devm = DeviceModel::instance();
 
     m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
 
@@ -138,6 +141,8 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     setupActions();
 
+    if (Settings::openLastFile() && !Settings::lastFilePath().isEmpty())
+        openFile(Settings::lastFilePath());
 }
 
 MainWindow* MainWindow::instance()
@@ -164,6 +169,8 @@ void MainWindow::setupActions()
 
     KStandardAction::openNew(this, SLOT(newFile()), actionCollection());
 
+    KStandardAction::preferences(this, SLOT(settingsConfigure()), actionCollection());
+
     setupGUI(Default, "tutorial4ui.rc");
 }
 
@@ -173,25 +180,25 @@ void MainWindow::newFile()
     textArea->clear();
 }
 
-void MainWindow::saveFileAs(const QString &outputFileName)
+void MainWindow::saveFileAs(const QUrl &outputFileName)
 {
-    if (!outputFileName.isNull()) {
-        QSaveFile file(outputFileName);
+    if (!outputFileName.isEmpty()) {
+        QSaveFile file(outputFileName.path());
         file.open(QIODevice::WriteOnly);
 
-//         QByteArray outputByteArray;
-//         outputByteArray.append(textArea->toPlainText().toUtf8());
-//         file.write(outputByteArray);
         m_pSession->serialize(&file);
         file.commit();
 
         fileName = outputFileName;
+
+        Settings::setLastFilePath(QUrl(outputFileName));
+        Settings::self()->writeConfig();
     }
 }
 
 void MainWindow::saveFileAs()
 {
-    saveFileAs(QFileDialog::getSaveFileName(this, i18n("Save File As")));
+    saveFileAs(QFileDialog::getSaveFileUrl(this, i18n("Save File As")));
 }
 
 void MainWindow::saveFile()
@@ -204,19 +211,32 @@ void MainWindow::saveFile()
     }
 }
 
-
-void MainWindow::openFile()
+void MainWindow::openFile(const QUrl &name)
 {
-    QUrl fileNameFromDialog = QFileDialog::getOpenFileUrl(this, i18n("Open File"));
-
-    if (!fileNameFromDialog.isEmpty()) {
-        KIO::Job* job = KIO::storedGet(fileNameFromDialog);
-        fileName = fileNameFromDialog.toLocalFile();
+    if (!name.isEmpty()) {
+        KIO::Job* job = KIO::storedGet(name);
+        fileName = name;
 
         connect(job, SIGNAL(result(KJob*)), this, SLOT(downloadFinished(KJob*)));
 
         job->exec();
     }
+}
+
+void MainWindow::openFile()
+{
+    QUrl fileNameFromDialog = QFileDialog::getOpenFileUrl(this, i18n("Open File"));
+    openFile(fileNameFromDialog);
+}
+
+void MainWindow::settingsConfigure()
+{
+    if (KConfigDialog::showDialog(QStringLiteral("settings"))) {
+        return;
+    }
+    ConfigDialog *dialog = new ConfigDialog(this);
+
+    dialog->show();
 }
 
 void MainWindow::downloadFinished(KJob* job)

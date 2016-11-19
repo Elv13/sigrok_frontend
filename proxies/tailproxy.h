@@ -10,7 +10,7 @@ class TailProxyPrivate;
  * Useful with models with a lot of irrelevant rows or models with high
  * throughput.
  */
-class TailProxy : public QAbstractProxyModel
+class Q_DECL_EXPORT TailProxy : public QAbstractProxyModel
 {
     Q_OBJECT
 public:

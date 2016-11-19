@@ -4,7 +4,7 @@
 #include "../widgets/meter.h"
 
 #include <QRemoteObjectHost>
-#include "../remotemanager.h"
+#include "common/remotemanager.h"
 
 
 class MeterData final : public MeterDataSimpleSource

@@ -9,7 +9,7 @@ class LastRowToListProxyPrivate;
  * 
  * This is useful for data acquisition for displaying the "current" values.
  */
-class LastRowToListProxy : public QAbstractListModel
+class Q_DECL_EXPORT LastRowToListProxy : public QAbstractListModel
 {
     Q_OBJECT
 

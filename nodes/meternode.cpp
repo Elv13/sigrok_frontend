@@ -1,16 +1,16 @@
 #include "meternode.h"
 
-#include "../widgets/current.h"
+#include "widgets/current.h"
 
 #include <QtCore/QDebug>
 
 #include <QtWidgets/QScrollBar>
-#include "../widgets/meter.h"
+#include "widgets/meter.h"
 
-#include "../mainwindow.h"
+#include "common/pagemanager.h"
 
-#include "../proxies/meterproxy.h"
-#include "../proxies/columnproxy.h"
+#include "proxies/meterproxy.h"
+#include "proxies/columnproxy.h"
 
 #include <QDebug>
 
@@ -34,16 +34,12 @@ MeterNode::MeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new MeterNodePr
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
-    MainWindow::addDock(d_ptr->m_pCurrent, "Meter");
+    PageManager::instance()->addPage(d_ptr->m_pCurrent, "Meter");
 
-    d_ptr->m_pMeterW->m_pContent->setModel(d_ptr->m_pCheckProxy);
-    d_ptr->m_pMeterW->m_pContent->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    d_ptr->m_pMeterW->m_pContent->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    d_ptr->m_pMeterW->m_pContent->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &MeterNodePrivate::slotModelChanged);
     QObject::connect(d_ptr->m_pCheckProxy, &MeterProxy::columnEnabled, d_ptr, &MeterNodePrivate::slotColumnEnabled);
-
 }
 
 MeterNode::~MeterNode()
@@ -98,7 +94,7 @@ void MeterNodePrivate::slotRowsInserted()
     const int main = m_pCheckProxy->mainColumn();
     const auto idx = m_pSource->index(m_pSource->rowCount()-1,main);
 
-    m_pCurrent->m_pValue->setText(
+    m_pCurrent->setText(
         idx.data().toString()
     );
 

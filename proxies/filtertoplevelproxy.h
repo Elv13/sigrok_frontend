@@ -42,7 +42,7 @@ class FilterTopLevelProxyPrivate;
  * |->Baz
  *
  */
-class FilterTopLevelProxy : public QSortFilterProxyModel
+class Q_DECL_EXPORT FilterTopLevelProxy : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:

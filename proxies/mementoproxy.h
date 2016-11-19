@@ -27,7 +27,7 @@ class MementoProxyPrivate;
  *  * This model currently doesn't support incremental updates
  *
  */
-class MementoProxy : public QAbstractItemModel
+class Q_DECL_EXPORT MementoProxy : public QAbstractItemModel
 {
     Q_OBJECT
 public:

@@ -1,12 +1,12 @@
 #include "devicenode.h"
 
-#include "../widgets/aquisition.h"
-#include "../aquisitionmodel.h"
+#include "widgets/aquisition.h"
+#include "sigrokd/aquisitionmodel.h"
 
 #include <QDebug>
 #include <libsigrokcxx/libsigrokcxx.hpp>
 
-#include "devicemodel.h"
+#include "sigrokd/devicemodel.h"
 
 class DeviceNodePrivate : public QObject
 {
@@ -63,11 +63,11 @@ void DeviceNode::setModel(AquisitionModel* m)
     d_ptr->m_pModel = m;
 
     if (d_ptr->m_pModel) {
-        QObject::connect(d_ptr->m_pWidget->m_pStart, &QPushButton::clicked, d_ptr->m_pModel,
+        QObject::connect(d_ptr->m_pWidget, &Aquisition::started, d_ptr->m_pModel,
             &AquisitionModel::start);
-        QObject::connect(d_ptr->m_pWidget->m_pStop, &QPushButton::clicked, d_ptr->m_pModel,
+        QObject::connect(d_ptr->m_pWidget, &Aquisition::stopped, d_ptr->m_pModel,
             &AquisitionModel::stop);
-        QObject::connect(d_ptr->m_pWidget->m_pClear, &QPushButton::clicked, d_ptr,
+        QObject::connect(d_ptr->m_pWidget, &Aquisition::cleared, d_ptr,
             &DeviceNodePrivate::slotClear);
     }
 }

@@ -1,16 +1,14 @@
 #include "colornode.h"
 
-#include "../proxies/columnproxy.h"
-#include "../proxies/coloredrangeproxy.h"
+#include "proxies/columnproxy.h"
+#include "proxies/coloredrangeproxy.h"
 
 #include <QtWidgets/QScrollBar>
 #include <KColorButton>
 
-#include "../widgets/range.h"
+#include "widgets/range.h"
 
 #include <QDebug>
-
-#include "../mainwindow.h"
 
 class ColorNodePrivate : public QObject
 {

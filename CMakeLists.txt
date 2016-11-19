@@ -1,6 +1,11 @@
 project (tutorial4)
 
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+
+IF(POLICY CMP0063)
+   CMAKE_POLICY(SET CMP0063 NEW)
+ENDIF(POLICY CMP0063)
+
 set(QT_MIN_VERSION "5.3.0")
 set(KF5_MIN_VERSION "5.2.0")
 
@@ -9,7 +14,7 @@ set(CMAKE_BUILD_TYPE DEBUG)
 find_package(ECM 1.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-find_package(PkgConfig)
+find_package(PkgConfig REQUIRED)
 
 # Disable foreach, slots, signals to avoid collisions
 add_definitions(-DQT_NO_KEYWORDS)
@@ -17,7 +22,6 @@ add_definitions(-DQT_NO_KEYWORDS)
 PKG_CHECK_MODULES(SIGROK REQUIRED libsigrok)
 PKG_CHECK_MODULES(SIGROKCXX REQUIRED libsigrokcxx)
 
-add_subdirectory(qt5-node-editor)
 
 include_directories(${SIGROK_INCLUDE_DIRS})
 link_directories(${SIGROK_LIBRARY_DIRS})
@@ -33,6 +37,14 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings)
 include(FeatureSummary)
+
+add_subdirectory(qt5-node-editor)
+add_subdirectory(delegates)
+add_subdirectory(common)
+add_subdirectory(proxies)
+add_subdirectory(nodes)
+add_subdirectory(widgets)
+add_subdirectory(sigrokd)
 
 set(CMAKE_AUTOMOC ON)
 
@@ -62,104 +74,35 @@ set(tutorial4_SRCS
     # Application
     main.cpp
     mainwindow.cpp
-    remotemanager.cpp
+    configdialog.cpp
 
     # Model
-    devicemodel.cpp
-    aquisitionmodel.cpp
     models/remotewidgets.cpp
-
-    # Proxy
-    proxies/columnproxy.cpp
-    proxies/meterproxy.cpp
-    proxies/rangeproxy.cpp
-    proxies/coloredrangeproxy.cpp
-    proxies/mementoproxy.cpp
-    proxies/tailproxy.cpp
-    proxies/headproxy.cpp
-    proxies/lastrowtolistproxy.cpp
-    proxies/chronometerproxy.cpp
-    proxies/filtertoplevelproxy.cpp
 
     # Business delegates
     ratesink.cpp
     nodeadapter.cpp
 
-    # Widgets
-    widgets/statusbar.cpp
-    widgets/current.cpp
-    widgets/aquisition.cpp
-    widgets/devicelist.cpp
-    widgets/charttype.cpp
-    widgets/categorizedtree.cpp
-    widgets/meter.cpp
-    widgets/column.cpp
-    widgets/table.cpp
-    widgets/memento.cpp
-    widgets/rowsubset.cpp
-    widgets/timer.cpp
-    widgets/range.cpp
-
-    # Processing nodes
-    nodes/abstractnode.cpp
-    nodes/devicenode.cpp
-    nodes/proxynode.cpp
-    nodes/chartnode.cpp
-    nodes/tablenode.cpp
-    nodes/meternode.cpp
-    nodes/columnnode.cpp
-    nodes/colornode.cpp
-    nodes/mementonode.cpp
-    nodes/multiplexernode.cpp
-    nodes/tailnode.cpp
-    nodes/headnode.cpp
-    nodes/currentvalues.cpp
-    nodes/timernode.cpp
-    nodes/chrononode.cpp
-    nodes/devicelistnode.cpp
-    nodes/remote/remotetable.cpp
-    nodes/remote/remotemeter.cpp
-    nodes/remote/remotecontrols.cpp
-
-    # Delegates
-    delegates/categorizeddelegate.cpp
-    delegates/autocompletiondelegate.cpp
-
     # Session
     proxynodefactory.cpp
 )
 
-qt5_generate_repc(tutorial4_SRCS
-    repc/meterdata.rep
-    SOURCE
-)
-qt5_generate_repc(tutorial4_SRCS
-    repc/remotewidgets.rep
-    SOURCE
-)
-
 ki18n_wrap_ui(tutorial4_SRCS
     mainwindow.ui
-    current.ui
-    aquisition.ui
-    widgets/charttype.ui
-    widgets/column.ui
-    widgets/meter.ui
-    widgets/colorizer.ui
-    widgets/devicelist.ui
-    widgets/table.ui
-    widgets/memento.ui
-    widgets/statusbar.ui
-    widgets/rowsubset.ui
-    widgets/timer.ui
-    widgets/rangeselection.ui
-    widgets/range.ui
+    generalconfig.ui
 )
+
+kconfig_add_kcfg_files(tutorial4_SRCS data/tutorial4Settings.kcfgc)
 
 add_executable(tutorial4 ${tutorial4_SRCS})
 
 target_link_libraries(tutorial4
+    KF5::XmlGui
     qnodeeditor
+    extraproxies
+    nodes
+    nodewidgets
+    sigrokd
     Qt5::Widgets
     Qt5::RemoteObjects
     KF5::CoreAddons

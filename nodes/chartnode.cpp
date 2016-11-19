@@ -1,6 +1,6 @@
 #include "chartnode.h"
 
-#include "../widgets/aquisition.h"
+#include "widgets/aquisition.h"
 
 #include <KChartPlotter>
 #include <KChartAbstractProxyModel.h>
@@ -14,9 +14,9 @@
 #include <KChartBackgroundAttributes>
 #include <KChartFrameAttributes.h>
 
-#include "../widgets/charttype.h"
+#include "widgets/charttype.h"
 
-#include "../mainwindow.h"
+#include "common/pagemanager.h"
 
 class ChartNodePrivate : public QObject
 {
@@ -31,7 +31,7 @@ public Q_SLOTS:
 ChartNode::ChartNode(QObject* parent) : ProxyNode(parent), d_ptr(new ChartNodePrivate())
 {
     auto chart = new KChart::Chart(nullptr);
-    MainWindow::addDock(chart, "Chart");
+    PageManager::instance()->addPage(chart, "Chart");
 
     auto coordinatePlane = dynamic_cast<KChart::CartesianCoordinatePlane*>(
         chart->coordinatePlane()

@@ -4,7 +4,7 @@
 
 class MeterProxyPrivate;
 
-class MeterProxy : public QIdentityProxyModel
+class Q_DECL_EXPORT MeterProxy : public QIdentityProxyModel
 {
     Q_OBJECT
 public:

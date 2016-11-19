@@ -16,7 +16,7 @@ class ChronometerProxyPrivate;
  *
  *TODO also compute the mean / rate over the last `n` samples.
  */
-class ChronometerProxy : public QIdentityProxyModel
+class Q_DECL_EXPORT ChronometerProxy : public QIdentityProxyModel
 {
     Q_OBJECT
 public:

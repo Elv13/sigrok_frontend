@@ -1,17 +1,15 @@
 #include "tablenode.h"
 
-#include "../widgets/aquisition.h"
+#include "widgets/aquisition.h"
 
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QTableView>
 
 #include <QtCore/QDebug>
 
-#include "../remotemanager.h"
+#include "widgets/table.h"
 
-#include "../widgets/table.h"
-
-#include "../mainwindow.h"
+#include "common/pagemanager.h"
 
 class TableNodePrivate : public QObject
 {
@@ -27,7 +25,7 @@ public Q_SLOTS:
 TableNode::TableNode(QObject* parent) : ProxyNode(parent), d_ptr(new TableNodePrivate())
 {
     d_ptr->m_pTableView  = new QTableView(nullptr);
-    MainWindow::addDock(d_ptr->m_pTableView, "Table");
+    PageManager::instance()->addPage(d_ptr->m_pTableView, "Table");
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &TableNodePrivate::slotModelChanged);
 }

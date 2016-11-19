@@ -17,18 +17,6 @@
    <string notr="true">background-color:transparent;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
    <item>
     <widget class="QCheckBox" name="checkBox">
      <property name="text">
@@ -76,5 +64,41 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>spinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>RowSubset</receiver>
+   <slot>slotMaxRow(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>46</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>RowSubset</receiver>
+   <slot>slotLimit(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>14</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>83</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>slotLimit(bool)</slot>
+  <slot>slotMaxRow(int)</slot>
+ </slots>
 </ui>

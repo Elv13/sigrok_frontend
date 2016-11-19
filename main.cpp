@@ -1,5 +1,3 @@
-#include <cstdlib>
- 
 #include <QApplication>
 #include <QCommandLineParser>
 
@@ -7,16 +5,16 @@
 #include <KLocalizedString>
 
 #include "mainwindow.h"
- 
+
 int main (int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    
+
     KLocalizedString::setApplicationDomain("org.sigrok");
-    
+
     KAboutData aboutData(
                          // The program name used internally. (componentName)
-                         QStringLiteral("SigRok Capture center"),
+                         QStringLiteral("Captivate"),
                          // A displayable program name string. (displayName)
                          i18n("Tutorial 4"),
                          // The program version string. (version)
@@ -24,9 +22,9 @@ int main (int argc, char *argv[])
                          // Short description of what the app does. (shortDescription)
                          i18n("A simple text area which can load and save."),
                          // The license this code is released under
-                         KAboutLicense::GPL,
+                         KAboutLicense::Custom,
                          // Copyright Statement (copyrightStatement = QString())
-                         i18n("(c) 2015"),
+                         i18n("(c) 2016"),
                          // Optional text shown in the About box.
                          // Can contain any information desired. (otherText)
                          i18n("Some text..."),

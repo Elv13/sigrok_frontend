@@ -81,5 +81,59 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>spinBox_2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>Timer</receiver>
+   <slot>slotsMs(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>134</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>Timer</receiver>
+   <slot>slotSeconds(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>14</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>187</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Timer</receiver>
+   <slot>slotActivated(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>9</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>138</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotSeconds(int)</slot>
+  <slot>slotsMs(int)</slot>
+  <slot>slotActivated(bool)</slot>
+ </slots>
 </ui>

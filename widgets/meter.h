@@ -2,9 +2,10 @@
 
 #include <QtWidgets/QWidget>
 
-#include "ui_meter.h"
+class QTableView;
+class QAbstractItemModel;
 
-class Meter : public QWidget, public Ui_Meter
+class Meter : public QWidget
 {
     Q_OBJECT
 
@@ -12,4 +13,9 @@ public:
     explicit Meter(QWidget* parent = nullptr);
 
     virtual ~Meter();
+
+    void setModel(QAbstractItemModel* m);
+
+private:
+    QTableView* m_pTable;
 };
