@@ -41,6 +41,7 @@ void Deduplicate::slotChangeTreshold(double value)
 
 void Deduplicate::slotIndexChanged(int idx)
 {
+
     Q_EMIT currentColumnChanged(idx);
 }
 
@@ -79,4 +80,6 @@ void Deduplicate::slotColumnInserted()
 void Deduplicate::slotIndexChanged()
 {
     m_HasManualSelection = true;
+
+    Q_EMIT currentColumnChanged(m_pColumnCBB->currentIndex());
 }

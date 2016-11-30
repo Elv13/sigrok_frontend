@@ -37,6 +37,8 @@ d_ptr(new MementoProxyPrivate())
 
     d_ptr->m_llRoots.resize(arr.size());
 
+    bool firstCell = true;
+
     for (int row = 0; row < arr.size(); ++row) {
         const auto r = arr[row].toArray();
         d_ptr->m_llRoots[row].resize(r.size());
@@ -50,8 +52,13 @@ d_ptr(new MementoProxyPrivate())
             const auto cell = r[col].toObject();
 
             for (auto role = cell.constBegin(); role != cell.constEnd(); ++role) {
+                if (firstCell)
+                    d_ptr->m_lRoles << role.key().toInt();
+
                 node->m_hData[role.key().toInt()] = role.value().toVariant();
             }
+
+            firstCell = false;
 
             d_ptr->m_llRoots[row][col] = node;
         }
@@ -83,6 +90,21 @@ QVariant MementoProxy::data(const QModelIndex& idx, int role) const
     const auto n = static_cast<Node*>(idx.internalPointer());
 
     return n->m_hData[role];
+}
+
+bool MementoProxy::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if ((!index.isValid()) || !index.model())
+        return false;
+
+    const auto n = static_cast<Node*>(index.internalPointer());
+
+    n->m_hData[role] = value;
+
+    if (role == Qt::EditRole)
+        n->m_hData[Qt::DisplayRole] = value;
+
+    return true;
 }
 
 int MementoProxy::rowCount(const QModelIndex& parent) const
@@ -119,6 +141,13 @@ QModelIndex MementoProxy::index(int row, int column, const QModelIndex& parent) 
 
     return {};
 }
+
+Qt::ItemFlags MementoProxy::flags(const QModelIndex &idx) const
+{
+    return (!idx.isValid()) ? Qt::NoItemFlags :
+        (Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsSelectable);
+}
+
 
 QModelIndex MementoProxy::parent(const QModelIndex& idx) const
 {

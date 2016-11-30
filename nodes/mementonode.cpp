@@ -30,11 +30,16 @@ public:
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
     virtual bool removeRows(int row, int count, const QModelIndex &parent = {}) override;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
+
 
     QVector<MementoProxy*> m_lMementos;
-    QVector<QDateTime> m_lAddedTime;
+    QVector<QVariant> m_lTitle;
 
     MementoProxy* takeMemento(QAbstractItemModel* model);
+
+    MementoNode* q_ptr;
 };
 
 class MementoNodePrivate : public QObject
@@ -64,13 +69,37 @@ QVariant MementosList::data(const QModelIndex& idx, int role) const
 
     switch(role) {
         case Qt::DisplayRole:
-            return m_lAddedTime[idx.row()];
+            return m_lTitle[idx.row()];
         case Qt::UserRole:
         case Qt::ToolTipRole:
             return m_lMementos[idx.row()]->rowCount();
     };
 
     return {};
+}
+
+bool MementosList::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if ((!index.isValid()) || !index.model())
+        return false;
+
+    if (value.toString().isEmpty())
+        return false;
+
+    switch(role) {
+        case Qt::DisplayRole:
+        case Qt::EditRole:
+            m_lTitle[index.row()] = value;
+            return true;
+    }
+
+    return false;
+}
+
+Qt::ItemFlags MementosList::flags(const QModelIndex &idx) const
+{
+    return (!idx.isValid()) ? Qt::NoItemFlags :
+        (Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsSelectable);
 }
 
 int MementosList::rowCount(const QModelIndex& parent) const
@@ -80,7 +109,7 @@ int MementosList::rowCount(const QModelIndex& parent) const
 
 bool MementosList::removeRows(int row, int count, const QModelIndex &parent)
 {
-    if (row < 0 || count < 1 || row+count >= rowCount())
+    if (row < 0 || count < 1 || row+count > rowCount())
         return false;
 
     beginRemoveRows(parent, row, row+count-1);
@@ -97,6 +126,7 @@ bool MementosList::removeRows(int row, int count, const QModelIndex &parent)
 MementoNode::MementoNode(QObject* parent) : ProxyNode(parent), d_ptr(new MementoNodePrivate())
 {
     d_ptr->q_ptr = this;
+    d_ptr->m_pMementoList->q_ptr = this;
 
     d_ptr->m_RemoveRowProxy.setSourceModel(d_ptr->m_pMementoList);
     d_ptr->m_RemoveRowProxy.setSelectionModel(d_ptr->m_pSelection);
@@ -131,13 +161,21 @@ void MementoNode::read(const QJsonObject &parent)
 
     d_ptr->m_pMementoList->beginInsertRows({}, 0, mementos.size()-1);
     for (int i = 0; i < mementos.size(); ++i) {
-        const QJsonObject memento = mementos[i].toObject();
+        const QJsonObject obj = mementos[i].toObject();
+
+        const QJsonObject memento = obj["content"].toObject();
+
         auto proxy = new MementoProxy(memento, this);
 
         d_ptr->m_pMementoList->m_lMementos << proxy;
-        d_ptr->m_pMementoList->m_lAddedTime << QDateTime::currentDateTime();
+        d_ptr->m_pMementoList->m_lTitle << obj["title"].toString();
 
-        Q_EMIT selectedMementoChanged(proxy); //FIXME don't
+        if (obj["selected"].toBool()) {
+            d_ptr->m_pSelection->setCurrentIndex(
+                d_ptr->m_pMementoList->index(i,0),
+                QItemSelectionModel::ClearAndSelect
+            );
+        }
     }
     d_ptr->m_pMementoList->endInsertRows();
 
@@ -149,8 +187,15 @@ void MementoNode::write(QJsonObject &parent) const
 
     QJsonArray mementos;
 
-    for (auto m : qAsConst(d_ptr->m_pMementoList->m_lMementos))
-        mementos.append(m->toJson());
+    int i = 0;
+
+    for (auto m : qAsConst(d_ptr->m_pMementoList->m_lMementos)) {
+        QJsonObject obj;
+        obj[ "title"    ] = d_ptr->m_pMementoList->m_lTitle[i++].toString();
+        obj[ "content"  ] = m->toJson();
+        obj[ "selected" ] = selectedMemento() == m;
+        mementos.append(obj);
+    }
 
     parent["mementos"] = mementos;
 }
@@ -168,8 +213,10 @@ MementoProxy* MementosList::takeMemento(QAbstractItemModel* model)
 
     beginInsertRows({}, m_lMementos.size(), m_lMementos.size());
     m_lMementos << p;
-    m_lAddedTime << QDateTime::currentDateTime();
+    m_lTitle << QDateTime::currentDateTime();
     endInsertRows();
+
+    Q_EMIT q_ptr->mementoAdded(p);
 
     return p;
 }
@@ -183,14 +230,12 @@ QAbstractItemModel* MementoNode::lastestMemento() const
 
 void MementoNode::takeMemento(bool)
 {
-    auto p = d_ptr->m_pMementoList->takeMemento(model());
-    Q_EMIT mementoAdded(p);
+    d_ptr->m_pMementoList->takeMemento(model());
 }
 
 void MementoNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     Q_UNUSED(old)
-    m_pMementoList->takeMemento(newModel); //FIXME don't do that
 }
 
 QAbstractItemModel* MementoNode::selectedMemento() const

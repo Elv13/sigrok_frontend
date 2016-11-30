@@ -39,9 +39,6 @@ DeduplicateNode::DeduplicateNode(QObject* parent) : ProxyNode(parent), d_ptr(new
 
     d_ptr->m_pFilteredModel->setExtraColumnName("Samples");
 
-    connect(d_ptr->m_pDeduplicate, &Deduplicate::enableExtraColumn, d_ptr->m_pFilteredModel, &DeduplicateProxy::setExtraColumn);
-    connect(d_ptr->m_pDeduplicate, &Deduplicate::thresholdChanged , d_ptr->m_pFilteredModel, &DeduplicateProxy::setThreshold  );
-    connect(d_ptr->m_pDeduplicate, &Deduplicate::currentColumnChanged , d_ptr->m_pFilteredModel, &DeduplicateProxy::setFilterKeyColumn  );
 }
 
 DeduplicateNode::~DeduplicateNode()
@@ -102,12 +99,13 @@ QWidget* DeduplicateNode::widget() const
         d_ptr->m_pDeduplicate = new Deduplicate(this);
         d_ptr->m_pDeduplicate->setPreferredColumn(d_ptr->m_PreferredColumn);
 
+        connect(d_ptr->m_pDeduplicate, &Deduplicate::currentColumnChanged , d_ptr->m_pFilteredModel, &DeduplicateProxy::setFilterKeyColumn  );
+
         if (model())
             d_ptr->m_pDeduplicate->setModel(model());
 
         connect(d_ptr->m_pDeduplicate, &Deduplicate::enableExtraColumn, d_ptr->m_pFilteredModel, &DeduplicateProxy::setExtraColumn);
         connect(d_ptr->m_pDeduplicate, &Deduplicate::thresholdChanged , d_ptr->m_pFilteredModel, &DeduplicateProxy::setThreshold  );
-        connect(d_ptr->m_pDeduplicate, &Deduplicate::currentColumnChanged , d_ptr->m_pFilteredModel, &DeduplicateProxy::setFilterKeyColumn  );
     }
 
     return d_ptr->m_pDeduplicate;

@@ -43,6 +43,8 @@ public:
     virtual int columnCount(const QModelIndex& parent = {}) const override;
     virtual QModelIndex index(int row, int column, const QModelIndex& parent ={}) const override;
     virtual QModelIndex parent(const QModelIndex& idx) const override;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     QJsonObject toJson() const;
 

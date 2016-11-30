@@ -9,6 +9,10 @@ Timer::Timer(const TimerNode* n, QWidget* parent) : QWidget(parent)
     Ui_Timer ui;
     ui.setupUi(this);
     m_pCheck = ui.m_pActivated;
+
+    ui.m_pMilliSeconds->setValue(n->milliseconds());
+    ui.m_pSeconds->setValue(n->seconds());
+    ui.m_pActivated->setChecked(n->isActive());
 }
 
 Timer::~Timer()

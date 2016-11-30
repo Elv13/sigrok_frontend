@@ -306,6 +306,10 @@ bool AquisitionModel::addLastSample()
     if (d_ptr->m_Mode != AquisitionModel::Mode::MANUAL || !d_ptr->m_pLastValue)
         return false;
 
+    if (d_ptr->m_pLastValue
+      && (!d_ptr->m_lRows.isEmpty())
+      && d_ptr->m_pLastValue == d_ptr->m_lRows.last())
+        return false;
 
     beginInsertRows({}, d_ptr->m_lRows.size(), d_ptr->m_lRows.size());
     d_ptr->m_lRows << d_ptr->m_pLastValue;
