@@ -85,14 +85,11 @@ void DeduplicateProxy::setExtraColumn(bool value)
     const int cc = columnCount();
 
     if ((!d_ptr->m_AddExtraColumn) && value) {
-        qDebug() << "\n\n\nINSERT COL" << cc;
         beginInsertColumns({}, cc, cc);
         d_ptr->m_AddExtraColumn = value;
         endInsertColumns();
-        qDebug() << "DONE" << index(0,cc);
     }
     else {
-        qDebug() << "\n\n\nREMOVE COL" << (cc-1);
         beginRemoveColumns({}, cc-1, cc-1);
         d_ptr->m_AddExtraColumn = value;
         endRemoveColumns();
@@ -358,7 +355,7 @@ QModelIndex DeduplicateProxy::parent(const QModelIndex& idx) const
 
 QVariant DeduplicateProxy::headerData(int s, Qt::Orientation o, int role) const
 {
-    if (o == Qt::Horizontal && d_ptr->m_AddExtraColumn && s == columnCount() -1)
+    if (o == Qt::Horizontal && d_ptr->m_AddExtraColumn && s == columnCount() -1 && role == Qt::DisplayRole)
         return d_ptr->m_ExtraColumnName;
 
     return QSortFilterProxyModel::headerData(s, o, role);

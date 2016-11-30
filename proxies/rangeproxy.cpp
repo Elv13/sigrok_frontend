@@ -66,11 +66,16 @@ QVariant RangeProxy::headerData(int sec, Qt::Orientation ori, int role) const
 
 QModelIndex RangeProxy::index(int row, int column, const QModelIndex &parent) const
 {
+    if (!sourceModel())
+        return {};
+
     if (row < 0 || column < 0 || column > d_ptr->m_ExtraColumnCount + 1)
         return {};
 
-    if (ColumnProxy::rowCount() == d_ptr->m_lRows.size()) {
-        qWarning() << "A proxy is invalid" << ColumnProxy::rowCount() << d_ptr->m_lRows.size();
+    if (ColumnProxy::rowCount() != d_ptr->m_lRows.size()) {
+        qWarning() << "A proxy is invalid (indexing missing rows)"
+            << ColumnProxy::rowCount() << d_ptr->m_lRows.size() << sourceModel();
+
         d_ptr->slotLayoutChanged();
     }
 
@@ -366,7 +371,7 @@ void RangeProxyPrivate::slotRowsAboutToBeRemoved(const QModelIndex &parent, int 
         return;
 
     if (first >= m_lRows.size()) {
-        qWarning() << "The proxy is invalid";
+        qWarning() << "The proxy is invalid (removing missing rows)";
         return;
     }
 

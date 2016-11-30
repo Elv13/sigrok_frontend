@@ -28,7 +28,7 @@ public:
     };
 
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
-    ColumnSerializationAdapter m_Serializer {m_pCheckable, {1,2}, this};
+    ColumnSerializationAdapter m_Serializer {m_pCheckable, {0}, this};
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -80,16 +80,16 @@ QWidget* ColumnNode::widget() const
 
 QAbstractItemModel* ColumnNode::filteredModel() const
 {
-    return 0;//d_ptr->m_pFilteredModel;
+    return d_ptr->m_pFilteredModel;
 }
 
 void ColumnNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     Q_UNUSED(old)
-qDebug() << "DFSGFDGDFG" << newModel;
+
     m_pColumnProxy->setSourceModel(newModel);
 
-    //m_pFilteredModel->setSourceModel(newModel);
+    m_pFilteredModel->setSourceModel(newModel);
 
     QItemSelectionModel *checkModel = new QItemSelectionModel(newModel, this); //FIXME leak
     m_pCheckable->setSelectionModel(checkModel);
@@ -107,7 +107,5 @@ void ColumnNodePrivate::slotDataChanged()
         }
     }
     m_pFilteredModel->setSourceColumns(ret);
-
-//qDebug() << "AAAAAA" << ret << m_pFilteredModel->rowCount() << m_pColumnProxy->rowCount();
 }
 

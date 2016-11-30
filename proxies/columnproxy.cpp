@@ -8,6 +8,7 @@ public:
     explicit ColumnProxyPrivate(ColumnProxy* q) : QObject(q), q_ptr(q) {}
 
     QAbstractItemModel* m_pSourceModel {nullptr};
+    int m_RowCount {0};
 
     ColumnProxy* q_ptr;
 
@@ -57,6 +58,8 @@ void ColumnProxy::setSourceModel(QAbstractItemModel* source)
 
         QObject::disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::layoutChanged,
             d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
+        QObject::disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::modelReset,
+            d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
     }
 
     d_ptr->m_pSourceModel = source;
@@ -78,8 +81,10 @@ void ColumnProxy::setSourceModel(QAbstractItemModel* source)
 
     QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::layoutChanged,
                      d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
+    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::modelReset,
+                     d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
 
-    Q_EMIT layoutChanged();
+    d_ptr->slotLayoutChanged();
 }
 
 QAbstractItemModel* ColumnProxy::sourceModel() const
@@ -91,13 +96,28 @@ QVariant ColumnProxy::data(const QModelIndex& idx, int role) const
 {
     if (!idx.isValid()) return {};
 
-    return sourceModel()->headerData(idx.row(), Qt::Horizontal, role);
+    // Do not forward everything, a buggy sourceModel() headerData will work
+    // correctly for the usual views but can cause this to confuse further
+    // views or proxies. For example, headerData returning the name without
+    // checking the role will break a QComboBox view
+    switch (role) {
+        case Qt::DisplayRole:
+        case Qt::CheckStateRole:
+        case Qt::DecorationRole:
+        case Qt::BackgroundRole:
+        case Qt::ForegroundRole:
+            return sourceModel()->headerData(idx.row(), Qt::Horizontal, role);
+    }
+
+    return {};
 }
 
 int ColumnProxy::rowCount(const QModelIndex& parent) const
 {
-    qDebug() << (sourceModel() && (!parent.isValid()) ? sourceModel()->columnCount() : 0);
-    return sourceModel() && (!parent.isValid()) ? sourceModel()->columnCount() : 0;
+    // the reason why this is cached rather than just calling sourceModel()
+    // columnCount() is because it would just propagate garbage if the
+    // sourceModel is buggy and it makes debugging close to impossible.
+    return parent.isValid() ? 0 : d_ptr->m_RowCount;
 }
 
 int ColumnProxy::columnCount(const QModelIndex& parent) const
@@ -111,7 +131,7 @@ QModelIndex ColumnProxy::index(int row, int column, const QModelIndex& parent) c
         (!sourceModel()) ||
         column ||
         parent.isValid() ||
-        row >= sourceModel()->columnCount()
+        row >= d_ptr->m_RowCount
     ) return {};
 
     return createIndex(row, column, nullptr);
@@ -125,6 +145,8 @@ QModelIndex ColumnProxy::parent(const QModelIndex& idx) const
 
 void ColumnProxyPrivate::slotLayoutChanged()
 {
+    m_RowCount = q_ptr->sourceModel() ? q_ptr->sourceModel()->columnCount() : 0;
+
     Q_EMIT q_ptr->layoutChanged();
 }
 
@@ -132,14 +154,11 @@ void ColumnProxyPrivate::slotColumnsInserted(const QModelIndex& p, int first, in
 {
     Q_UNUSED(first)
     Q_UNUSED(last)
-qDebug() << "\n\nCOLUMN PROXY INSERT" << first << last << q_ptr->rowCount();
-    if (p.isValid())
+
+    if (p.isValid() || last > first)
         return;
 
     q_ptr->endInsertRows();
-
-    for (int i=0; i < q_ptr->rowCount();i++)
-        qDebug() << i << q_ptr->index(i,0) << q_ptr->index(i,0).data();
 
     //Q_EMIT q_ptr->dataChanged(q_ptr->index(first,0), q_ptr->index(last, 0));
 }
@@ -149,7 +168,7 @@ void ColumnProxyPrivate::slotColumnsRemoved(const QModelIndex& p, int first, int
     Q_UNUSED(first)
     Q_UNUSED(last)
 
-    if (p.isValid())
+    if (p.isValid() || last > first)
         return;
 
     //FIXME there can be a crash if clicked fast enough
@@ -158,18 +177,20 @@ void ColumnProxyPrivate::slotColumnsRemoved(const QModelIndex& p, int first, int
 
 void ColumnProxyPrivate::slotColumnsAboutInserted(const QModelIndex& p, int first, int last)
 {
-    if (p.isValid())
+    if (p.isValid() || last > first)
         return;
-qDebug() << "BEGIN INSERT" << first << last;
+
     q_ptr->beginInsertRows(p, first, last);
+    m_RowCount += (last-first)+1;
 }
 
 void ColumnProxyPrivate::slotColumnsAboutRemoved(const QModelIndex& p, int first, int last)
 {
-    if (p.isValid())
+    if (p.isValid() || last > first)
         return;
 
     q_ptr->beginRemoveRows(p, first, last);
+    m_RowCount -= (last-first)+1;
 }
 
 // void ColumnProxyPrivate::slotColumnsMoved(const QModelIndex& p, int first, int last)
