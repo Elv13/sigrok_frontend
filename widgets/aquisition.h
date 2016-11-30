@@ -2,26 +2,32 @@
 
 #include <QtWidgets/QWidget>
 
-
+class QPushButton;
 class AquisitionModel;
 
 class Aquisition : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Aquisition(QWidget* parent = nullptr);
+    explicit Aquisition(bool showAquired = true, QWidget* parent = nullptr);
 
-    void setModel(const AquisitionModel* m);
+    void setShowAcquire(bool v);
 
     virtual ~Aquisition();
 
-public Q_SLOT:
+public Q_SLOTS:
     void slotStarted();
     void slotStopped();
     void slotCleared();
+    void slotAquire();
 
 Q_SIGNALS:
     void started();
     void stopped();
     void cleared();
+    void aquired();
+    void showAquire(bool);
+
+private:
+    QPushButton* m_pAcqB;
 };

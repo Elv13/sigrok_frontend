@@ -1,9 +1,0 @@
-#include <QtCore>
-
-class RemoteWidgets
-{
-    PROP(QStringList names);
-    PROP(QVector<int> types);
-    PROP(QVector<int> ids);
-    SLOT(void activated(int index, QVariant value));
-};

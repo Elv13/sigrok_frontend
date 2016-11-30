@@ -22,13 +22,14 @@ find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-find_package(KChart "2.6.0" REQUIRED) #TODO make optional
+include(../cmake/extrawarnings.cmake)
+
+# find_package(KChart "2.6.0" REQUIRED) #TODO make optional
 
 SET(libnodes_SRCS
     abstractnode.cpp
-    devicenode.cpp
     proxynode.cpp
-    chartnode.cpp
+#     chartnode.cpp
     tablenode.cpp
     meternode.cpp
     columnnode.cpp
@@ -40,11 +41,22 @@ SET(libnodes_SRCS
     currentvalues.cpp
     timernode.cpp
     chrononode.cpp
-    devicelistnode.cpp
+    lcdmeternode.cpp
+    remoteaction.cpp
+    deduplicatenode.cpp
+    manualaquisitionnode.cpp
     remote/remotetable.cpp
     remote/remotemeter.cpp
     remote/remotecontrols.cpp
 )
+
+if(NOT DISABLE_SIGROK)
+    SET(libnodes_SRCS
+        ${libnodes_SRCS}
+        aquisitionnode.cpp #FIXME is doesn't have to be there
+        devicelistnode.cpp
+    )
+endif()
 
 ADD_LIBRARY( nodes STATIC ${libnodes_SRCS} )
 
@@ -56,5 +68,11 @@ TARGET_LINK_LIBRARIES( nodes
     Qt5::RemoteObjects
     KF5::ItemModels
     KF5::WidgetsAddons
-    KChart
+#     KChart
 )
+
+if(NOT DISABLE_SIGROK)
+    TARGET_LINK_LIBRARIES( nodes
+        sigrokd
+    )
+endif()

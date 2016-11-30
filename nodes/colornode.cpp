@@ -71,6 +71,13 @@ void ColorNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
+//     QJsonArray columns;
+
+    
+}
+
+void ColorNode::read(const QJsonObject &parent)
+{
     
 }
 
@@ -86,6 +93,7 @@ QAbstractItemModel* ColorNode::filteredModel() const
 
 void ColorNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(old)
     m_pRangeProxy->setSourceModel(newModel);
 }
 /*

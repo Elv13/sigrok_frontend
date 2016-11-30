@@ -6,25 +6,32 @@
 
 class HeadNodePrivate;
 
-class HeadNode : public ProxyNode
+class Q_DECL_EXPORT HeadNode : public ProxyNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
 
     Q_INVOKABLE explicit HeadNode(QObject* parent = nullptr);
     virtual ~HeadNode();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
     virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
+    virtual void read(const QJsonObject &parent) override;
 
     QAbstractItemModel* filteredModel() const;
+
+    bool isLimited() const;
+    int maximumRows() const;
+
+    void setLimited(bool v);
+    void setMaximumRows(int v);
 
 Q_SIGNALS:
     void filteredModelChanged(); //dummy

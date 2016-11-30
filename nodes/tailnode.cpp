@@ -43,6 +43,35 @@ QString TailNode::id() const
 void TailNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
+
+    parent[ "count"   ] = maximumRows();
+    parent[ "limited" ] = isLimited();
+}
+
+void TailNode::read(const QJsonObject &parent)
+{
+    setLimited    (parent["limited"].toBool());
+    setMaximumRows(parent["count"  ].toInt ());
+}
+
+bool TailNode::isLimited() const
+{
+    return d_ptr->m_Proxy.isLimited();
+}
+
+int TailNode::maximumRows() const
+{
+    return d_ptr->m_Proxy.maximum();
+}
+
+void TailNode::setLimited(bool v)
+{
+    d_ptr->m_Proxy.setLimited(v);
+}
+
+void TailNode::setMaximumRows(int v)
+{
+    d_ptr->m_Proxy.setMaximum(v);
 }
 
 QWidget* TailNode::widget() const

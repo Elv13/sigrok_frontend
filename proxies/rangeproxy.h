@@ -19,7 +19,7 @@ class Q_DECL_EXPORT RangeProxy : public ColumnProxy
     Q_OBJECT
 public:
     enum class Role {
-        RANGE_DELIMITER = ColumnProxy::Role::USER_ROLE,
+        RANGE_DELIMITER = (int)ColumnProxy::Role::USER_ROLE,
         RANGE_VALUE,
         USER_ROLE
     };

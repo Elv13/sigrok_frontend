@@ -8,9 +8,9 @@
 class TimerNodePrivate final : public QObject
 {
 public:
-    int m_Ms {0};
+    int m_Ms {1000};
     QTimer m_Timer {this};
-    Timer m_Widget;
+    Timer* m_pWidget {Q_NULLPTR};
 
     TimerNode* q_ptr;
 
@@ -21,11 +21,7 @@ public Q_SLOTS:
 TimerNode::TimerNode(QObject* parent) : AbstractNode(parent), d_ptr(new TimerNodePrivate())
 {
     d_ptr->q_ptr = this;
-    QObject::connect(&d_ptr->m_Widget, &Timer::secondChanged, this, &TimerNode::setSeconds);
-    QObject::connect(&d_ptr->m_Widget, &Timer::millisecondChanged, this, &TimerNode::setMilliseconds);
-    connect(&d_ptr->m_Widget, &Timer::activated, this, &TimerNode::setActive);
     connect(&d_ptr->m_Timer, &QTimer::timeout, d_ptr, &TimerNodePrivate::timeout);
-
 }
 
 TimerNode::~TimerNode()
@@ -46,16 +42,37 @@ QString TimerNode::id() const
 void TimerNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
+
+    parent[ "milliseconds" ] = seconds()*1000+milliseconds();
+}
+
+void TimerNode::read(const QJsonObject &parent)
+{
+    AbstractNode::read(parent);
+
+    setMilliseconds(parent[ "milliseconds" ].toInt()%1000);
+    setSeconds     (parent[ "milliseconds" ].toInt()/1000);
 }
 
 QWidget* TimerNode::widget() const
 {
-    return &d_ptr->m_Widget;
+    if (!d_ptr->m_pWidget) {
+        d_ptr->m_pWidget = new Timer(this);
+        connect(d_ptr->m_pWidget, &Timer::secondChanged, this, &TimerNode::setSeconds);
+        connect(d_ptr->m_pWidget, &Timer::millisecondChanged, this, &TimerNode::setMilliseconds);
+        connect(d_ptr->m_pWidget, &Timer::activated, this, &TimerNode::setActive);
+
+        connect(this, &TimerNode::secondsChanged, d_ptr->m_pWidget, &Timer::slotSeconds);
+        connect(this, &TimerNode::millisecondsChanged, d_ptr->m_pWidget, &Timer::slotsMs);
+        connect(this, &TimerNode::activated, d_ptr->m_pWidget, &Timer::slotActivated);
+    }
+
+    return d_ptr->m_pWidget;
 }
 
 int TimerNode::milliseconds() const
 {
-    return d_ptr->m_Ms;
+    return d_ptr->m_Ms%1000;
 }
 
 int TimerNode::seconds() const
@@ -75,25 +92,37 @@ void TimerNodePrivate::timeout()
 
 void TimerNode::setMilliseconds(int value)
 {
+    if (value%1000 == d_ptr->m_Ms%1000)
+        return;
+
     d_ptr->m_Ms = value;
     d_ptr->m_Timer.setInterval(d_ptr->m_Ms);
+    Q_EMIT millisecondsChanged(value);
 }
 
 void TimerNode::setSeconds(int value)
 {
-    d_ptr->m_Ms = value * 1000;
+    if (value == d_ptr->m_Ms/1000)
+        return;
+
+    d_ptr->m_Ms = value * 1000 + d_ptr->m_Ms%1000;
     d_ptr->m_Timer.setInterval(d_ptr->m_Ms);
+    Q_EMIT secondsChanged(value);
 }
 
 void TimerNode::setActive(bool value)
 {
+    if (value == isActive())
+        return;
 
     if (value)
         d_ptr->m_Timer.start();
     else
         d_ptr->m_Timer.stop();
 
-    d_ptr->m_Widget.setActive(isActive());
+    d_ptr->m_pWidget->setActive(isActive());
 
     Q_EMIT activated(isActive());
 }
+
+bool TimerNode::dummy() const {return false;}

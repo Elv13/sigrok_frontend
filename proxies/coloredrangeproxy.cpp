@@ -2,8 +2,10 @@
 
 #include <QtCore/QDebug>
 
-#include <KChart/KChartGlobal.h>
-#include <KChartLineAttributes.h>
+#ifdef ENABLE_KCHART
+ #include <KChart/KChartGlobal.h>
+ #include <KChartLineAttributes.h>
+#endif
 
 #include "columnproxy.h"
 #include "rangeproxy_p.h"
@@ -87,19 +89,25 @@ QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
     // Technically, the source index could hold its own Bg/Fg roles, but then
     // it would make this proxy less useful. So it is ignored on purpose.
     switch(role) {
+#ifdef ENABLE_KCHART
         case KChart::DatasetBrushRole:
+#endif
         case Qt::BackgroundRole:
             return d_ptr->q_ptr->matchSourceIndex(mapToSource(idx))
                 .data(Qt::BackgroundRole);
+#ifdef ENABLE_KCHART
         case KChart::DatasetPenRole:
+#endif
         case Qt::ForegroundRole:
             return d_ptr->q_ptr->matchSourceIndex(mapToSource(idx))
                 .data(Qt::ForegroundRole);
+#ifdef ENABLE_KCHART
         case KChart::LineAttributesRole:
             static KChart::LineAttributes attributes;
             attributes.setDisplayArea(true);
             attributes.setTransparency(127);
             return QVariant::fromValue(attributes);
+#endif
     }
 
     return QIdentityProxyModel::data(idx, role);

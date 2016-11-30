@@ -24,7 +24,6 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     static MainWindow* instance();
 
   private:
-    KTextEdit* textArea;
     StatusBar2* m_pStatusBar;
     ProxyNodeFactoryAdapter* m_pSession;
     void setupActions();

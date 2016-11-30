@@ -25,9 +25,10 @@ public:
 
     virtual int columnCount(const QModelIndex& parent = {}) const override;
     virtual QModelIndex index(int row, int column, const QModelIndex& parent ={}) const override;
-    virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
+    virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 private:
     ChronometerProxyPrivate* d_ptr;

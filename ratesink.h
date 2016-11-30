@@ -24,7 +24,7 @@ public:
 
 private:
     RateSinkPrivate* d_ptr;
-    Q_DECLARE_PRIVATE(RateSink);
+    Q_DECLARE_PRIVATE(RateSink)
 
 Q_SIGNALS:
     void rateChanged(float rate);

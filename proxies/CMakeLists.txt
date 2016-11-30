@@ -11,7 +11,10 @@ ENDIF(POLICY CMP0063)
 
 INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
 
-find_package(KChart "2.6.0" REQUIRED) #TODO make optional
+include(../cmake/extrawarnings.cmake)
+
+#WARNING: If this is enabled, the resulting binary is GPL
+# find_package(KChart "2.6.0")
 
 SET(libextraproxies_SRCS
     columnproxy.cpp
@@ -24,11 +27,13 @@ SET(libextraproxies_SRCS
     lastrowtolistproxy.cpp
     chronometerproxy.cpp
     filtertoplevelproxy.cpp
+    rowsdeletionproxy.cpp
+    deduplicateproxy.cpp
 )
 
 ADD_LIBRARY( extraproxies STATIC ${libextraproxies_SRCS} )
 
 TARGET_LINK_LIBRARIES( extraproxies
     ${Qt5Core_LIBRARIES}
-    KChart
+#     KChart
 )

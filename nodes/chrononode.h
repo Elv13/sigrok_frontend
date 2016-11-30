@@ -6,23 +6,24 @@
 
 class ChronoNodePrivate;
 
-class ChronoNode : public ProxyNode
+class Q_DECL_EXPORT ChronoNode : public ProxyNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
 
     Q_INVOKABLE explicit ChronoNode(QObject* parent = nullptr);
     virtual ~ChronoNode();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
     virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
+    virtual void read(const QJsonObject &parent) override;
 
     QAbstractItemModel* filteredModel() const;
 

@@ -27,6 +27,15 @@ RangeProxy::RangeProxy(QObject* parent) : ColumnProxy(parent),
     d_ptr(new RangeProxyPrivate())
 {
     d_ptr->q_ptr = this;
+
+    connect(this, &QAbstractItemModel::rowsAboutToBeInserted,
+            d_ptr, &RangeProxyPrivate::slotRowsAboutToBeInserted);
+    connect(this, &QAbstractItemModel::rowsAboutToBeRemoved,
+                d_ptr, &RangeProxyPrivate::slotRowsAboutToBeRemoved);
+    connect(this, &QAbstractItemModel::layoutChanged,
+                d_ptr, &RangeProxyPrivate::slotLayoutChanged);
+    connect(this, &QAbstractItemModel::modelReset,
+                d_ptr, &RangeProxyPrivate::slotLayoutChanged);
 }
 
 
@@ -60,8 +69,12 @@ QModelIndex RangeProxy::index(int row, int column, const QModelIndex &parent) co
     if (row < 0 || column < 0 || column > d_ptr->m_ExtraColumnCount + 1)
         return {};
 
+    if (ColumnProxy::rowCount() == d_ptr->m_lRows.size()) {
+        qWarning() << "A proxy is invalid" << ColumnProxy::rowCount() << d_ptr->m_lRows.size();
+        d_ptr->slotLayoutChanged();
+    }
 
-    if (!parent.isValid() && row < d_ptr->m_lRows.size()) {
+    if ((!parent.isValid()) && row < d_ptr->m_lRows.size()) {
         Q_ASSERT(d_ptr->m_lRows[row]);
         return createIndex(row, column, d_ptr->m_lRows[row]);
     }
@@ -71,7 +84,6 @@ QModelIndex RangeProxy::index(int row, int column, const QModelIndex &parent) co
         if (row >= node->m_lChildren.size())
             return {};
 
-        Q_ASSERT(node->m_lChildren[row]);
         return createIndex(row, column, node->m_lChildren[row]);
     }
 
@@ -142,8 +154,6 @@ void RangeProxyPrivate::slotAutoAddRows(const QModelIndex& parent)
     for (auto n : *const_cast<const QVector<Node*>*>(&node->m_lChildren))
         if (n->m_Delim == RangeProxy::Delimiter::NONE) return;
 
-    const int index = node->m_lChildren.size();
-
     q_ptr->addFilter(parent, RangeProxy::Delimiter::NONE);
 }
 
@@ -169,6 +179,7 @@ bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
                 d_ptr->slotAutoAddRows(i.parent());
                 return true;
             }
+            break;
         case Qt::EditRole:
         case (int) Role::RANGE_VALUE:
             node->m_RangeValue = value;
@@ -187,7 +198,7 @@ int RangeProxy::extraColumnCount() const
 void RangeProxy::setExtraColumnCount(int value)
 {
     d_ptr->m_ExtraColumnCount = value;
-    d_ptr->slotLayoutChanged();
+
     Q_EMIT layoutChanged();
 }
 
@@ -215,23 +226,11 @@ QAbstractItemModel* RangeProxy::delimiterModel() const
 
 void RangeProxy::setSourceModel(QAbstractItemModel* source)
 {
-    if (sourceModel()) {
-        disconnect(sourceModel(), &QAbstractItemModel::columnsAboutToBeInserted,
-                   d_ptr, &RangeProxyPrivate::slotRowsAboutToBeInserted);
-        disconnect(sourceModel(), &QAbstractItemModel::layoutChanged,
-                   d_ptr, &RangeProxyPrivate::slotLayoutChanged);
-    }
-
     // It assumes the old and new columns represent the same thing.
 
     ColumnProxy::setSourceModel(source);
 
-    d_ptr->slotLayoutChanged();
-
-    connect(sourceModel(), &QAbstractItemModel::columnsAboutToBeInserted,
-                d_ptr, &RangeProxyPrivate::slotRowsAboutToBeInserted);
-    connect(sourceModel(), &QAbstractItemModel::layoutChanged,
-                d_ptr, &RangeProxyPrivate::slotLayoutChanged);
+    Q_ASSERT(ColumnProxy::rowCount() == d_ptr->m_lRows.size());
 }
 
 QModelIndex RangeProxyPrivate::matchSourceIndex(const QModelIndex& srcIdx) const
@@ -323,33 +322,58 @@ void RangeProxy::addFilter(const QModelIndex& idx, RangeProxy::Delimiter delim)
 
 void RangeProxyPrivate::slotLayoutChanged()
 {
-    const int delta = q_ptr->rowCount() - m_lRows.size();
+    const int rc = q_ptr->rowCount();
+    const int delta = rc - m_lRows.size();
 
     if (!delta) return;
 
+    if (m_lRows.size()-1 > rc) {
+        for(int i=rc; i < m_lRows.size(); i++) {
+            delete m_lRows[rc];
+            m_lRows.remove(rc);
+        }
+    }
+
     slotRowsAboutToBeInserted({}, m_lRows.size(), delta - 1);
+    Q_ASSERT(m_lRows.size() == rc);
 }
 
 void RangeProxyPrivate::slotRowsAboutToBeInserted(const QModelIndex &parent, int first, int last)
 {
-    //FIXME support moved
-    const int count = last - first + 1;
-    m_lRows.resize(m_lRows.size()+count);
+    Q_UNUSED(parent)
 
-    const bool hasItem = m_lRows.size();
+    //FIXME support moved
+
+    if (parent.isValid())
+        return;
 
     for (int i = first; i <= last;i++) {
-        //Move existing
-        if (hasItem && m_lRows.size() > i+count) {
-            m_lRows[i+count] = m_lRows[i];
-            m_lRows[i+count]->m_Index = i+count;
-        }
-
         // Add the new column
         Node* n = new Node;
         n->m_Index = i;
-        m_lRows[i] = n;
+        m_lRows.insert(i, n);
     }
 
-    Q_EMIT q_ptr->dataChanged(q_ptr->index(0,0), q_ptr->index(q_ptr->rowCount(),0));
-};
+    for (int i = last+1; i < m_lRows.size();i++)
+        m_lRows[i]->m_Index++;
+
+    //Q_EMIT q_ptr->dataChanged(q_ptr->index(0,0), q_ptr->index(q_ptr->rowCount(),0));
+}
+
+void RangeProxyPrivate::slotRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
+{
+    if (parent.isValid())
+        return;
+
+    if (first >= m_lRows.size()) {
+        qWarning() << "The proxy is invalid";
+        return;
+    }
+
+    for (int i = first; i <= last;i++) {
+        m_lRows.remove(first);
+    }
+
+    for (int i = first; i < m_lRows.size();i++)
+        m_lRows[i]->m_Index--;
+}

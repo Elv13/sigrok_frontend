@@ -1,5 +1,9 @@
 #include "abstractnode.h"
 
+#ifndef DECL_QAbstractItemModel
+#define DECL_QAbstractItemModel
+Q_DECLARE_STREAM_METATYPE(QAbstractItemModel*)
+#endif
 
 void AbstractNode::write(QJsonObject &parent) const
 {

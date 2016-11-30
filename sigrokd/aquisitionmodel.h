@@ -9,9 +9,10 @@ namespace sigrok {
     class Context;
 }
 
-class AquisitionModelPrivate;
+class SigrokDevice;
 
-class AquisitionModel : public QAbstractTableModel
+class AquisitionModelPrivate;
+class Q_DECL_EXPORT AquisitionModel : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -24,13 +25,23 @@ public:
         UNIT_NAME,
         QUANTITY,
         QUANTITY_NAME,
+        U_TIMESTAMP
     };
 
-    explicit AquisitionModel(std::shared_ptr<sigrok::Context> ctx, std::shared_ptr<sigrok::HardwareDevice> device);
+    enum class Mode {
+        UNTHROTTLED,
+        MANUAL,
+    };
+
+    explicit AquisitionModel(SigrokDevice* device);
     virtual ~AquisitionModel();
+
+    void setMode(Mode m);
 
     int channelCount() const;
     QList<float> currentValues() const;
+
+    bool addLastSample();
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;

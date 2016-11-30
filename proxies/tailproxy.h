@@ -14,7 +14,7 @@ class Q_DECL_EXPORT TailProxy : public QAbstractProxyModel
 {
     Q_OBJECT
 public:
-    Q_PROPERTY(int maximum READ maximum WRITE setMaximum NOTIFY maximumChanged);
+    Q_PROPERTY(int maximum READ maximum WRITE setMaximum NOTIFY maximumChanged)
 
     explicit TailProxy(QObject* parent = nullptr);
     virtual ~TailProxy();

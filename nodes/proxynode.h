@@ -8,21 +8,21 @@ class QAbstractItemModel;
 
 class ProxyNodePrivate;
 
-class ProxyNode : public AbstractNode
+class Q_DECL_EXPORT ProxyNode : public AbstractNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged USER true)
 
     Q_INVOKABLE explicit ProxyNode(QObject* parent = nullptr);
     virtual ~ProxyNode();
 
-    virtual QString title() const;
+    virtual QString title() const override;
 
     virtual QString id() const override;
 
-    virtual QWidget* widget() const;
+    virtual QWidget* widget() const override;
 
     void setModel(QAbstractItemModel* m);
     QAbstractItemModel* model() const;

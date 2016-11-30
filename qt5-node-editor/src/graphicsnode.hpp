@@ -32,6 +32,7 @@ public:
     QGraphicsItem *graphicsItem() const;
 
     QSizeF size() const;
+    QRectF rect() const;
 
     void setTitle(const QString &title);
 
@@ -46,6 +47,9 @@ public:
     void setSize(const QSizeF size);
     void setSize(const QPointF size);
 
+    void setRect(const qreal x, const qreal y, const qreal width, const qreal height);
+    void setRect(const QRectF size);
+
     QModelIndex index() const;
     QAbstractItemModel* model() const;
 
@@ -59,6 +63,7 @@ private:
     virtual ~GraphicsNode();
 
     void update();
+    void setIndex(const QModelIndex& idx);//FIXME HACK this is a workaround for a bug elsewhere
 
     GraphicsNodePrivate* d_ptr;
     Q_DECLARE_PRIVATE(GraphicsNode)

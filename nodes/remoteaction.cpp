@@ -1,59 +1,45 @@
 #include "remoteaction.h"
 
-#include "widgets/aquisition.h"
-#include "aquisitionmodel.h"
+#include "widgets/controls.h"
+#include "widgets/controlschooser.h"
+
+#include "common/pagemanager.h"
 
 #include <QDebug>
-#include <libsigrokcxx/libsigrokcxx.hpp>
-
-#include "models/remotewidgets.h"
 
 class RemoteActionNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
-    AquisitionModel* m_pModel {nullptr};
-    Aquisition* m_pWidget {nullptr};
-    QString m_Title {QStringLiteral("Aquisition")};
-    std::shared_ptr<sigrok::HardwareDevice> m_pDevice;
-
-    RemoteActionNode* q_ptr;
+    Controls m_Current;
+    ControlsChooser m_ControlCW;
+    QAbstractItemModel* m_pSource {nullptr};
 
 public Q_SLOTS:
-    void slotClear();
+    void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-RemoteActionNode::RemoteActionNode(QObject* parent) :
-    AbstractNode(parent), d_ptr(new RemoteActionNodePrivate())
+RemoteActionNode::RemoteActionNode(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteActionNodePrivate())
 {
-//     d_ptr->m_Title = name;
-    d_ptr->q_ptr = this;
+    PageManager::instance()->addPage(&d_ptr->m_Current, "Controls");
+    QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteActionNodePrivate::slotModelChanged);
 
+    d_ptr->m_Current.setModel(d_ptr->m_ControlCW.currentModel());
 }
-
-// RemoteActionNode::RemoteActionNode(QObject* parent) :
-//     AbstractNode(parent), d_ptr(new RemoteActionNodePrivate())
-// {
-//     auto devm = DeviceModel::instance();
-// 
-//     auto ctx = devm->context();
-//     auto dev = devm->currentDevice();
-// 
-//     setModel(new AquisitionModel(ctx, dev));
-// }
 
 RemoteActionNode::~RemoteActionNode()
 {
-    
+    delete d_ptr;
 }
 
 QString RemoteActionNode::title() const
 {
-    return d_ptr->m_Title;
+    return "Controls";
 }
 
 QString RemoteActionNode::id() const
 {
-    return QStringLiteral("device_node");
+    return QStringLiteral("remoteaction_node");
 }
 
 void RemoteActionNode::write(QJsonObject &parent) const
@@ -65,63 +51,15 @@ void RemoteActionNode::write(QJsonObject &parent) const
 
 QWidget* RemoteActionNode::widget() const
 {
-    if (!d_ptr->m_pWidget) {
-        d_ptr->m_pWidget = new Aquisition();
-    }
-
-    return d_ptr->m_pWidget;
+    return &d_ptr->m_ControlCW;
 }
 
-void RemoteActionNode::setModel(AquisitionModel* m)
+void RemoteActionNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
-    //TODO disconnect existing
-    d_ptr->m_pModel = m;
-
-    if (d_ptr->m_pModel) {
-        QObject::connect(d_ptr->m_pWidget->m_pStart, &QPushButton::clicked, d_ptr->m_pModel,
-            &AquisitionModel::start);
-        QObject::connect(d_ptr->m_pWidget->m_pStop, &QPushButton::clicked, d_ptr->m_pModel,
-            &AquisitionModel::stop);
-        QObject::connect(d_ptr->m_pWidget->m_pClear, &QPushButton::clicked, d_ptr,
-            &RemoteActionNodePrivate::slotClear);
-    }
+    Q_UNUSED(old)
+    m_pSource = newModel;
+    m_Current.setModel(newModel);
 }
 
-QAbstractItemModel* RemoteActionNode::model() const
-{
-    return d_ptr->m_pModel;
-}
 
-std::shared_ptr<sigrok::HardwareDevice> RemoteActionNode::device() const
-{
-    return d_ptr->m_pDevice;
-}
-
-void RemoteActionNode::setDevice(std::shared_ptr<sigrok::HardwareDevice> dev)
-{
-    //TODO if device and running, ask to stop
-
-    d_ptr->m_pDevice = dev;
-
-    d_ptr->m_Title = QString::fromStdString(dev->model());
-
-    Q_EMIT titleChanged(d_ptr->m_Title);
-
-    auto devm = DeviceModel::instance();
-
-    auto ctx = devm->context();
-
-    setModel(new AquisitionModel(ctx, dev));
-}
-
-bool RemoteActionNode::dummy() const{
-    // do nothing, the property is a trigger
-    return false;
-}
-
-void RemoteActionNodePrivate::slotClear()
-{
-    Q_EMIT q_ptr->aboutToClear();
-    m_pModel->clear();
-    Q_EMIT q_ptr->cleared();
-}
+#include <remoteaction.moc>

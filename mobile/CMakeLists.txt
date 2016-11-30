@@ -1,0 +1,36 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+ADD_DEFINITIONS("-std=c++11")
+
+PROJECT(mobile)
+
+SET(QT_MIN_VERSION  "5.2.0")
+
+IF(POLICY CMP0063)
+    CMAKE_POLICY(SET CMP0063 NEW)
+ENDIF(POLICY CMP0063)
+
+INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
+
+include(../cmake/extrawarnings.cmake)
+
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+    Widgets
+)
+
+SET(mobile_SRCS
+    mainwindow.cpp
+)
+
+QT5_WRAP_UI(mobile_SRCS
+    mainwindow.ui
+)
+
+ADD_LIBRARY( mobile STATIC ${mobile_SRCS} )
+
+TARGET_LINK_LIBRARIES( mobile
+    common
+    
+)

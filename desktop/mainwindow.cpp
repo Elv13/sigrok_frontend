@@ -5,7 +5,6 @@
 #include <QTextStream>
 #include <QByteArray>
 
-#include <KTextEdit>
 #include <KLocalizedString>
 #include <KActionCollection>
 #include <KStandardAction>
@@ -13,16 +12,17 @@
 #include <KConfigDialog>
 #include <KIO/Job>
 
-#include "devicemodel.h"
-#include "aquisitionmodel.h"
-#include "nodeadapter.h"
+#include "sigrokd/aquisitionmodel.h"
+
 #include "proxynodefactory.h"
 #include "models/remotewidgets.h"
 
-#include "nodes/devicenode.h"
-#include "nodes/chartnode.h"
+#include "nodes/aquisitionnode.h"
+#include "nodes/manualaquisitionnode.h"
+// #include "nodes/chartnode.h"
 #include "nodes/tablenode.h"
 #include "nodes/meternode.h"
+#include "nodes/lcdmeternode.h"
 #include "nodes/columnnode.h"
 #include "nodes/colornode.h"
 #include "nodes/mementonode.h"
@@ -31,8 +31,11 @@
 #include "nodes/timernode.h"
 #include "nodes/chrononode.h"
 #include "nodes/currentvalues.h"
+#include "nodes/remoteaction.h"
 #include "nodes/devicelistnode.h"
 #include "nodes/multiplexernode.h"
+#include "nodes/remoteaction.h"
+#include "nodes/deduplicatenode.h"
 #include "nodes/remote/remotetable.h"
 #include "nodes/remote/remotemeter.h"
 #include "nodes/remote/remotecontrols.h"
@@ -58,16 +61,18 @@
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 
-#include <libsigrokcxx/libsigrokcxx.hpp>
-
 #include "common/pagemanager.h"
 
 static MainWindow* ins; //FIXME
 
 QDockWidget* MainWindow::addDock(QWidget* w, const QString& title)
 {
-    auto dock = new QDockWidget(ins);
+    static QHash<QString, int> uniqueNames;
+
+    auto dock = new QDockWidget(title, ins);
+
     dock->setWidget(w);
+    dock->setObjectName(title+QString::number(uniqueNames[title]++));
     ins->addDockWidget(Qt::TopDockWidgetArea, dock);
 
     return dock;
@@ -75,6 +80,7 @@ QDockWidget* MainWindow::addDock(QWidget* w, const QString& title)
 
 MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QString())
 {
+    setObjectName("Master Window");
     ins = this;
 
     m_pStatusBar = new StatusBar2(this);
@@ -85,19 +91,21 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
 
-    auto devm = DeviceModel::instance();
-
     m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
 
     setCentralWidget(w);
 
-    m_pSession->registerType<ChartNode>  ("Chart"          , "Widgets"   , "chart_node", QIcon::fromTheme( "document-edit"        ));
+//     m_pSession->registerType<ChartNode>  ("Chart"          , "Widgets"   , "chart_node", QIcon::fromTheme( "document-edit"        ));
     m_pSession->registerType<TableNode>  ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
     m_pSession->registerType<MeterNode>  ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
+    m_pSession->registerType<RemoteActionNode>  ("Controls"          , "Widgets"   , "remoteaction_node", QIcon::fromTheme( "bookmark-new"         ));
+    m_pSession->registerType<LCDMeterNode>  ("LCD Meter"      , "Widgets"   , "lcdmeter_node", QIcon::fromTheme( "bookmark-new"         ));
     m_pSession->registerType<ColumnNode> ("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
     m_pSession->registerType<ColorNode>  ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
     m_pSession->registerType<ColumnNode> ("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
-    m_pSession->registerType<DeviceNode> ("Live aquisition" , "Sources"  , "device_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<DeduplicateNode> ("Deduplicate"  , "Filters"   , "deduplicate_node", QIcon::fromTheme( "view-filter"          ));
+    m_pSession->registerType<AquisitionNode> ("Live aquisition" , "Sources"  , "aquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    m_pSession->registerType<ManualAquisitionNode> ("Manual aquisition" , "Sources"  , "manualaquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
     m_pSession->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
     m_pSession->registerType<TailNode>   ("Tail filter"     , "Filters"  , "tail_node"  , QIcon::fromTheme( "kt-add-filters"   ));
@@ -126,6 +134,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     //Create the node creator dock
     auto dock = new QDockWidget    ( ins );
     auto tab  = new CategorizedTree( dock     );
+    dock->setObjectName("ToolBox");
     tab->setModel(m_pSession);
     auto del = new CategorizedDelegate(tab);
     del->setChildDelegate(new AutoCompletionDelegate());
@@ -157,7 +166,6 @@ void MainWindow::setupActions()
     clearAction->setIcon(QIcon::fromTheme("document-new"));
     actionCollection()->setDefaultShortcut(clearAction, Qt::CTRL + Qt::Key_W);
     actionCollection()->addAction("clear", clearAction);
-//     connect(clearAction, SIGNAL(triggered(bool)), textArea, SLOT(clear()));
 
     KStandardAction::quit(qApp, SLOT(quit()), actionCollection());
 
@@ -177,7 +185,6 @@ void MainWindow::setupActions()
 void MainWindow::newFile()
 {
     fileName.clear();
-    textArea->clear();
 }
 
 void MainWindow::saveFileAs(const QUrl &outputFileName)
@@ -192,7 +199,6 @@ void MainWindow::saveFileAs(const QUrl &outputFileName)
         fileName = outputFileName;
 
         Settings::setLastFilePath(QUrl(outputFileName));
-        Settings::self()->writeConfig();
     }
 }
 
@@ -248,7 +254,6 @@ void MainWindow::downloadFinished(KJob* job)
     }
 
     KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
-//     textArea->setPlainText(QTextStream(storedJob->data(), QIODevice::ReadOnly).readAll());
 
     m_pSession->load(storedJob->data());
 }

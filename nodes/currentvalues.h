@@ -6,7 +6,7 @@
 
 class CurrentValuesPrivate;
 
-class CurrentValues : public ProxyNode
+class Q_DECL_EXPORT CurrentValues : public ProxyNode
 {
     Q_OBJECT
 
@@ -15,9 +15,9 @@ public:
     Q_INVOKABLE explicit CurrentValues(QObject* parent = nullptr);
     virtual ~CurrentValues();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
-    virtual Mode mode() const {return AbstractNode::Mode::MODEL;}
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
+    virtual Mode mode() const override {return AbstractNode::Mode::MODEL;}
     virtual QAbstractItemModel* sourceModel() const override;
 
     virtual QString id() const override;

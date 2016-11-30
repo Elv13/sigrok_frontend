@@ -14,7 +14,7 @@ public:
     explicit MeterData(QObject* parent = nullptr) : MeterDataSimpleSource(parent) {}
 
 private:
-    float m_MainValue {0};
+    //float m_MainValue {0};
 };
 
 class RemoteMeterPrivate final : public QObject
@@ -35,10 +35,7 @@ RemoteMeter::RemoteMeter(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteM
 {
     d_ptr->q_ptr = this;
 
-    auto host = RemoteManager::instance()->host();
-
-    bool worked = host->enableRemoting(&d_ptr->m_MeterData);
-    qDebug() << "\n\n\nDFDGDGFGFD"<< worked;
+    RemoteManager::instance()->addObject(&d_ptr->m_MeterData, "Remote_meter");
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteMeterPrivate::slotModelChanged);
 }

@@ -1,0 +1,10 @@
+#include <QtCore>
+
+class Device
+{
+    PROP(QString name);
+    PROP(bool isActive);
+    PROP(QByteArray type);
+    SLOT(void start());
+    SLOT(void stop());
+};

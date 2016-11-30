@@ -10,7 +10,7 @@ class AdditionalProperties : public QObject
 {
     Q_OBJECT
 public:
-    Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged USER true)
 
     QAbstractItemModel* model() const;
     void setModel(QAbstractItemModel* m);

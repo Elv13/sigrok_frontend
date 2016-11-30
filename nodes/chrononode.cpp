@@ -43,6 +43,11 @@ void ChronoNode::write(QJsonObject &parent) const
     AbstractNode::write(parent);
 }
 
+void ChronoNode::read(const QJsonObject &parent)
+{
+    
+}
+
 QWidget* ChronoNode::widget() const
 {
     return nullptr;

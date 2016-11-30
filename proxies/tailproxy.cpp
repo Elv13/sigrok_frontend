@@ -135,7 +135,6 @@ QModelIndex TailProxy::mapToSource(const QModelIndex& proxyIndex) const
     if (!proxyIndex.isValid())
         return {};
 
-    Q_D(const TailProxy);
     Q_ASSERT(proxyIndex.model() == this);
 
     const bool inRange = !isCurrentlyLimited();

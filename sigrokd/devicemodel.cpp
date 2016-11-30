@@ -3,32 +3,21 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
 
-// #include "nodes/devicenode.h"
+#include "sigrokdevice.h"
 
-/* Avoid converting string between std and QtCore */
-struct QSigRokDevice
-{
-    QString m_Name;
-    std::shared_ptr<sigrok::HardwareDevice> m_pDevice;
-//     DeviceNode* m_pNode;
-};
+#include <libsigrokcxx/libsigrokcxx.hpp>
+
+// #include "nodes/devicenode.h"
 
 class DeviceModelPrivate
 {
 public:
-    QVector<QSigRokDevice*> m_lDevices;
+    QVector<SigrokDevice*> m_lDevices;
     QItemSelectionModel* m_pSelectionModel {nullptr};
     std::shared_ptr<sigrok::Context> m_pContext {nullptr};
 
     void slotIndexChanged(const QModelIndex& idx, const QModelIndex& previous);
 };
-
-void DeviceModelPrivateslotIndexChanged(const QModelIndex& idx, const QModelIndex& previous)
-{
-    Q_UNUSED(idx)
-    Q_UNUSED(previous)
-    //TODO
-}
 
 DeviceModel::DeviceModel() : QAbstractListModel(), d_ptr(new DeviceModelPrivate)
 {
@@ -89,7 +78,7 @@ std::shared_ptr<sigrok::HardwareDevice> DeviceModel::currentDevice() const
 {
     if (selectionModel()->currentIndex().isValid()) {
         const int row = d_ptr->m_pSelectionModel->currentIndex().row();
-        return d_ptr->m_lDevices[row]->m_pDevice;
+        return d_ptr->m_lDevices[row]->native();
     }
 
     return nullptr;
@@ -109,9 +98,7 @@ void DeviceModel::scan()
 
         for (const auto& dev : devs) {
             beginInsertRows(QModelIndex(), d_ptr->m_lDevices.size(), d_ptr->m_lDevices.size());
-            d_ptr->m_lDevices << new QSigRokDevice {
-                name, dev
-            };
+            d_ptr->m_lDevices << new SigrokDevice( dev, name, this );
             endInsertRows();
         }
 
@@ -137,7 +124,7 @@ QVariant DeviceModel::data(const QModelIndex& idx, int role) const
 
     switch (role) {
         case Qt::DisplayRole:
-            return d_ptr->m_lDevices[idx.row()]->m_Name;
+            return d_ptr->m_lDevices[idx.row()]->name();
         case Qt::EditRole:
         case (int) DeviceModel::Role::DEVICE:
             const auto n = d_ptr->m_lDevices[idx.row()];
@@ -149,7 +136,7 @@ QVariant DeviceModel::data(const QModelIndex& idx, int role) const
 //                 );
 //                 n->m_pNode->setDevice(n->m_pDevice);
 //             }
-            return QVariant::fromValue(n->m_pDevice);
+            return QVariant::fromValue(n);
     }
 
     return {};

@@ -7,10 +7,15 @@
 
 #include "ui_aquisition.h"
 
-Aquisition::Aquisition(QWidget* parent) : QWidget(parent)
+Aquisition::Aquisition(bool showAquired, QWidget* parent) : QWidget(parent)
 {
     Ui_Aquisition aq;
     aq.setupUi(this);
+
+    if (!showAquired)
+        aq.m_pAquire->setHidden(true);
+
+    m_pAcqB = aq.m_pAquire;
 }
 
 Aquisition::~Aquisition()
@@ -18,22 +23,14 @@ Aquisition::~Aquisition()
 
 }
 
-void Aquisition::setModel(const AquisitionModel* m)
+void Aquisition::setShowAcquire(bool v)
 {
-    Q_UNUSED(m)
-//     auto sink = new RateSink(m); //FIXME leak
-
-//     QObject::connect(sink, &RateSink::rateChangedAsString, m_pRate, &QLabel::setText);
-// 
-//     QObject::connect(m, &AquisitionModel::currentValuesChanged, [this](QList<float> values) {
-//         m_pValue->setText(QString::number(values[0]));
-//     });
-
+    m_pAcqB->setHidden(v);
 }
 
 void Aquisition::slotStarted()
 {
-    Q_EMIT started();
+    Q_EMIT this->started();
 }
 
 void Aquisition::slotStopped()
@@ -44,4 +41,9 @@ void Aquisition::slotStopped()
 void Aquisition::slotCleared()
 {
     Q_EMIT cleared();
+}
+
+void Aquisition::slotAquire()
+{
+    Q_EMIT aquired();
 }

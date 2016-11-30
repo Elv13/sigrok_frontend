@@ -29,7 +29,7 @@ QModelIndex LastRowToListProxy::mapFromSource(const QModelIndex& sourceIndex) co
     if (!sourceIndex.isValid()) return {};
     if (!d_ptr->m_pSourceModel) return {};
 
-    const unsigned lastRow = d_ptr->m_pSourceModel->rowCount();
+    const int lastRow = d_ptr->m_pSourceModel->rowCount();
 
     if (!lastRow) return {};
     if (sourceIndex.row() != lastRow - 1) return {};

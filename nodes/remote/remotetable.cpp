@@ -48,9 +48,10 @@ void RemoteTablePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstrac
 {
     Q_UNUSED(old)
 
-    QVector<int> roles;
-    roles << Qt::DisplayRole << Qt::BackgroundRole;
+    static QVector<int> roles {
+        Qt::DisplayRole,
+        Qt::BackgroundRole
+    };
 
-    auto node2 = RemoteManager::instance()->host();
-    bool worked = node2->enableRemoting(newModel, QStringLiteral("RemoteModel"), roles);
+    RemoteManager::instance()->addModel(newModel, roles, "RemoteModel");
 }

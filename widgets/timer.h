@@ -2,6 +2,8 @@
 
 #include <QtWidgets/QWidget>
 
+class TimerNode;
+
 class QCheckBox;
 
 class Q_DECL_EXPORT Timer : public QWidget
@@ -9,7 +11,7 @@ class Q_DECL_EXPORT Timer : public QWidget
     Q_OBJECT
 
 public:
-    explicit Timer(QWidget* parent = nullptr);
+    explicit Timer(const TimerNode* n, QWidget* parent = nullptr);
 
     virtual ~Timer();
 

@@ -1,9 +1,11 @@
 #include "mementonode.h"
 
 #include "proxies/mementoproxy.h"
+#include "proxies/rowsdeletionproxy.h"
 #include "widgets/memento.h"
 
 #include <QtCore/QDebug>
+#include <QtGui/QIcon>
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QItemSelectionModel>
 #include <QtCore/QDateTime>
@@ -27,6 +29,7 @@ public:
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
+    virtual bool removeRows(int row, int count, const QModelIndex &parent = {}) override;
 
     QVector<MementoProxy*> m_lMementos;
     QVector<QDateTime> m_lAddedTime;
@@ -38,10 +41,10 @@ class MementoNodePrivate : public QObject
 {
     Q_OBJECT
 public:
-//     MementoProxy* m_pProxy {new MementoProxy};
     MementosList *m_pMementoList {new MementosList(this)};
     Memento* m_pWidgets {new Memento()};
-    QItemSelectionModel* m_pSelection {new QItemSelectionModel(m_pMementoList)};
+    RowsDeletionProxy m_RemoveRowProxy {this};
+    QItemSelectionModel* m_pSelection {new QItemSelectionModel(&m_RemoveRowProxy)};
 
     MementoNode* q_ptr;
 
@@ -75,10 +78,31 @@ int MementosList::rowCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : m_lMementos.size();
 }
 
+bool MementosList::removeRows(int row, int count, const QModelIndex &parent)
+{
+    if (row < 0 || count < 1 || row+count >= rowCount())
+        return false;
+
+    beginRemoveRows(parent, row, row+count-1);
+    for (int i = row; i < row+count; i++) {
+        auto s = m_lMementos[i];
+        m_lMementos.remove(i);
+        delete s;
+    }
+    endRemoveRows();
+
+    return true;
+}
+
 MementoNode::MementoNode(QObject* parent) : ProxyNode(parent), d_ptr(new MementoNodePrivate())
 {
     d_ptr->q_ptr = this;
-    d_ptr->m_pWidgets->setModel(d_ptr->m_pMementoList, d_ptr->m_pSelection);
+
+    d_ptr->m_RemoveRowProxy.setSourceModel(d_ptr->m_pMementoList);
+    d_ptr->m_RemoveRowProxy.setSelectionModel(d_ptr->m_pSelection);
+    d_ptr->m_RemoveRowProxy.setIcon(QIcon::fromTheme("list-remove"));
+
+    d_ptr->m_pWidgets->setModel(&d_ptr->m_RemoveRowProxy, d_ptr->m_pSelection);
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &MementoNodePrivate::slotModelChanged);
     QObject::connect(d_ptr->m_pWidgets, &Memento::takeMemento, this, &MementoNode::takeMemento);
@@ -165,6 +189,7 @@ void MementoNode::takeMemento(bool)
 
 void MementoNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(old)
     m_pMementoList->takeMemento(newModel); //FIXME don't do that
 }
 

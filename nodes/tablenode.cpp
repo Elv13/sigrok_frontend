@@ -59,6 +59,7 @@ QWidget* TableNode::widget() const
 
 void TableNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(old)
     m_pTableView->setModel(newModel);
 
     /* Scroll to the end */

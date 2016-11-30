@@ -6,20 +6,20 @@
 
 class MementoNodePrivate;
 
-class MementoNode : public ProxyNode
+class Q_DECL_EXPORT MementoNode : public ProxyNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* selectedMemento READ selectedMemento NOTIFY selectedMementoChanged USER true);
-    Q_PROPERTY(QAbstractItemModel* lastestMemento READ lastestMemento NOTIFY mementoAdded USER true);
-    Q_PROPERTY(TRIGGER trigger WRITE takeMemento USER true);
+    Q_PROPERTY(QAbstractItemModel* selectedMemento READ selectedMemento NOTIFY selectedMementoChanged USER true)
+    Q_PROPERTY(QAbstractItemModel* lastestMemento READ lastestMemento NOTIFY mementoAdded USER true)
+    Q_PROPERTY(TRIGGER trigger WRITE takeMemento USER true)
 
     Q_INVOKABLE explicit MementoNode(QObject* parent = nullptr);
     virtual ~MementoNode();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
     virtual QString id() const override;
 

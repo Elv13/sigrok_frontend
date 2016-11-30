@@ -15,10 +15,10 @@ public:
     Q_INVOKABLE explicit RemoteControls(QObject* parent = nullptr);
     virtual ~RemoteControls();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
-    virtual Mode mode() const {return AbstractNode::Mode::MODEL;}
+    virtual Mode mode() const override {return AbstractNode::Mode::MODEL;}
 
     virtual QString id() const override;
 

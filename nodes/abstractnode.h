@@ -9,7 +9,7 @@ class QWidget;
 typedef bool TRIGGER;
 typedef bool PULSE;
 
-class AbstractNode : public QObject
+class Q_DECL_EXPORT AbstractNode : public QObject
 {
     Q_OBJECT
 public:
@@ -41,3 +41,17 @@ Q_DECLARE_METATYPE(AbstractNode*)
 Q_DECLARE_METATYPE(TRIGGER)
 // Q_DECLARE_METATYPE(PULSE)
 Q_DECLARE_METATYPE(QAbstractItemModel*)
+
+#ifndef Q_DECLARE_STREAM_METATYPE
+#define Q_DECLARE_STREAM_METATYPE(T) \
+QDataStream &operator<<(QDataStream &s, const T);\
+QDataStream &operator<<(QDataStream &s, const T) { return s; }\
+QDataStream &operator>>(QDataStream &s, const T);\
+QDataStream &operator>>(QDataStream &s, const T) { return s; }\
+static int ___ = ([]()->int{\
+    qRegisterMetaType<T>(#T);\
+    qRegisterMetaTypeStreamOperators<T>(#T);\
+    return 0;\
+})();
+#endif
+

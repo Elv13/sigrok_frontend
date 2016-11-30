@@ -25,6 +25,8 @@ public:
     int topLevelIdentifierRole() const;
     void setTopLevelIdentifierRole(int role);
 
+    Q_INVOKABLE QAbstractItemModel* getModel(const QModelIndex& idx) const;
+
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
@@ -39,6 +41,7 @@ public:
     virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action,
                 int row, int column, const QModelIndex &parent) override;
     virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
+    virtual bool removeRows(int row, int count, const QModelIndex &parent = {}) override;
 
     QModelIndex appendModel(QAbstractItemModel* model, const QVariant& id = {});
 

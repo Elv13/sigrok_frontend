@@ -9,9 +9,9 @@ IF(POLICY CMP0063)
     CMAKE_POLICY(SET CMP0063 NEW)
 ENDIF(POLICY CMP0063)
 
-INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
+include(../cmake/extrawarnings.cmake)
 
-find_package(KChart "2.6.0" REQUIRED) #TODO make optional
+INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
 
 SET(libdelegates_SRCS
     categorizeddelegate.cpp
@@ -22,5 +22,4 @@ ADD_LIBRARY( delegates STATIC ${libdelegates_SRCS} )
 
 TARGET_LINK_LIBRARIES( delegates
     ${Qt5Core_LIBRARIES}
-    KChart
 )

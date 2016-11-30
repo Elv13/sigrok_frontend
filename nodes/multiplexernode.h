@@ -6,20 +6,20 @@
 
 class MultiplexerNodePrivate;
 
-class MultiplexerNode : public ProxyNode
+class Q_DECL_EXPORT MultiplexerNode : public ProxyNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* model2 READ model NOTIFY modelChangedCopy USER true);
-    Q_PROPERTY(QAbstractItemModel* model3 READ model NOTIFY modelChangedCopy USER true);
-    Q_PROPERTY(QAbstractItemModel* model4 READ model NOTIFY modelChangedCopy USER true);
+    Q_PROPERTY(QAbstractItemModel* model2 READ model NOTIFY modelChangedCopy USER true)
+    Q_PROPERTY(QAbstractItemModel* model3 READ model NOTIFY modelChangedCopy USER true)
+    Q_PROPERTY(QAbstractItemModel* model4 READ model NOTIFY modelChangedCopy USER true)
 
     Q_INVOKABLE explicit MultiplexerNode(QObject* parent = nullptr);
     virtual ~MultiplexerNode();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
     virtual QString id() const override;
 

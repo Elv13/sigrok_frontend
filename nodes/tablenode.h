@@ -6,7 +6,7 @@
 
 class TableNodePrivate;
 
-class TableNode : public ProxyNode
+class Q_DECL_EXPORT TableNode : public ProxyNode
 {
     Q_OBJECT
 
@@ -14,13 +14,13 @@ public:
     Q_INVOKABLE explicit TableNode(QObject* parent = nullptr);
     virtual ~TableNode();
 
-    virtual QString title() const;
+    virtual QString title() const override;
 
     virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 
-    virtual QWidget* widget() const;
+    virtual QWidget* widget() const override;
 
 //     virtual void connectTo(AbstractNode* other, QAbstractItemModel* model, int col) override;
 

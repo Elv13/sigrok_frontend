@@ -25,6 +25,7 @@ void Memento::setModel(QAbstractItemModel* m, QItemSelectionModel* s)
     m_pTable->verticalHeader()->setHidden(true);
     m_pTable->horizontalHeader()->setHidden(true);
     m_pTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_pTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 }
 
 void Memento::slotTakeMemento()

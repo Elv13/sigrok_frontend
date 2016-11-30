@@ -10,6 +10,7 @@
 
 #include <KRearrangeColumnsProxyModel>
 #include <KCheckableProxyModel>
+#include "columnserializationadapter.h"
 
 #include <QDebug>
 
@@ -27,6 +28,7 @@ public:
     };
 
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
+    ColumnSerializationAdapter m_Serializer {m_pCheckable, {1,2}, this};
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -39,8 +41,6 @@ ColumnNode::ColumnNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColumnNod
     d_ptr->m_pCheckable->setSourceModel(d_ptr->m_pColumnProxy);
 
     d_ptr->m_pColumnW->setModel(d_ptr->m_pCheckable);
-
-    d_ptr->m_pFilteredModel->setObjectName("FOOPROXY");
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ColumnNodePrivate::slotModelChanged);
     QObject::connect(d_ptr->m_pCheckable, &QAbstractItemModel::dataChanged, d_ptr, &ColumnNodePrivate::slotDataChanged);
@@ -60,7 +60,12 @@ void ColumnNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    
+    d_ptr->m_Serializer.write(parent);
+}
+
+void ColumnNode::read(const QJsonObject &parent)
+{
+    d_ptr->m_Serializer.read(parent);
 }
 
 QString ColumnNode::id() const
@@ -75,14 +80,16 @@ QWidget* ColumnNode::widget() const
 
 QAbstractItemModel* ColumnNode::filteredModel() const
 {
-    return d_ptr->m_pFilteredModel;
+    return 0;//d_ptr->m_pFilteredModel;
 }
 
 void ColumnNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(old)
+qDebug() << "DFSGFDGDFG" << newModel;
     m_pColumnProxy->setSourceModel(newModel);
 
-    m_pFilteredModel->setSourceModel(newModel);
+    //m_pFilteredModel->setSourceModel(newModel);
 
     QItemSelectionModel *checkModel = new QItemSelectionModel(newModel, this); //FIXME leak
     m_pCheckable->setSelectionModel(checkModel);
@@ -94,15 +101,13 @@ void ColumnNodePrivate::slotDataChanged()
     QVector<int> ret;
 
     auto m = m_pCheckable;
-
     for (auto i = m->index(0,0); i.isValid(); i = m->index(i.row()+1,0)) {
         if (i.data(Qt::CheckStateRole) == Qt::Checked) {
             ret << i.row();
         }
     }
-
     m_pFilteredModel->setSourceColumns(ret);
+
+//qDebug() << "AAAAAA" << ret << m_pFilteredModel->rowCount() << m_pColumnProxy->rowCount();
 }
 
-bool ColumnNode::test2() const {return true;}
-    void ColumnNode::setTest2(bool) {}

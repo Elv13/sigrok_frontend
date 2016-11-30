@@ -30,7 +30,6 @@ struct Node
 class RangeProxyPrivate : public QObject
 {
 public:
-    QVector<bool> m_lShow;
     int m_ExtraColumnCount {0};
     QVector<Node*> m_lRows;
     bool m_MatchAllColumns{false};
@@ -47,4 +46,5 @@ public Q_SLOTS:
     void slotLayoutChanged();
     void slotAutoAddRows(const QModelIndex& parent);
     void slotRowsAboutToBeInserted(const QModelIndex &parent, int first, int last);
+    void slotRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 };

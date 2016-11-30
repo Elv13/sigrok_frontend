@@ -40,9 +40,16 @@ RangeProxy* Range::rangeProxy() const
 void Range::setRangeProxy(RangeProxy* p)
 {
     m_pProxy = p;
+
     m_pFiltered->setSourceModel(p);
+
     m_pColumn->setModel(p);
+
+//     qDebug() << "\n\n\nRC" << p->rowCount() << m_pColumn->currentIndex();
+    m_pColumn->setCurrentIndex(0);
+
     m_pColumn->setCurrentIndex(p->rowCount()-1);
+
 
     setColumnWidgetFactory(0, [this](const QPersistentModelIndex& idx) -> QWidget* {
 
@@ -96,6 +103,9 @@ void Range::slotAjustColumns()
 
     applyWidget({}, m_lWidgetFactories);
 
+    if(m_pColumn->currentIndex() == -1)
+        m_pColumn->setCurrentIndex(m_pProxy->rowCount()-1);
+
     // Let the layout some time to adjust
     QTimer::singleShot(0, [this](){m_pTree->expandAll();});
 }
@@ -117,6 +127,12 @@ void Range::setColumnWidgetFactory(int col, std::function<QWidget*(const QPersis
 void Range::slotAddClicked()
 {
     if (!m_pProxy) return;
+
+    Q_ASSERT(m_pColumn->count() == m_pProxy->rowCount());
+
+//     for (int i = 0; i < m_pColumn->count(); i++)
+//         qDebug() << "I" << i << m_pColumn->itemText(i);
+
     m_pProxy->addFilter(m_pProxy->index(m_pColumn->currentIndex(),0));
 }
 

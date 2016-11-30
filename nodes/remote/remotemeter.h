@@ -15,8 +15,8 @@ public:
     Q_INVOKABLE explicit RemoteMeter(QObject* parent = nullptr);
     virtual ~RemoteMeter();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
     virtual QString id() const override;
 

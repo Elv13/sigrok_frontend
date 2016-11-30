@@ -11,7 +11,7 @@ ENDIF(POLICY CMP0063)
 
 INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
 
-find_package(KChart "2.6.0" REQUIRED) #TODO make optional
+include(../cmake/extrawarnings.cmake)
 
 find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
@@ -29,8 +29,17 @@ qt5_generate_repc(libcommon_SRCS
     SOURCE
 )
 qt5_generate_repc(libcommon_SRCS
-    repc/remotewidgets.rep
+    repc/device.rep
     SOURCE
+)
+
+qt5_generate_repc(libcommon_SRCS
+    repc/meterdata.rep
+    REPLICA
+)
+qt5_generate_repc(libcommon_SRCS
+    repc/device.rep
+    REPLICA
 )
 
 ADD_LIBRARY( common STATIC ${libcommon_SRCS} )

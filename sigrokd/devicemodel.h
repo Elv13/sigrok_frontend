@@ -5,14 +5,17 @@
 
 #include <memory>
 
+namespace sigrok {
+    class HardwareDevice;
+    class Context;
+}
 
-#include <libsigrokcxx/libsigrokcxx.hpp>
 
 Q_DECLARE_METATYPE(std::shared_ptr<sigrok::HardwareDevice>)
 
 class DeviceModelPrivate;
 
-class DeviceModel : public QAbstractListModel
+class Q_DECL_EXPORT DeviceModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -47,7 +50,7 @@ private:
     explicit DeviceModel();
     virtual ~DeviceModel();
     DeviceModelPrivate* d_ptr;
-    Q_DECLARE_PRIVATE(DeviceModel);
+    Q_DECLARE_PRIVATE(DeviceModel)
 };
 
 Q_DECLARE_METATYPE(DeviceModel*)

@@ -14,6 +14,8 @@
 
 #include <QDebug>
 
+#include "columnserializationadapter.h"
+
 class MeterNodePrivate : public QObject
 {
     Q_OBJECT
@@ -23,6 +25,7 @@ public:
     MeterProxy* m_pCheckProxy {new MeterProxy(this)};
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
     QAbstractItemModel* m_pSource {nullptr};
+    ColumnSerializationAdapter m_Serializer {m_pCheckProxy, {1,2}, this};
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -61,7 +64,12 @@ void MeterNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    
+    d_ptr->m_Serializer.write(parent);
+}
+
+void MeterNode::read(const QJsonObject &parent)
+{
+    d_ptr->m_Serializer.read(parent);
 }
 
 QWidget* MeterNode::widget() const
@@ -86,7 +94,7 @@ void MeterNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractI
 
 void MeterNodePrivate::slotColumnEnabled(int col, bool)
 {
-    
+    Q_UNUSED(col) //FIXME
 }
 
 void MeterNodePrivate::slotRowsInserted()

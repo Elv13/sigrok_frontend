@@ -23,8 +23,6 @@ class FilterTopLevelProxyPrivate final : public QObject
 public:
     explicit FilterTopLevelProxyPrivate(FilterTopLevelProxy* parent);
 
-    bool m_RecursionLock {false}; //Avoid infinite loop (not thread safe)
-
 public Q_SLOTS:
     void changeParent(const QModelIndex& parent, int start, int end );
 
@@ -65,9 +63,12 @@ void FilterTopLevelProxy::setSourceModel(QAbstractItemModel* source)
 #include <QtCore/QDebug>
 bool FilterTopLevelProxy::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
-    if (source_row >= 0 && (!d_ptr->m_RecursionLock) && !source_parent.isValid()) {
-        qDebug() << "GET" << source_row;
-        return sourceModel()->index(0, 0, sourceModel()->index(source_row,0)).isValid();
+    if (source_row >= 0 && !source_parent.isValid()) {
+        const auto i = sourceModel()->index(source_row,0);
+
+        Q_ASSERT(i.isValid() && (sourceModel()->rowCount(i) == 0 || sourceModel()->index(0,0,i).isValid()));
+
+        return sourceModel()->rowCount(i) > 0;
     }
 
     return true;
@@ -83,13 +84,10 @@ void FilterTopLevelProxy::sort ( int column, Qt::SortOrder order)
 void FilterTopLevelProxyPrivate::changeParent(const QModelIndex& parent, int start, int end )
 {
     Q_UNUSED(end)
-
+    Q_UNUSED(start)
     /// (performance) Only bother when the first child is involved
-    if ((!start) && parent.isValid() && !parent.parent().isValid()) {
-//         m_RecursionLock = true;
-        qDebug() << "ADD CHILD";
+    if (start >= 0 && parent.isValid() && !parent.parent().isValid()) {
         Q_EMIT q_ptr->sourceModel()->dataChanged(parent,parent);
-//         m_RecursionLock = false;
     }
 }
 

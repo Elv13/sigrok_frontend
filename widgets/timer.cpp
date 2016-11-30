@@ -2,11 +2,13 @@
 
 #include "ui_timer.h"
 
-Timer::Timer(QWidget* parent) : QWidget(parent)
+#include "nodes/timernode.h"
+
+Timer::Timer(const TimerNode* n, QWidget* parent) : QWidget(parent)
 {
     Ui_Timer ui;
     ui.setupUi(this);
-    m_pCheck = ui.toolButton;
+    m_pCheck = ui.m_pActivated;
 }
 
 Timer::~Timer()

@@ -42,9 +42,13 @@ public:
 public Q_SLOTS:
     QPair<GraphicsNode*, AbstractNode*> addToScene(const QModelIndex& idx);
 
+private Q_SLOTS:
+    void remove(const QObject* o, const QString& id);
+
 private:
     QNodeWidget* m_pNodeW;
     struct MetaInfo {
+        int m_Index;
         const QMetaObject m_spMetaObj;
         QString m_Name;
         QIcon m_Icon;
@@ -80,8 +84,8 @@ void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& c
         m_slCategory << cat;
     }
 
-    auto mi =  new ProxyNodeFactoryAdapter::MetaInfo {
-        T::staticMetaObject, name, icon, {}
+    auto mi = new ProxyNodeFactoryAdapter::MetaInfo {
+        cat->m_lTypes.size(), T::staticMetaObject, name, icon, {}
     };
 
     cat->m_lTypes << mi;

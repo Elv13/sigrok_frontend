@@ -8,7 +8,7 @@ class Q_DECL_EXPORT HeadProxy : public QIdentityProxyModel
 {
     Q_OBJECT
 public:
-    Q_PROPERTY(int maximum READ maximum WRITE setMaximum NOTIFY maximumChanged);
+    Q_PROPERTY(int maximum READ maximum WRITE setMaximum NOTIFY maximumChanged)
 
     explicit HeadProxy(QObject* parent = nullptr);
     virtual ~HeadProxy();

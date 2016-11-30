@@ -18,8 +18,8 @@ static QList<QWidget*>& getPages()
 
 void PageManager::addPage(QWidget* w, const QString& title)
 {
-
     getPages() << w;
+    Q_EMIT pageAdded(w, title);
 }
 
 PageManager::PageManager()

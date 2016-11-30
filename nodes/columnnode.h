@@ -7,27 +7,24 @@
 
 class ColumnNodePrivate;
 
-class ColumnNode : public ProxyNode
+class Q_DECL_EXPORT ColumnNode : public ProxyNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(bool test2 READ test2 WRITE setTest2 NOTIFY test2Changed USER true);
-    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
     Q_INVOKABLE explicit ColumnNode(QObject* parent = nullptr);
     virtual ~ColumnNode();
 
-    virtual QString title() const;
+    virtual QString title() const override;
 
     virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
+    virtual void read(const QJsonObject &parent) override;
 
-    virtual QWidget* widget() const;
-
-    bool test2() const;
-    void setTest2(bool);
+    virtual QWidget* widget() const override;
 
     QAbstractItemModel* filteredModel() const;
 

@@ -6,7 +6,7 @@
 
 class ChartNodePrivate;
 
-class ChartNode : public ProxyNode
+class Q_DECL_EXPORT ChartNode : public ProxyNode
 {
     Q_OBJECT
 
@@ -14,14 +14,12 @@ public:
     Q_INVOKABLE explicit ChartNode(QObject* parent = nullptr);
     virtual ~ChartNode();
 
-    virtual QString title() const;
-    virtual QWidget* widget() const;
+    virtual QString title() const override;
+    virtual QWidget* widget() const override;
 
     virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
-
-//     virtual void connectTo(AbstractNode* other, QAbstractItemModel* model, int col) override;
 
 private:
     ChartNodePrivate* d_ptr;

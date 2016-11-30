@@ -7,23 +7,24 @@
 
 class ColorNodePrivate;
 
-class ColorNode : public ProxyNode
+class Q_DECL_EXPORT ColorNode : public ProxyNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true);
+    Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
     Q_INVOKABLE explicit ColorNode(QObject* parent = nullptr);
     virtual ~ColorNode();
 
-    virtual QString title() const;
+    virtual QString title() const override;
 
     virtual QString id() const override;
 
-    virtual QWidget* widget() const;
+    virtual QWidget* widget() const override;
 
     virtual void write(QJsonObject &parent) const override;
+    virtual void read(const QJsonObject &parent) override;
 
     QAbstractItemModel* filteredModel() const;
 

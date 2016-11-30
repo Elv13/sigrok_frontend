@@ -45,6 +45,7 @@ public:
 
 public Q_SLOTS:
     void slotRowsInserted(const QModelIndex& parent, int first, int last);
+    void slotDataChanged(const QModelIndex& tl, const QModelIndex& br);
     void slotAddRows(const QModelIndex& parent, int first, int last, QAbstractItemModel* src);
 };
 
@@ -64,6 +65,24 @@ QMultiModelTree::~QMultiModelTree()
     }
 
     delete d_ptr;
+}
+
+QAbstractItemModel* QMultiModelTree::getModel(const QModelIndex& _idx) const
+{
+    auto idx = _idx;
+
+    if (idx.parent().isValid())
+        idx = idx.parent();
+
+    if ((!idx.isValid()) || idx.model() != this || idx.parent().isValid())
+        return Q_NULLPTR;
+
+    const auto i = static_cast<InternalItem*>(idx.internalPointer());
+
+    Q_ASSERT(!i->m_pParent);
+    Q_ASSERT(i->m_pModel);
+
+    return i->m_pModel;
 }
 
 QVariant QMultiModelTree::data(const QModelIndex& idx, int role) const
@@ -178,7 +197,6 @@ QModelIndex QMultiModelTree::mapFromSource(const QModelIndex& sourceIndex) const
     if ((!sourceIndex.isValid()) || sourceIndex.parent().isValid() || sourceIndex.column())
         return {};
 
-
     const auto i = d_ptr->m_hModels[sourceIndex.model()];
 
     if ((!i) || sourceIndex.row() >= i->m_lChildren.size())
@@ -200,6 +218,48 @@ QModelIndex QMultiModelTree::mapToSource(const QModelIndex& proxyIndex) const
     return i->m_pModel->index(proxyIndex.row(), proxyIndex.column());
 }
 
+bool QMultiModelTree::removeRows(int row, int count, const QModelIndex &parent)
+{
+    if (row < 0 || count < 1)
+        return false;
+
+    auto idx = parent;
+
+    while (idx.parent().isValid())
+        idx = idx.parent();
+
+    if (idx.isValid() && !idx.parent().isValid()) {
+        const auto i = static_cast<InternalItem*>(idx.internalPointer());
+        if (i->m_pModel->removeRows(row, count, mapToSource(parent))) {
+            beginRemoveRows(parent, row, row + count - 1);
+            endRemoveRows();
+            return true;
+        }
+        //FIXME update the m_Index
+    }
+    else if (!parent.isValid() && row + count <= d_ptr->m_lRows.size()) {
+
+        beginRemoveRows(parent, row, row + count - 1);
+            for(int i = row; i < row+count; i++) {
+                auto item = d_ptr->m_lRows[i];
+                d_ptr->m_hModels.remove(item->m_pModel);
+
+                delete item;
+            }
+
+            d_ptr->m_lRows.remove(row, count);
+
+            for (int i = row+count-1; i < rowCount(); i++)
+                d_ptr->m_lRows[i]->m_Index = i;
+
+        endRemoveRows();
+
+        return true;
+    }
+
+    return false;
+}
+
 void QMultiModelTreePrivate::slotAddRows(const QModelIndex& parent, int first, int last, QAbstractItemModel* src)
 {
     if (parent.isValid()) return;
@@ -217,7 +277,8 @@ void QMultiModelTreePrivate::slotAddRows(const QModelIndex& parent, int first, i
             src,
             p,
             {},
-            QStringLiteral("N/A")
+            QStringLiteral("N/A"),
+            {}
         };
     }
     q_ptr->endInsertRows();
@@ -229,6 +290,20 @@ void QMultiModelTreePrivate::slotRowsInserted(const QModelIndex& parent, int fir
     Q_ASSERT(model);
 
     slotAddRows(parent, first, last, model);
+}
+
+void QMultiModelTreePrivate::slotDataChanged(const QModelIndex& tl, const QModelIndex& br)
+{
+    if (tl == br && !tl.parent().isValid()) {
+        const auto i = q_ptr->mapFromSource(tl);
+
+        Q_ASSERT((!tl.isValid()) || i.isValid());
+
+        Q_EMIT q_ptr->dataChanged(i, i);
+    }
+    else {
+        Q_EMIT q_ptr->dataChanged(q_ptr->mapFromSource(tl), q_ptr->mapFromSource(br));
+    }
 }
 
 QModelIndex QMultiModelTree::appendModel(QAbstractItemModel* model, const QVariant& id)
@@ -253,6 +328,8 @@ QModelIndex QMultiModelTree::appendModel(QAbstractItemModel* model, const QVaria
     //TODO connect to the model row moved/removed/reset
     connect(model, &QAbstractItemModel::rowsInserted,
         d_ptr, &QMultiModelTreePrivate::slotRowsInserted);
+    connect(model, &QAbstractItemModel::dataChanged,
+        d_ptr, &QMultiModelTreePrivate::slotDataChanged);
 
     return index(rowCount()-1, 0);
 }
@@ -309,7 +386,7 @@ QMimeData* QMultiModelTree::mimeData(const QModelIndexList &indexes) const
         }
     }
 
-    if ((!newList.isEmpty()) && srcModel)
+    if (singleModel && (!newList.isEmpty()) && srcModel)
         return srcModel->mimeData(newList);
 
     return QAbstractItemModel::mimeData(indexes);

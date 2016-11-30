@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>206</width>
+    <width>198</width>
     <height>186</height>
    </rect>
   </property>
@@ -37,7 +37,11 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QSpinBox" name="spinBox_2"/>
+    <widget class="QSpinBox" name="m_pMilliSeconds">
+     <property name="maximum">
+      <number>999</number>
+     </property>
+    </widget>
    </item>
    <item row="3" column="0">
     <spacer name="verticalSpacer">
@@ -60,10 +64,17 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QSpinBox" name="spinBox"/>
+    <widget class="QSpinBox" name="m_pSeconds">
+     <property name="maximum">
+      <number>999999</number>
+     </property>
+     <property name="value">
+      <number>1</number>
+     </property>
+    </widget>
    </item>
    <item row="2" column="0" colspan="2">
-    <widget class="QCheckBox" name="toolButton">
+    <widget class="QCheckBox" name="m_pActivated">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -83,7 +94,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>spinBox_2</sender>
+   <sender>m_pMilliSeconds</sender>
    <signal>valueChanged(int)</signal>
    <receiver>Timer</receiver>
    <slot>slotsMs(int)</slot>
@@ -99,7 +110,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>spinBox</sender>
+   <sender>m_pSeconds</sender>
    <signal>valueChanged(int)</signal>
    <receiver>Timer</receiver>
    <slot>slotSeconds(int)</slot>
@@ -115,7 +126,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>toolButton</sender>
+   <sender>m_pActivated</sender>
    <signal>toggled(bool)</signal>
    <receiver>Timer</receiver>
    <slot>slotActivated(bool)</slot>
@@ -130,8 +141,59 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>Timer</sender>
+   <signal>activated(bool)</signal>
+   <receiver>m_pActivated</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>204</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>36</x>
+     <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Timer</sender>
+   <signal>millisecondChanged(int)</signal>
+   <receiver>m_pMilliSeconds</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>172</x>
+     <y>181</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>155</x>
+     <y>50</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Timer</sender>
+   <signal>secondChanged(int)</signal>
+   <receiver>m_pSeconds</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>155</x>
+     <y>14</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
+  <signal>millisecondChanged(int)</signal>
+  <signal>secondChanged(int)</signal>
+  <signal>activated(bool)</signal>
   <slot>slotSeconds(int)</slot>
   <slot>slotsMs(int)</slot>
   <slot>slotActivated(bool)</slot>
