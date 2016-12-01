@@ -46,8 +46,8 @@ public Q_SLOTS:
 CurrentValues::CurrentValues(QObject* parent) : ProxyNode(parent), d_ptr(new CurrentValuesPrivate(this))
 {
     d_ptr->m_Proxy.setUsingHeaderAsDisplayRole(true);
-    d_ptr->m_Concat.addSourceModel(&d_ptr->m_ObjModel);
     d_ptr->m_Concat.addSourceModel(&d_ptr->m_Proxy);
+    d_ptr->m_Concat.addSourceModel(&d_ptr->m_ObjModel);
 
 
     QObject::connect(&d_ptr->m_Obj, &AdditionalProperties::modelChanged, d_ptr, &CurrentValuesPrivate::slotModelChanged);
@@ -96,6 +96,9 @@ QAbstractItemModel* AdditionalProperties::model() const
 
 void AdditionalProperties::setModel(QAbstractItemModel* m)
 {
+    if (m == m_pModel)
+        return;
+
     auto o = m_pModel;
     m_pModel = m;
     Q_EMIT modelChanged(m, o);

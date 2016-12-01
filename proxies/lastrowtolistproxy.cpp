@@ -1,5 +1,7 @@
 #include "lastrowtolistproxy.h"
 
+#include <QtCore/QDebug>
+
 class LastRowToListProxyPrivate : public QObject
 {
 public:
@@ -68,7 +70,13 @@ int LastRowToListProxy::rowCount(const QModelIndex& parent) const
 
 Qt::ItemFlags LastRowToListProxy::flags(const QModelIndex &idx) const
 {
-    return mapToSource(idx).flags() | Qt::ItemIsDragEnabled;
+    if (!idx.isValid())
+        return Qt::NoItemFlags;
+
+    const auto pi = mapToSource(idx);
+
+    return (pi.isValid() ? pi.flags() : Qt::ItemIsEnabled | Qt::ItemIsSelectable)
+        | Qt::ItemIsDragEnabled;
 }
 
 QVariant LastRowToListProxy::headerData(int section, Qt::Orientation o, int role) const
@@ -89,6 +97,18 @@ void LastRowToListProxyPrivate::slotRowsInserted()
 
 void LastRowToListProxy::setSourceModel(QAbstractItemModel* src)
 {
+    if (src == d_ptr->m_pSourceModel)
+        return;
+
+    const bool reset = !(
+        src &&
+        d_ptr->m_pSourceModel &&
+        d_ptr->m_pSourceModel->columnCount() == src->columnCount()
+    );
+
+    if (reset)
+        beginResetModel();
+
     if (sourceModel()) {
         disconnect(d_ptr->m_pSourceModel, &QAbstractItemModel::rowsInserted,
             d_ptr, &LastRowToListProxyPrivate::slotRowsInserted
@@ -150,7 +170,10 @@ void LastRowToListProxy::setSourceModel(QAbstractItemModel* src)
         d_ptr, &LastRowToListProxyPrivate::slotLayoutChanged
     );
 
-    Q_EMIT layoutChanged();
+    if (reset)
+        endResetModel();
+    else
+        Q_EMIT dataChanged(index(0,0), index(rowCount(),0));
 }
 
 

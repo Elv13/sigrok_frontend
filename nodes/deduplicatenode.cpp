@@ -28,7 +28,6 @@ public:
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
-    void slotThreshold(double v);
 };
 
 DeduplicateNode::DeduplicateNode(QObject* parent) : ProxyNode(parent), d_ptr(new DeduplicateNodePrivate())
@@ -83,7 +82,13 @@ qreal DeduplicateNode::threshold() const
 
 void DeduplicateNode::setThreshold(qreal v)
 {
-    return d_ptr->m_pFilteredModel->setThreshold(v);
+    if (v == d_ptr->m_pFilteredModel->threshold())
+        return;
+
+    d_ptr->m_pFilteredModel->setThreshold(v);
+
+    Q_ASSERT(v == d_ptr->m_pFilteredModel->threshold());
+
     Q_EMIT thresholdChanged(v);
 }
 
@@ -124,9 +129,4 @@ void DeduplicateNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbs
         m_pDeduplicate->setModel(newModel);
 
     m_pFilteredModel->setSourceModel(newModel);
-}
-
-void DeduplicateNodePrivate::slotThreshold(double v)
-{
-    Q_EMIT q_ptr->thresholdChanged(v);
 }
