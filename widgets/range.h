@@ -1,12 +1,19 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
+#include <QtCore/QModelIndex>
 #include <functional>
 
 class QTreeView;
 class QComboBox;
 class RangeProxy;
 class FilterTopLevelProxy;
+class QVBoxLayout;
+class QDialogButtonBox;
+
+namespace color_widgets {
+    class ColorWheel;
+};
 
 class Range : public QWidget
 {
@@ -31,6 +38,12 @@ private:
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactoriesChild;
     QTreeView* m_pTree;
     QComboBox* m_pColumn;
+    bool m_Mutex {false};
+    QWidget* m_pMainWidget;
+    QVBoxLayout* m_pLayout;
+    color_widgets::ColorWheel* m_pColorWheel {nullptr};
+    QDialogButtonBox* m_pButtonBox {nullptr};
+    QPersistentModelIndex m_CurrentIdx;
 
     // Helpers
     void applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(const QPersistentModelIndex&)> >& f);
@@ -39,4 +52,6 @@ private Q_SLOTS:
     void slotAjustColumns();
     void slotAddClicked();
     void slotAllColumns(bool);
+    void okClicked();
+    void cancelClicked();
 };

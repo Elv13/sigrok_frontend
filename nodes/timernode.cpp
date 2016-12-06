@@ -120,7 +120,10 @@ void TimerNode::setActive(bool value)
     else
         d_ptr->m_Timer.stop();
 
+    d_ptr->m_pWidget->blockSignals(true);
+    d_ptr->m_pWidget->blockSignals(true);
     d_ptr->m_pWidget->setActive(isActive());
+    d_ptr->m_pWidget->blockSignals(false);
 
     Q_EMIT activated(isActive());
 }

@@ -60,7 +60,6 @@ void RowsDeletionProxy::setSelectionModel(QItemSelectionModel* sm)
                 sm->setCurrentIndex({}, QItemSelectionModel::Clear);
                 Q_ASSERT(!sm->currentIndex().isValid());
 
-                qDebug() << "REMOVE" << pIdx << sourceModel() << sm->currentIndex();
                 removeRow(pIdx.row(), pIdx.parent());
                 sm->setCurrentIndex({}, QItemSelectionModel::Clear);
                 d_ptr->m_Mutex = false;

@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
 SET(libdelegates_SRCS
     categorizeddelegate.cpp
     autocompletiondelegate.cpp
+    colordelegate.cpp
 )
 
 ADD_LIBRARY( delegates STATIC ${libdelegates_SRCS} )

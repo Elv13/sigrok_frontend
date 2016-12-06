@@ -7,6 +7,8 @@ class QAbstractItemView;
 
 class RangeProxyPrivate;
 
+class QItemSelectionModel;
+
 /**
  * Convert the original model into a tree with the source columns as root
  * indexes and configurable ranges for each column as children.
@@ -21,6 +23,7 @@ public:
     enum class Role {
         RANGE_DELIMITER = (int)ColumnProxy::Role::USER_ROLE,
         RANGE_VALUE,
+        RANGE_DELIMITER_NAME,
         USER_ROLE
     };
 
@@ -58,6 +61,7 @@ public:
     void addFilter(const QModelIndex& idx, Delimiter delim = Delimiter::ANY);
 
     QAbstractItemModel* delimiterModel() const;
+
 
 Q_SIGNALS:
     void mainChanged(int main);

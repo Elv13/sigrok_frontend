@@ -73,11 +73,6 @@ QWidget* ChartNode::widget() const
     return d_ptr->m_pChartW;
 }
 
-// void ChartNode::connectTo(AbstractNode* other, QAbstractItemModel* model, int col)
-// {
-//     
-// }
-
 void ChartNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     Q_UNUSED(old)

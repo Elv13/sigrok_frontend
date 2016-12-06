@@ -65,6 +65,7 @@ if(NOT DISABLE_SIGROK)
 endif()
 
 add_subdirectory(qt5-node-editor)
+add_subdirectory(Qt-Color-Widgets)
 add_subdirectory(delegates)
 add_subdirectory(proxies)
 add_subdirectory(nodes)

@@ -2,6 +2,10 @@
 
 #include <QtCore/QTimer>
 #include <QtCore/QDebug>
+#include <QtCore/QItemSelectionModel>
+#include <QtWidgets/QDialogButtonBox>
+
+#include "Qt-Color-Widgets/include/ColorWheel"
 
 #include "delegates/categorizeddelegate.h"
 
@@ -9,6 +13,7 @@
 #include "proxies/filtertoplevelproxy.h"
 #include "ui_rangeselection.h"
 #include "ui_range.h"
+#include "delegates/colordelegate.h"
 
 Range::Range(QWidget* parent) : QWidget(parent)
 {
@@ -17,10 +22,14 @@ Range::Range(QWidget* parent) : QWidget(parent)
     m_pTree = ui.treeView;
     m_pColumn = ui.comboBox;
     auto del = new CategorizedDelegate(m_pTree);
+    del->setChildDelegate(new ColorDelegate(this));
     m_pTree->setItemDelegate(del);
     m_pTree->setIndentation(0);
     m_pFiltered = new FilterTopLevelProxy(nullptr);
     m_pTree->setModel(m_pFiltered);
+
+    m_pLayout = ui.verticalLayout_2;
+    m_pMainWidget = ui.m_pMainWidget;
 
     connect(m_pFiltered, &FilterTopLevelProxy::layoutChanged  , this, &Range::slotAjustColumns);
     connect(m_pFiltered, &FilterTopLevelProxy::columnsInserted, this, &Range::slotAjustColumns);
@@ -41,11 +50,56 @@ void Range::setRangeProxy(RangeProxy* p)
 {
     m_pProxy = p;
 
+    // Act on clicks
+    auto sm = m_pTree->selectionModel();
+    connect(sm, &QItemSelectionModel::currentChanged, [this, p, sm](const QModelIndex& idx) {
+        if (m_Mutex || !idx.isValid() || !idx.parent().isValid())
+            return;
+
+        m_Mutex = true;
+
+        auto m = sm->model();
+
+        if (sm->model() != p) {
+            while (m && m != p && qobject_cast<QAbstractProxyModel*>(m))
+                m = qobject_cast<QAbstractProxyModel*>(m)->sourceModel();
+        }
+
+        Q_ASSERT(m == p);
+
+        QPersistentModelIndex pIdx(idx);
+
+        QTimer::singleShot(0,[this, pIdx, sm, p]() {
+            sm->clearCurrentIndex();
+            sm->clearSelection();
+            sm->setCurrentIndex({}, QItemSelectionModel::Clear);
+
+            m_Mutex = false;
+            Q_ASSERT(!sm->currentIndex().isValid());
+
+            if (!m_pColorWheel) {
+                m_pColorWheel = new color_widgets::ColorWheel(this);
+                m_pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,this);
+
+                m_pLayout->addWidget(m_pColorWheel);
+                m_pLayout->addWidget(m_pButtonBox);
+
+                connect(m_pButtonBox, &QDialogButtonBox::accepted, this, &Range::okClicked);
+                connect(m_pButtonBox, &QDialogButtonBox::rejected, this, &Range::cancelClicked);
+            }
+            else {
+                m_pColorWheel->setVisible(true);
+                m_pButtonBox->setVisible(true);
+            }
+            m_pMainWidget->setHidden(true);
+            m_CurrentIdx = pIdx;
+        });
+    });
+
     m_pFiltered->setSourceModel(p);
 
     m_pColumn->setModel(p);
 
-//     qDebug() << "\n\n\nRC" << p->rowCount() << m_pColumn->currentIndex();
     m_pColumn->setCurrentIndex(0);
 
     m_pColumn->setCurrentIndex(p->rowCount()-1);
@@ -160,4 +214,24 @@ void Range::applyWidget(const QModelIndex& root, QVector< std::function<QWidget*
                 applyWidget(idx, m_lWidgetFactoriesChild);
         }
     }
+}
+
+void Range::okClicked()
+{
+    if (m_CurrentIdx.isValid()) {
+        if (m_CurrentIdx.column()==1)
+            m_pTree->model()->setData(m_CurrentIdx, m_pColorWheel->color(), Qt::BackgroundRole);
+        else
+            m_pTree->model()->setData(m_CurrentIdx, m_pColorWheel->color(), Qt::ForegroundRole);
+    }
+
+    cancelClicked();
+}
+
+void Range::cancelClicked()
+{
+    m_pColorWheel->setVisible(false);
+    m_pButtonBox->setVisible (false);
+    m_pMainWidget->setHidden (false);
+    m_CurrentIdx = QModelIndex();
 }

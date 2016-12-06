@@ -8,7 +8,10 @@
 
 #include "widgets/range.h"
 
-#include <QDebug>
+#include "proxies/rangeproxy.h"
+
+#include <QtCore/QDebug>
+#include <QtCore/QJsonArray>
 
 class ColorNodePrivate : public QObject
 {
@@ -30,26 +33,6 @@ ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePr
     d_ptr->m_Widget.setRangeProxy(d_ptr->m_pRangeProxy);
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ColorNodePrivate::slotModelChanged);
-//     QObject::connect(d_ptr->m_pCheckable, &QAbstractItemModel::dataChanged, d_ptr, &ColorNodePrivate::slotDataChanged);
-
-    d_ptr->m_Widget.setColumnWidgetFactory(1, [this](const QPersistentModelIndex& idx) -> QWidget* {
-        auto w = new KColorButton();
-        w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-        QObject::connect(w, &KColorButton::changed, [this, idx](const QColor& col) {
-//             d_ptr->m_pRangeProxy->setBackgroundColor(row, col);
-            d_ptr->m_pRangeProxy->setData(idx, col, Qt::BackgroundRole);
-        });
-        return w;
-    });
-    d_ptr->m_Widget.setColumnWidgetFactory(2, [this](const QPersistentModelIndex& idx) -> QWidget* {
-        auto w = new KColorButton();
-        w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-        QObject::connect(w, &KColorButton::changed, [this, idx](const QColor& col) {
-            d_ptr->m_pRangeProxy->setData(idx, col, Qt::ForegroundRole);
-//             d_ptr->m_pRangeProxy->setForegroundColor(row, col);
-        });
-        return w;
-    });
 }
 
 ColorNode::~ColorNode()
@@ -71,14 +54,37 @@ void ColorNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-//     QJsonArray columns;
+    QJsonArray columns;
 
-    
+    for (int i = 0; i< d_ptr->m_pRangeProxy->rowCount(); i++) {
+        const auto idx = d_ptr->m_pRangeProxy->index(i, 0);
+
+        if (d_ptr->m_pRangeProxy->rowCount(idx)) {
+            QJsonObject col;
+            const QString column = idx.data().toString();
+
+            col[ "name"      ] = column;
+            col[ "bg"        ] = d_ptr->m_pRangeProxy->index(0, 1, idx)
+                .data(Qt::BackgroundRole).toString();
+            col[ "fg"        ] = d_ptr->m_pRangeProxy->index(0, 1, idx)
+                .data(Qt::ForegroundRole).toString();
+            col[ "delimiter" ] = d_ptr->m_pRangeProxy->index(0, 0, idx)
+                .data((int)RangeProxy::Role::RANGE_DELIMITER_NAME).toString();
+
+            Q_ASSERT(d_ptr->m_pRangeProxy->index(0, 0, idx).parent() == idx);
+            Q_ASSERT(d_ptr->m_pRangeProxy->index(0, 1, idx).parent() == idx);
+            Q_ASSERT(d_ptr->m_pRangeProxy->index(0, 2, idx).parent() == idx);
+
+            columns.append(col);
+        }
+    }
+
+    parent["columns"] = columns;
 }
 
 void ColorNode::read(const QJsonObject &parent)
 {
-    
+    qDebug() << "\n\n\nIN READ COLOR";
 }
 
 QWidget* ColorNode::widget() const

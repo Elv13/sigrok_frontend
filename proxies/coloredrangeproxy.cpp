@@ -19,6 +19,7 @@ class ColoredRangeProxyPrivate
 public:
     ColoredProxy* m_pProxy;
     ColoredRangeProxy* q_ptr;
+    bool m_Mutex {false};
 };
 
 class ColoredProxy : public QIdentityProxyModel
@@ -56,9 +57,12 @@ QVariant ColoredRangeProxy::data(const QModelIndex& idx, int role) const
     const auto n = static_cast<Node*>(idx.internalPointer());
 
     switch (role) {
-        case Qt::BackgroundRole:
         case Qt::ForegroundRole:
-            return (*n->m_hExtraValues)[role];
+        case Qt::BackgroundRole:
+            if (idx.column() == 1)
+                return (*n->m_hExtraValues)[Qt::BackgroundRole];
+            if (idx.column() == 2)
+                return (*n->m_hExtraValues)[Qt::ForegroundRole];
     };
 
     return RangeProxy::data(idx, role);

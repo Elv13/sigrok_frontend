@@ -1,7 +1,9 @@
 #include "rangeproxy.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QAbstractProxyModel>
 
 #include "rangeproxy_p.h"
 
@@ -127,6 +129,8 @@ QVariant RangeProxy::data(const QModelIndex& idx, int role) const
             case Qt::EditRole:
             case (int) Role::RANGE_VALUE:
                 return node->m_RangeValue;
+            case (int) Role::RANGE_DELIMITER_NAME:
+                return RangeProxyPrivate::DELIMITERNAMES[(int)node->m_Delim];
         }
     }
 
@@ -141,7 +145,7 @@ QModelIndex RangeProxy::parent(const QModelIndex& idx) const
     const auto node = static_cast<Node*>(idx.internalPointer());
 
     if (node->m_Mode == Node::Mode::CHILD)
-        return createIndex(node->m_Index, 0, node->m_pParent);
+        return createIndex(node->m_pParent->m_Index, 0, node->m_pParent);
 
     return {};
 }

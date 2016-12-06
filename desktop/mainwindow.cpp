@@ -20,6 +20,7 @@
 #include "nodes/aquisitionnode.h"
 #include "nodes/manualaquisitionnode.h"
 // #include "nodes/chartnode.h"
+#include "nodes/curvechartnode.h"
 #include "nodes/tablenode.h"
 #include "nodes/meternode.h"
 #include "nodes/lcdmeternode.h"
@@ -95,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     setCentralWidget(w);
 
-//     m_pSession->registerType<ChartNode>  ("Chart"          , "Widgets"   , "chart_node", QIcon::fromTheme( "document-edit"        ));
+    m_pSession->registerType<CurveChartNode>  ("Chart"          , "Widgets"   , "curvedchart_node", QIcon::fromTheme( "document-edit"        ));
     m_pSession->registerType<TableNode>  ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
     m_pSession->registerType<MeterNode>  ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
     m_pSession->registerType<RemoteActionNode>  ("Controls"          , "Widgets"   , "remoteaction_node", QIcon::fromTheme( "bookmark-new"         ));
