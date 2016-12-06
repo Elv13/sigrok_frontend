@@ -46,6 +46,7 @@ SET(libnodewidgets_SRCS
     controls.cpp
     controlschooser.cpp
     deduplicate.cpp
+    curvechart.cpp
 )
 
 QT5_WRAP_UI(libnodewidgets_SRCS
@@ -77,6 +78,7 @@ ADD_LIBRARY( nodewidgets STATIC ${libnodewidgets_SRCS} )
 
 TARGET_LINK_LIBRARIES( nodewidgets
     delegates
+    ColorWidgets-qt5
     common
     extraproxies
     Qt5::Widgets

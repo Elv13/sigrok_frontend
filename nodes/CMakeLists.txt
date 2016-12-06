@@ -30,6 +30,7 @@ SET(libnodes_SRCS
     abstractnode.cpp
     proxynode.cpp
 #     chartnode.cpp
+    curvechartnode.cpp
     tablenode.cpp
     meternode.cpp
     columnnode.cpp
