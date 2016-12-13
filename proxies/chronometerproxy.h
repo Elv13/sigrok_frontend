@@ -20,6 +20,14 @@ class Q_DECL_EXPORT ChronometerProxy : public QIdentityProxyModel
 {
     Q_OBJECT
 public:
+    enum ExtraColumns {
+        AUTO      = 0 << 0,
+        MS_DELTA  = 1 << 0,
+        MS_EPOCH  = 1 << 1,
+        TIMESTAMP = 1 << 2,
+        DATE_TIME = 1 << 3,
+    };
+
     explicit ChronometerProxy(QObject* parent = nullptr);
     virtual ~ChronometerProxy();
 
@@ -29,6 +37,15 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
     virtual QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+    /// Use a row column instead of std::chrono
+    void setTimeSourceColumn(int col);
+
+    /// Use a role instead of std::chrono
+    void setTimeSourceRole(int role);
+
+    void setExtraColumns(ExtraColumns cols);
+    int extraColumns() const;
 
 private:
     ChronometerProxyPrivate* d_ptr;

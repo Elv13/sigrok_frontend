@@ -25,7 +25,18 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
+    bool hasDeltaColumn    () const;
+    bool hasMsEpochColumn  () const;
+    bool hasTimestampColumn() const;
+    bool hasDateTimeColumn () const;
+
     QAbstractItemModel* filteredModel() const;
+
+public Q_SLOTS:
+    void enableDelta(bool);
+    void enableMsEpoch(bool);
+    void enableTimestamp(bool);
+    void enableDateTime(bool);
 
 Q_SIGNALS:
     void filteredModelChanged(); //dummy

@@ -47,6 +47,8 @@ SET(libnodewidgets_SRCS
     controlschooser.cpp
     deduplicate.cpp
     curvechart.cpp
+    sequence.cpp
+    chrono.cpp
 )
 
 QT5_WRAP_UI(libnodewidgets_SRCS
@@ -68,6 +70,8 @@ QT5_WRAP_UI(libnodewidgets_SRCS
     controls.ui
     controlschooser.ui
     deduplicate.ui
+    sequence.ui
+    chrono.ui
 )
 
 # QT5_ADD_RESOURCES(libnodewidgets_SRCS
