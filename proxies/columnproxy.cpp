@@ -64,25 +64,27 @@ void ColumnProxy::setSourceModel(QAbstractItemModel* source)
 
     d_ptr->m_pSourceModel = source;
 
-    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsInserted,
-                     d_ptr, &ColumnProxyPrivate::slotColumnsInserted);
+    if (source) {
+        QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsInserted,
+                        d_ptr, &ColumnProxyPrivate::slotColumnsInserted);
 
-    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsRemoved,
-                     d_ptr, &ColumnProxyPrivate::slotColumnsRemoved);
+        QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsRemoved,
+                        d_ptr, &ColumnProxyPrivate::slotColumnsRemoved);
 
-    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsAboutToBeInserted,
-                     d_ptr, &ColumnProxyPrivate::slotColumnsAboutInserted);
+        QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsAboutToBeInserted,
+                        d_ptr, &ColumnProxyPrivate::slotColumnsAboutInserted);
 
-    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsAboutToBeRemoved,
-                     d_ptr, &ColumnProxyPrivate::slotColumnsAboutRemoved);
+        QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsAboutToBeRemoved,
+                        d_ptr, &ColumnProxyPrivate::slotColumnsAboutRemoved);
 
-//     QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsMoved,
-//                      d_ptr, &ColumnProxyPrivate::slotColumnsMoved);
+    //     QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::columnsMoved,
+    //                      d_ptr, &ColumnProxyPrivate::slotColumnsMoved);
 
-    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::layoutChanged,
-                     d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
-    QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::modelReset,
-                     d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
+        QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::layoutChanged,
+                        d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
+        QObject::connect(d_ptr->m_pSourceModel, &QAbstractItemModel::modelReset,
+                        d_ptr, &ColumnProxyPrivate::slotLayoutChanged);
+    }
 
     d_ptr->slotLayoutChanged();
 }
@@ -94,6 +96,7 @@ QAbstractItemModel* ColumnProxy::sourceModel() const
 
 QVariant ColumnProxy::data(const QModelIndex& idx, int role) const
 {
+    if (!sourceModel()) return {};
     if (!idx.isValid()) return {};
 
     // Do not forward everything, a buggy sourceModel() headerData will work

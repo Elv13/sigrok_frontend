@@ -66,7 +66,6 @@ void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
     auto w = o->widget();
     n2->setCentralWidget(w);
 
-    m_pNodeW->scene()->addItem(n2->graphicsItem());
     n2->graphicsItem()->setPos(0,0);
 
 }
@@ -103,7 +102,6 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
         n2->setCentralWidget(w);
     });
 
-    m_pNodeW->scene()->addItem(n2->graphicsItem());
     n2->graphicsItem()->setPos(0,0);
 
     QPair<GraphicsNode*, AbstractNode*> pair {n2, anode};

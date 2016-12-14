@@ -258,12 +258,6 @@ setText(const QString& t)
         m->setData(d_ptr->m_PersistentIndex, t, Qt::DisplayRole);
 }
 
-void GraphicsNodeSocketPrivate::update()
-{
-    if (auto m = const_cast<QAbstractItemModel*>(m_PersistentIndex.model()))
-        Q_EMIT m->dataChanged(m_PersistentIndex, m_PersistentIndex);
-}
-
 QModelIndex GraphicsNodeSocket::
 index() const
 {

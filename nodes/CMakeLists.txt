@@ -46,6 +46,7 @@ SET(libnodes_SRCS
     remoteaction.cpp
     deduplicatenode.cpp
     manualaquisitionnode.cpp
+    sequencenode.cpp
     remote/remotetable.cpp
     remote/remotemeter.cpp
     remote/remotecontrols.cpp

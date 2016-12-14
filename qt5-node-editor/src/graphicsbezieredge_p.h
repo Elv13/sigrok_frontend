@@ -13,7 +13,7 @@ public:
     explicit GraphicsDirectedEdgePrivate(GraphicsDirectedEdge* q) : q_ptr(q) {}
 
     //TODO support effect lazy loading
-    QGraphicsDropShadowEffect *_effect {new QGraphicsDropShadowEffect()};
+//     QGraphicsDropShadowEffect *_effect {new QGraphicsDropShadowEffect()};
 
     QPen _pen {QColor("#00FF00")};
     QPointF _start;

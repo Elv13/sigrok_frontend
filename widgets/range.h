@@ -13,7 +13,7 @@ class QDialogButtonBox;
 
 namespace color_widgets {
     class ColorWheel;
-};
+}
 
 class Range : public QWidget
 {

@@ -18,6 +18,7 @@ include(../cmake/extrawarnings.cmake)
 find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
     Widgets
+    OpenGL
 )
 
 find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
@@ -51,6 +52,7 @@ TARGET_LINK_LIBRARIES( desktop
     Qt5::Gui
     Qt5::Widgets
     Qt5::RemoteObjects
+    Qt5::OpenGL
     qnodeeditor
     extraproxies
     nodes

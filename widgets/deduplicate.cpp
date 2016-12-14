@@ -26,7 +26,7 @@ Deduplicate::Deduplicate(const DeduplicateNode* n, QWidget* parent) : QWidget(pa
 
 Deduplicate::~Deduplicate()
 {
-
+    m_pColumnCBB->setModel(nullptr);
 }
 
 void Deduplicate::slotEnableExtraColumn(bool v)

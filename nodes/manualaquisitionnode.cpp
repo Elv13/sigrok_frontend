@@ -55,6 +55,15 @@ void ManualAquisitionNode::aquireSample(bool)
         qWarning() << "Sample failed: There is none yet";
 }
 
+void ManualAquisitionNode::aquireSampleAs(const QString& name)
+{
+    if (aqModel() && aqModel()->addLastSample()) {
+        const auto i = aqModel()->index(aqModel()->rowCount()-1,0);
+        Q_ASSERT(i.isValid());
+        aqModel()->setData(i, name, Qt::EditRole);
+    }
+}
+
 void ManualAquisitionNode::setDevice(SigrokDevice* dev)
 {
     if (device() == dev)

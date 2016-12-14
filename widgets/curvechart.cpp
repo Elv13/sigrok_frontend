@@ -34,7 +34,6 @@ void CurveChart::setModel(QAbstractItemModel* m)
 void CurveChart::slotRowsInserted(const QModelIndex& parent, int first, int last)
 {
     Q_UNUSED(parent)
-    qDebug() << "ADD";
 
     for (int i=first; i <= last;i++) {
         const float v = m_pModel->index(i, 1).data().toFloat();
@@ -65,8 +64,7 @@ void CurveChart::paintEvent(QPaintEvent *event)
     painter.setPen(QPen(QColor(Qt::yellow), 2, Qt::SolidLine,
                         Qt::FlatCap, Qt::MiterJoin));
 
-    const int dx = rect.width()/rc;
-
+    const int   dx    = rect.width()/rc;
     const float range = std::max(0.001f, m_Max - m_Min);
 
     for (int j = 1; j < m_pModel->columnCount();j++) {
@@ -83,8 +81,6 @@ void CurveChart::paintEvent(QPaintEvent *event)
         }
         painter.drawPath(path);
     }
-
-
 }
 
 QSize CurveChart::sizeHint() const

@@ -5,6 +5,8 @@
 
 #include <libsigrokcxx/libsigrokcxx.hpp>
 
+#include <chrono>
+
 #include "sigrokdevice.h"
 #include "devicemodel.h"
 
@@ -17,9 +19,10 @@ struct Row {
     int m_Index;
     unsigned long long m_TimeStamp;
     QVector<Chan*> m_lChans;
-    QDateTime m_Time;
+    qint64 m_Epoch;
     QString m_Unit;
     QString m_Quantity;
+    QVariant m_Id;
 
     //Helpers
     QVariant commonRole(int role) const;
@@ -71,9 +74,12 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
                         {
                             new Chan { true, test }
                         },
-                        {},
+                        std::chrono::time_point_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now()
+                        ).time_since_epoch().count(),
                         unit,
                         quantity,
+                        {},
                     };
                     self->endInsertRows();
                     break;
@@ -84,9 +90,12 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
                         {
                             new Chan { true, test }
                         },
-                        {},
+                        std::chrono::time_point_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now()
+                        ).time_since_epoch().count(),
                         unit,
                         quantity,
+                        {},
                     };
             }
 
@@ -210,7 +219,9 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
             switch(role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return idx.row();
+                    return r->m_Id.isValid() ? r->m_Id :idx.row();
+                case (int) AquisitionModel::Role::U_TIMESTAMP:
+                    return r->m_Epoch;
             };
             return r->commonRole(role);
 
@@ -233,11 +244,28 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
                 case (int) AquisitionModel::Role::QUANTITY_NAME:
                     return r->m_Quantity;
                 case (int) AquisitionModel::Role::U_TIMESTAMP:
-                    return r->m_Time;
+                    return r->m_Epoch;
             };
     }
 
     return {};
+}
+
+bool AquisitionModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid())
+        return false;
+
+    if (role == Qt::EditRole && index.column() == 0) {
+        auto r = d_ptr->m_lRows[index.row()];
+
+        r->m_Id = value;
+        Q_EMIT dataChanged(index, index);
+
+        return true;
+    }
+
+    return false;
 }
 
 int AquisitionModel::rowCount(const QModelIndex& parent) const

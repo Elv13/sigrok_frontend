@@ -32,7 +32,7 @@ TableNode::TableNode(QObject* parent) : ProxyNode(parent), d_ptr(new TableNodePr
 
 TableNode::~TableNode()
 {
-    
+    delete d_ptr;
 }
 
 QString TableNode::title() const

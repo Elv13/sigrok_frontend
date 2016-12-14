@@ -85,7 +85,7 @@ public:
     QBrush m_brushSinks      {QColor("#FF0077FF")};
 
     //TODO lazy load, add option to disable, its nice, but sllooowwww
-    QGraphicsDropShadowEffect *_effect        {new QGraphicsDropShadowEffect()};
+//     QGraphicsDropShadowEffect *_effect        {new QGraphicsDropShadowEffect()};
     QGraphicsTextItem         *_title_item    {nullptr};
     CloseButton               *_close_item    {nullptr};
     QGraphicsProxyWidget      *_central_proxy {nullptr};
@@ -142,10 +142,10 @@ GraphicsNode::GraphicsNode(QNodeEditorSocketModel* model, const QPersistentModel
         - d_ptr->_close_item->width()
     );
 
-    d_ptr->_effect->setBlurRadius(13.0);
-    d_ptr->_effect->setColor(QColor("#99121212"));
+//     d_ptr->_effect->setBlurRadius(13.0);
+//     d_ptr->_effect->setColor(QColor("#99121212"));
 
-    d_ptr->m_pGraphicsItem->setGraphicsEffect(d_ptr->_effect);
+//     d_ptr->m_pGraphicsItem->setGraphicsEffect(d_ptr->_effect);
 }
 
 
@@ -155,6 +155,7 @@ setTitle(const QString &title)
     if (auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model()))
         m->setData(d_ptr->m_Index, title, Qt::DisplayRole);
 
+    d_ptr->m_pGraphicsItem->prepareGeometryChange();
     d_ptr->_title_item->setPlainText(d_ptr->m_Index.data().toString());
 }
 
@@ -206,9 +207,20 @@ graphicsItem() const
 GraphicsNode::
 ~GraphicsNode()
 {
-    if (d_ptr->_central_proxy) delete d_ptr->_central_proxy;
+    Q_ASSERT(!d_ptr->m_pGraphicsItem->scene());
+    // The widget proxy doesn't own the widget unless specified
+    if (d_ptr->_central_proxy) {
+        delete d_ptr->_central_proxy;
+        d_ptr->_central_proxy = Q_NULLPTR;
+
+        // Even when removed from the scene, the prepareGeometryChange is
+        // required to avoid a crash, don't ask me why
+        setSize(0,0);
+    }
+
     delete d_ptr->_title_item;
-    delete d_ptr->_effect;
+//     delete d_ptr->_effect;
+    delete d_ptr->m_pGraphicsItem;
     delete d_ptr;
 }
 
@@ -299,7 +311,11 @@ setSize(const QPointF size)
 void GraphicsNode::
 setSize(const QSizeF size)
 {
-    d_ptr->m_Size = size;
+    d_ptr->m_Size = {
+        std::max(d_ptr->m_MinSize.width() , size.width ()),
+        std::max(d_ptr->m_MinSize.height(), size.height())
+    };
+
     d_ptr->_changed = true;
     d_ptr->m_pGraphicsItem->prepareGeometryChange();
     d_ptr->updateGeometry();
@@ -332,7 +348,7 @@ itemChange(GraphicsItemChange change, const QVariant &value)
     case QGraphicsItem::ItemPositionHasChanged: {
         auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model());
 
-        m->setData(d_ptr->m_Index, QRectF(pos(), d_ptr->m_Size), Qt::SizeHintRole);
+        m->setData(d_ptr->m_Index, q_ptr->rect(), Qt::SizeHintRole);
     }
         break;
 
@@ -385,11 +401,6 @@ updateGeometry()
     // compute if we have reached the minimum size
     updateSizeHints();
 
-    m_Size = {
-        std::max(m_MinSize.width() , m_Size.width()  ),
-        std::max(m_MinSize.height(), m_Size.height() )
-    };
-
     // close button
     _close_item->setPos(m_Size.width() - _close_item->width(), 0);
 
@@ -409,7 +420,6 @@ updateGeometry()
             const auto size = s->size();
 
             s->graphicsItem()->setPos(0, yposSink + size.height()/2.0);
-            s->d_ptr->update();
             yposSink += size.height() + _item_padding;
 
             s->graphicsItem()->setOpacity(s->index().flags() & Qt::ItemIsEnabled ?
@@ -423,7 +433,6 @@ updateGeometry()
 
             yposSrc -= size.height();
             s->graphicsItem()->setPos(m_Size.width(), yposSrc + size.height()/2.0);
-            s->d_ptr->update();
             yposSrc -= _item_padding;
 
             s->graphicsItem()->setOpacity(s->index().flags() & Qt::ItemIsEnabled ?
@@ -450,6 +459,11 @@ setCentralWidget (QWidget *widget)
 {
     if (d_ptr->_central_proxy)
         delete d_ptr->_central_proxy;
+
+    if (!widget) {
+        d_ptr->m_pGraphicsItem->prepareGeometryChange();
+        d_ptr->updateGeometry();
+    }
 
     d_ptr->_central_proxy = new QGraphicsProxyWidget(d_ptr->m_pGraphicsItem);
     d_ptr->_central_proxy->setWidget(widget);
@@ -517,6 +531,19 @@ updateSizeHints() {
         std::max(min_width, _hard_min_width  ),
         std::max(min_height, _hard_min_height)
     };
+
+    // prevent the scene from being out of sync
+    if (m_Size.width() < min_width || m_Size.height() < min_height) {
+        m_pGraphicsItem->prepareGeometryChange();
+
+        m_Size = {
+            std::max(min_width , m_Size.width ()),
+            std::max(min_height, m_Size.height())
+        };
+
+        // Will cause the socket and edges to be updated
+        //FIXME Q_EMIT m_pModel->dataChanged(m_Index, m_Index);
+    }
 }
 
 CloseButton::CloseButton(NodeGraphicsItem* parent) : QGraphicsTextItem(parent),

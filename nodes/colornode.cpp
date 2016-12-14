@@ -18,7 +18,7 @@ class ColorNodePrivate : public QObject
 public:
     ColorNodePrivate(ColorNode* p) : QObject(p) {}
 
-    Range m_Widget;
+    Range* m_pWidget {nullptr};
 
     ColoredRangeProxy* m_pRangeProxy {new ColoredRangeProxy(this)};
 
@@ -30,7 +30,6 @@ public Q_SLOTS:
 
 ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePrivate(this))
 {
-    d_ptr->m_Widget.setRangeProxy(d_ptr->m_pRangeProxy);
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ColorNodePrivate::slotModelChanged);
 }
@@ -89,7 +88,11 @@ void ColorNode::read(const QJsonObject &parent)
 
 QWidget* ColorNode::widget() const
 {
-    return &d_ptr->m_Widget;
+    if (!d_ptr->m_pWidget) {
+        d_ptr->m_pWidget = new Range();
+        d_ptr->m_pWidget->setRangeProxy(d_ptr->m_pRangeProxy);
+    }
+    return d_ptr->m_pWidget;
 }
 
 QAbstractItemModel* ColorNode::filteredModel() const

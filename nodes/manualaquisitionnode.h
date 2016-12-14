@@ -22,6 +22,7 @@ class Q_DECL_EXPORT ManualAquisitionNode : public AquisitionNode
 
 public:
     Q_PROPERTY(bool aquire WRITE aquireSample USER true)
+    Q_PROPERTY(QString aquireAs WRITE aquireSampleAs USER true)
 
     Q_INVOKABLE explicit ManualAquisitionNode(QObject* parent = nullptr);
 
@@ -41,6 +42,7 @@ public:
 
 public Q_SLOTS:
     void aquireSample(bool=false);
+    void aquireSampleAs(const QString& name);
 
 private:
     ManualAquisitionNodePrivate* d_ptr;

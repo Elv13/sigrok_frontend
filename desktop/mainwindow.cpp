@@ -12,6 +12,8 @@
 #include <KConfigDialog>
 #include <KIO/Job>
 
+#include <QtOpenGL/QGLWidget>
+
 #include "sigrokd/aquisitionmodel.h"
 
 #include "proxynodefactory.h"
@@ -31,6 +33,7 @@
 #include "nodes/headnode.h"
 #include "nodes/timernode.h"
 #include "nodes/chrononode.h"
+#include "nodes/sequencenode.h"
 #include "nodes/currentvalues.h"
 #include "nodes/remoteaction.h"
 #include "nodes/devicelistnode.h"
@@ -90,6 +93,11 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     auto w = new QWidget(this);
     setupUi(w);
 
+    m_pNode->setViewport(new QGLWidget(
+            QGLFormat(QGL::SampleBuffers)));
+    m_pNode->setViewportUpdateMode(
+        QGraphicsView::FullViewportUpdate);
+
     connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
 
     m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
@@ -113,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     m_pSession->registerType<HeadNode>   ("Head filter"     , "Filters"  , "head_node" , QIcon::fromTheme( "kt-remove-filters"));
     m_pSession->registerType<CurrentValues>("Current Values", "Sinks"    , "currentvalues_node" , QIcon::fromTheme( "kt-remove-filters"));
     m_pSession->registerType<TimerNode>  ("Timer"           , "Tools"    , "timer_node", QIcon::fromTheme( "chronometer"          ));
+    m_pSession->registerType<SequenceNode>  ("Sequence"           , "Tools"    , "sequence_node", QIcon::fromTheme( "chronometer"          ));
     m_pSession->registerType<ChronoNode> ("Chronometer"     , "Metadata" , "chrono_node", QIcon::fromTheme( "chronometer"        ));
     m_pSession->registerType<DeviceListNode> ("Device List"      , "Sources"  , "devicelist_node", QIcon::fromTheme( "document-open"          ));
 

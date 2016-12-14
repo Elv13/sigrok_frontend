@@ -48,6 +48,8 @@ ColumnNode::ColumnNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColumnNod
 
 ColumnNode::~ColumnNode()
 {
+    d_ptr->m_pColumnW->setModel(nullptr);
+    d_ptr->m_pCheckable->setSourceModel(nullptr);
     
 }
 
