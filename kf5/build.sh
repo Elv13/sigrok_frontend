@@ -1,5 +1,9 @@
 #!/bin/bash
 
+export ANDROID_NDK=/android-ndk-r10e
+export ANDROID_SDK_ROOT=/android-sdk-linux
+Qt5_android=$ADIR/Qt5.5.0/5.5/android_armv7/
+
 # Build KF5, run and pray
 
 function build_framework()

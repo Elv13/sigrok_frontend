@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-class RemoteWidgetsReplica;
+// class RemoteWidgetsReplica;
 
 namespace Ui {
 class MainWindow;
@@ -17,9 +17,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    RemoteWidgetsReplica* rw;
+//     RemoteWidgetsReplica* rw;
 
 private Q_SLOTS:
+    void addDock(QWidget* w, const QString& title);
     void setMainLabel(float value);
     void reloadremotewidgets();
     void buttonPressed();
