@@ -1,6 +1,8 @@
 project (tutorial4)
 
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+
+ADD_DEFINITIONS("-std=c++11")
 
 IF(POLICY CMP0063)
    CMAKE_POLICY(SET CMP0063 NEW)
@@ -14,11 +16,16 @@ set(CMAKE_BUILD_TYPE DEBUG)
 #add_subdirectory(kf5) #FIXME check for the frameworks or build them
 
 find_package(ECM 1.0.0 REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    ${ECM_KDE_MODULE_DIR}
+    ${ECM_MODULE_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+)
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
-include(KDECompilerSettings)
 include(FeatureSummary)
 
 set(CMAKE_AUTOMOC ON)
@@ -68,11 +75,13 @@ add_subdirectory(qt5-node-editor)
 add_subdirectory(Qt-Color-Widgets)
 add_subdirectory(delegates)
 add_subdirectory(proxies)
-add_subdirectory(nodes)
-add_subdirectory(widgets)
 
 # Build the desktop centric (KDE) GUI
 if (NOT BUILD_MOBILE)
+    include(KDECompilerSettings)
+
+    add_subdirectory(nodes)
+    add_subdirectory(widgets)
     add_subdirectory(desktop)
 endif()
 
@@ -94,21 +103,24 @@ set(tutorial4_SRCS
     # Model
     models/remotewidgets.cpp
 
-    # Session
-    proxynodefactory.cpp
-    columnserializationadapter.cpp
-
     # Business delegates
 #     ratesink.cpp
 )
+
+
+if (NOT BUILD_MOBILE) #FIXME
+    set(tutorial4_SRCS ${tutorial4_SRCS}
+        # Session
+        proxynodefactory.cpp
+        columnserializationadapter.cpp
+    )
+endif()
 
 add_executable(tutorial4 ${tutorial4_SRCS})
 
 target_link_libraries(tutorial4
     qnodeeditor
     extraproxies
-    nodes
-    nodewidgets
     Qt5::RemoteObjects
     KF5::CoreAddons
 )
@@ -117,15 +129,22 @@ if (NOT BUILD_MOBILE)
     target_link_libraries(tutorial4
         desktop
         sigrokd
+        nodes
+        nodewidgets
     )
 endif()
 
 if (BUILD_MOBILE)
     target_link_libraries(tutorial4
         mobile
+        common
     )
 endif()
 
 
-install(TARGETS tutorial4  ${INSTALL_TARGETS_DEFAULT_ARGS})
-INSTALL( FILES data/tutorial4ui.rc DESTINATION  ${KXMLGUI_INSTALL_DIR}/tutorial4 )
+if (BUILD_MOBILE)
+    install(TARGETS tutorial4 RUNTIME DESTINATION bin)
+else()
+    install(TARGETS tutorial4  ${INSTALL_TARGETS_DEFAULT_ARGS})
+    install( FILES data/tutorial4ui.rc DESTINATION  ${KXMLGUI_INSTALL_DIR}/tutorial4 )
+endif()
