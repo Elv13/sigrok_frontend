@@ -18,3 +18,9 @@ void AbstractNode::read(const QJsonObject &parent)
 {
     Q_UNUSED(parent)
 }
+
+bool AbstractNode::createSocket(const QString& name)
+{
+    Q_UNUSED(name)
+    return false;
+}

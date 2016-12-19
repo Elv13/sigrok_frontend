@@ -1,6 +1,7 @@
 #include "remotecontrols.h"
 
 #include "../models/remotewidgets.h"
+#include <QtCore/QJsonArray>
 
 class RemoteControlsPrivate final : public QObject
 {
@@ -34,6 +35,17 @@ QString RemoteControls::id() const
 void RemoteControls::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
+
+    d_ptr->m_Model.write(parent);
+}
+
+void RemoteControls::read(const QJsonObject &parent)
+{
+}
+
+bool RemoteControls::createSocket(const QString& name)
+{
+    return d_ptr->m_Model.addRow(name);
 }
 
 QWidget* RemoteControls::widget() const

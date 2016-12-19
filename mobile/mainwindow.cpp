@@ -17,10 +17,13 @@ void MainWindow::addDock(QWidget* w, const QString& title)
 }
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    QMainWindow(parent)/*,
+    ui(new Ui::MainWindow)*/
 {
-    ui->setupUi(this);
+    auto mw = new QWidget(this);
+    setCentralWidget(mw);
+
+    ui->setupUi(mw);
 
     connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
 
@@ -46,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    //delete ui;
 }
 
 void MainWindow::setMainLabel(float value)

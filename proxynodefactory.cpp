@@ -296,8 +296,8 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
 
     const auto nodes = obj["nodes"].toArray();
 
-    QHash<QString, GraphicsNode*> fromHash;
     QHash<GraphicsNode*, QString> toHash;
+    QHash<GraphicsNode*, AbstractNode*> toNode;
 
     typedef struct {
         int           id;
@@ -375,8 +375,8 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
 
             loadConnections(widget["connections"].toArray(), nodeW);
 
-            fromHash[uid  ] = nodeW;
-            toHash  [nodeW] = uid;
+            toHash [nodeW] = uid;
+            toNode [nodeW] = pair.second;
 
             if (auto m = const_cast<QAbstractItemModel*>(nodeW->index().model()))
                 m->setData(nodeW->index(), uid, Qt::UserRole);
@@ -404,8 +404,21 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
             Q_ASSERT(toHash[conn->node] == otherconn->otherN);
 
             const int row = edgeM->rowCount() -1;
-            const auto srcSock  = conn->node->socketIndex(conn->ownS);
-            const auto sinkSock = otherconn->node->socketIndex(otherconn->ownS);
+            auto srcSock  = conn->node->socketIndex(conn->ownS);
+            auto sinkSock = otherconn->node->socketIndex(otherconn->ownS);
+
+            // Try to see if the node has a method to add
+            if (auto an = toNode[conn->node])
+                if ((!srcSock.isValid()) && an->createSocket(conn->ownS)) {
+                    conn->node->socketIndex(conn->ownS);
+                    srcSock  = conn->node->socketIndex(conn->ownS);
+                }
+
+            if (auto an = toNode[otherconn->node])
+                if ((!sinkSock.isValid()) && an->createSocket(otherconn->ownS)) {
+                    otherconn->node->socketIndex(otherconn->ownS);
+                    sinkSock = otherconn->node->socketIndex(otherconn->ownS);
+                }
 
             if ((!srcSock.isValid()) || (!sinkSock.isValid())) {
                 qWarning() << "Failed to restore the connection between"

@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 ADD_DEFINITIONS("-std=c++11")
 
 PROJECT(mobile)
@@ -31,6 +31,7 @@ QT5_WRAP_UI(mobile_SRCS
 ADD_LIBRARY( mobile STATIC ${mobile_SRCS} )
 
 TARGET_LINK_LIBRARIES( mobile
+    Qt5::Widgets
+    Qt5::Gui
     common
-    
 )

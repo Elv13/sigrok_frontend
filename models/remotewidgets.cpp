@@ -1,17 +1,21 @@
 #include "remotewidgets.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonArray>
 
 #include <QRemoteObjectHost>
 #include "common/remotemanager.h"
+#include "qt5-node-editor/src/qreactiveproxymodel.h"
 
 struct DataHolder
 {
-    QString    name {QStringLiteral("[ADD NEW]")};
-//     int        role;
-    quint32    m_TypeId {0};
+    bool     init {false};
+    quint32  m_TypeId {0};
+    int      id;
     QPersistentModelIndex m_Index;
-    int        id;
+    QVariant m_NodeUID;
+    QString  name {QStringLiteral("[ADD NEW]")};
 };
 
 class RemoteWidgetsPrivate
@@ -25,7 +29,6 @@ public:
 RemoteWidgets::RemoteWidgets(QObject* o) : QAbstractListModel(o),
     d_ptr(new RemoteWidgetsPrivate)
 {
-
     static QVector<int> roles {
         Qt::DisplayRole,
         Qt::BackgroundRole
@@ -66,16 +69,22 @@ QVariant RemoteWidgets::data(const QModelIndex& idx, int role) const
 bool RemoteWidgets::setData(const QModelIndex& idx, const QVariant& value, int role)
 {
     if (idx.isValid() && role == 999 && value.canConvert<QModelIndex>()) {
-        d_ptr->m_lRows[idx.row()]->m_Index = value.toPersistentModelIndex();
+        const auto pidx = value.toPersistentModelIndex();
+        auto dh = d_ptr->m_lRows[idx.row()];
+        const bool wasInit = dh->init;
 
-        d_ptr->m_lRows[idx.row()]->name = d_ptr->m_lRows[idx.row()]->m_Index.data().toString();
+        dh->init    = true;
+        dh->m_Index = pidx;
+        dh->name    = dh->m_Index.data().toString();
+
         Q_EMIT dataChanged(idx, idx);
 
         // Always add more rows when the last once is used
-        if (idx.row() == d_ptr->m_lRows.size() -1) {
+        if ((!wasInit) && idx.row() == d_ptr->m_lRows.size() -1) {
             beginInsertRows({}, d_ptr->m_lRows.size(), d_ptr->m_lRows.size());
             d_ptr->m_lRows << new DataHolder();
             d_ptr->m_lRows.last()->id = d_ptr->m_MaxId++;
+            d_ptr->m_lRows.last()->m_NodeUID = pidx.parent().data(Qt::UserRole);
             endInsertRows();
         }
 
@@ -136,6 +145,41 @@ int RemoteWidgetsClient::rowCount(const QModelIndex& parent) const
     const int rc = QIdentityProxyModel::rowCount(parent);
 
     return rc ? rc-1 : 0;
+}
+
+void RemoteWidgets::write(QJsonObject &parent) const
+{
+    QJsonArray a;
+
+    Q_FOREACH(const auto r, d_ptr->m_lRows) {
+        if (r->m_NodeUID.isValid()) {
+            QJsonObject ro;
+            ro[ "property" ] = r->name;
+            ro[ "node"     ] = r->m_NodeUID.toString();
+            a.append(ro);
+        }
+    }
+
+    parent["properties"] = a;
+}
+
+bool RemoteWidgets::addRow(const QModelIndex& idx)
+{
+    return setData(index(0,0), idx, 999);
+}
+
+bool RemoteWidgets::addRow(const QString& name)
+{
+    auto dh  = new DataHolder;
+    dh->name = name;
+    dh->init = true;
+    dh->id   = d_ptr->m_MaxId++;
+
+    beginInsertRows({}, d_ptr->m_lRows.size(), d_ptr->m_lRows.size());
+    d_ptr->m_lRows << dh;
+    endInsertRows();
+
+    return true;
 }
 
 #include <remotewidgets.moc>

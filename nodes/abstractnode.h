@@ -30,6 +30,8 @@ public:
     virtual QAbstractItemModel* sourceModel() const {return nullptr;}
     virtual QAbstractItemModel* sinkModel() const {return nullptr;}
 
+    virtual bool createSocket(const QString& name);
+
     virtual void write(QJsonObject &parent) const;
     virtual void read(const QJsonObject &parent);
 

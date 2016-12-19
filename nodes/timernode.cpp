@@ -58,6 +58,12 @@ QWidget* TimerNode::widget() const
 {
     if (!d_ptr->m_pWidget) {
         d_ptr->m_pWidget = new Timer(this);
+
+        d_ptr->m_pWidget->blockSignals(true);
+        d_ptr->m_pWidget->blockSignals(true);
+        d_ptr->m_pWidget->setActive(isActive());
+        d_ptr->m_pWidget->blockSignals(false);
+
         connect(d_ptr->m_pWidget, &Timer::secondChanged, this, &TimerNode::setSeconds);
         connect(d_ptr->m_pWidget, &Timer::millisecondChanged, this, &TimerNode::setMilliseconds);
         connect(d_ptr->m_pWidget, &Timer::activated, this, &TimerNode::setActive);
@@ -120,10 +126,12 @@ void TimerNode::setActive(bool value)
     else
         d_ptr->m_Timer.stop();
 
-    d_ptr->m_pWidget->blockSignals(true);
-    d_ptr->m_pWidget->blockSignals(true);
-    d_ptr->m_pWidget->setActive(isActive());
-    d_ptr->m_pWidget->blockSignals(false);
+    if (d_ptr->m_pWidget) {
+        d_ptr->m_pWidget->blockSignals(true);
+        d_ptr->m_pWidget->blockSignals(true);
+        d_ptr->m_pWidget->setActive(isActive());
+        d_ptr->m_pWidget->blockSignals(false);
+    }
 
     Q_EMIT activated(isActive());
 }
