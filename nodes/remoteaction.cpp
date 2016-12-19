@@ -12,7 +12,7 @@ class RemoteActionNodePrivate : public QObject
     Q_OBJECT
 public:
     Controls m_Current;
-    ControlsChooser m_ControlCW;
+    ControlsChooser* m_pControlCW {nullptr};
     QAbstractItemModel* m_pSource {nullptr};
 
 public Q_SLOTS:
@@ -23,8 +23,6 @@ RemoteActionNode::RemoteActionNode(QObject* parent) : ProxyNode(parent), d_ptr(n
 {
     PageManager::instance()->addPage(&d_ptr->m_Current, "Controls");
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteActionNodePrivate::slotModelChanged);
-
-    d_ptr->m_Current.setModel(d_ptr->m_ControlCW.currentModel());
 }
 
 RemoteActionNode::~RemoteActionNode()
@@ -51,7 +49,12 @@ void RemoteActionNode::write(QJsonObject &parent) const
 
 QWidget* RemoteActionNode::widget() const
 {
-    return &d_ptr->m_ControlCW;
+    if (!d_ptr->m_pControlCW) {
+        d_ptr->m_pControlCW = new ControlsChooser();
+        d_ptr->m_Current.setModel(d_ptr->m_pControlCW->currentModel());
+    }
+
+    return d_ptr->m_pControlCW;
 }
 
 void RemoteActionNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
