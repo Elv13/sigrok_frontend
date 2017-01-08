@@ -11,7 +11,7 @@
 
 #include <QtGui/QIcon>
 
-#include "nodes/abstractnode.h"
+#include "common/abstractnode.h"
 
 class QNodeWidget;
 class QAbstractItemModel;
@@ -22,7 +22,6 @@ class ProxyNodeFactoryAdapter : public QAbstractItemModel
 {
 public:
     explicit ProxyNodeFactoryAdapter(QNodeWidget* w);
-    void registerNode(AbstractNode* o);
 
     template<typename T>
     void registerType(const QString& name, const QString& id, const QString& cat, const QIcon& icon = {});

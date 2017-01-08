@@ -22,6 +22,8 @@ public:
 
     virtual void write(QJsonObject &parent) const override;
 
+    virtual QString remoteModelName() const override;
+
 private:
     RemoteTablePrivate* d_ptr;
     Q_DECLARE_PRIVATE(RemoteTable)

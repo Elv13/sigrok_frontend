@@ -21,6 +21,7 @@ find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
 
 SET(libcommon_SRCS
     pagemanager.cpp
+    abstractnode.cpp
     remotemanager.cpp
 )
 

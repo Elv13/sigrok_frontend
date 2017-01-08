@@ -55,3 +55,8 @@ void RemoteTablePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstrac
 
     RemoteManager::instance()->addModel(newModel, roles, "RemoteModel");
 }
+
+QString RemoteTable::remoteModelName() const
+{
+    return "remotetable";
+}

@@ -5,7 +5,7 @@
 class QLCDNumber;
 class QAbstractItemModel;
 
-class LCDMeter : public QWidget
+class Q_DECL_EXPORT LCDMeter : public QWidget
 {
     Q_OBJECT
 

@@ -31,7 +31,7 @@ public Q_SLOTS:
 ChartNode::ChartNode(QObject* parent) : ProxyNode(parent), d_ptr(new ChartNodePrivate())
 {
     auto chart = new KChart::Chart(nullptr);
-    PageManager::instance()->addPage(chart, "Chart");
+    PageManager::instance()->addPage(this, chart, "Chart");
 
     auto coordinatePlane = dynamic_cast<KChart::CartesianCoordinatePlane*>(
         chart->coordinatePlane()

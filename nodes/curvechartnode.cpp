@@ -8,11 +8,18 @@
 
 #include "common/pagemanager.h"
 
+#include "remotemanager.h"
+
+#include <QtCore/QTimer>
+#include <QtCore/QIdentityProxyModel>
+
 class CurveChartNodePrivate : public QObject
 {
 public:
     CurveChart* m_pPlotter;
 //     ChartType* m_pChartW {new ChartType};
+    mutable QIdentityProxyModel* m_pRemoteModel {nullptr};
+    mutable QString m_Id;
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -24,8 +31,9 @@ CurveChartNode::CurveChartNode(QObject* parent) : ProxyNode(parent), d_ptr(new C
 
     d_ptr->m_pPlotter = new CurveChart();
 
-    PageManager::instance()->addPage(d_ptr->m_pPlotter, "Chart");
-
+    QTimer::singleShot(0, [this](){
+        PageManager::instance()->addPage(this, d_ptr->m_pPlotter, "Chart", uid());
+    });
 //     auto coordinatePlane = dynamic_cast<KChart::CartesianCoordinatePlane*>(
 //         chart->coordinatePlane()
 //     );
@@ -69,4 +77,28 @@ void CurveChartNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbst
 {
     Q_UNUSED(old)
     m_pPlotter->setModel(newModel);
+}
+
+
+QString CurveChartNode::remoteModelName() const
+{
+    if (!d_ptr->m_pRemoteModel) {
+        static int count = 1;
+        d_ptr->m_Id = id()+QString::number(count++);
+
+        d_ptr->m_pRemoteModel = new QIdentityProxyModel(const_cast<CurveChartNode*>(this));
+        d_ptr->m_pRemoteModel->setSourceModel(model());
+
+        RemoteManager::instance()->addModel(d_ptr->m_pRemoteModel, {
+            Qt::DisplayRole,
+            Qt::EditRole,
+        }, d_ptr->m_Id);
+    }
+
+    return d_ptr->m_Id;
+}
+
+QString CurveChartNode::remoteWidgetType() const
+{
+    return id();
 }

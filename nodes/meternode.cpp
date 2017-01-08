@@ -13,6 +13,7 @@
 #include "proxies/columnproxy.h"
 
 #include <QDebug>
+#include <QtCore/QTimer>
 
 #include "columnserializationadapter.h"
 
@@ -37,7 +38,9 @@ MeterNode::MeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new MeterNodePr
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
-    PageManager::instance()->addPage(d_ptr->m_pCurrent, "Meter");
+    QTimer::singleShot(0, [this]() {
+        PageManager::instance()->addPage(this, d_ptr->m_pCurrent, "Meter", uid());
+    });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);
 
@@ -106,6 +109,11 @@ void MeterNodePrivate::slotRowsInserted()
         idx.data().toString()
     );
 
+}
+
+QString MeterNode::remoteWidgetType() const
+{
+    return id();
 }
 
 #include "meternode.moc"

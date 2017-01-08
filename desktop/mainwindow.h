@@ -19,7 +19,8 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     Q_OBJECT
 
   public:
-    MainWindow(QWidget *parent=0);
+    explicit MainWindow(QWidget *parent=0);
+    virtual ~MainWindow();
 
     static MainWindow* instance();
 
@@ -27,11 +28,12 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     StatusBar2* m_pStatusBar;
     ProxyNodeFactoryAdapter* m_pSession;
     void setupActions();
+    QHash<QString, QDockWidget*> m_lDocks;
 
     QUrl fileName;
 
   private Q_SLOTS:
-    QDockWidget* addDock(QWidget* w, const QString& title);
+    QDockWidget* addDock(QWidget* w, const QString& title, const QString& uid);
     void settingsConfigure();
     void newFile();
     void openFile();

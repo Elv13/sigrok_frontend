@@ -215,7 +215,7 @@ GraphicsNode::
 
         // Even when removed from the scene, the prepareGeometryChange is
         // required to avoid a crash, don't ask me why
-        setSize(0,0);
+        //setSize(0,0);
     }
 
     delete d_ptr->_title_item;

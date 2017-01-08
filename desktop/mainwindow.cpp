@@ -69,7 +69,7 @@
 
 static MainWindow* ins; //FIXME
 
-QDockWidget* MainWindow::addDock(QWidget* w, const QString& title)
+QDockWidget* MainWindow::addDock(QWidget* w, const QString& title, const QString& uid)
 {
     static QHash<QString, int> uniqueNames;
 
@@ -78,6 +78,8 @@ QDockWidget* MainWindow::addDock(QWidget* w, const QString& title)
     dock->setWidget(w);
     dock->setObjectName(title+QString::number(uniqueNames[title]++));
     ins->addDockWidget(Qt::TopDockWidgetArea, dock);
+
+    m_lDocks[uid] = dock;
 
     return dock;
 }
@@ -99,6 +101,17 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
         QGraphicsView::FullViewportUpdate);
 
     connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
+
+    connect(PageManager::instance(), &QAbstractItemModel::rowsAboutToBeRemoved, [this](const QModelIndex& tl, int first, int last) {
+        for (int i = first; i <= last; i++) {
+            const auto uid = PageManager::instance()->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
+
+            if (m_lDocks.contains(uid)) {
+                removeDockWidget(m_lDocks[uid]);
+                m_lDocks[uid] = nullptr;
+            }
+        }
+    });
 
     m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
 
@@ -162,6 +175,11 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     if (Settings::openLastFile() && !Settings::lastFilePath().isEmpty())
         openFile(Settings::lastFilePath());
+}
+
+MainWindow::~MainWindow()
+{
+//     auto dock, m_lDocks
 }
 
 MainWindow* MainWindow::instance()

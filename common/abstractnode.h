@@ -9,6 +9,8 @@ class QWidget;
 typedef bool TRIGGER;
 typedef bool PULSE;
 
+class AbstractNodePrivate;
+
 class Q_DECL_EXPORT AbstractNode : public QObject
 {
     Q_OBJECT
@@ -18,11 +20,15 @@ public:
         MODEL,
     };
 
-    explicit AbstractNode(QObject* parent = nullptr) : QObject(parent) {}
-    virtual ~AbstractNode() {}
+    explicit AbstractNode(QObject* parent = nullptr);
+    virtual ~AbstractNode();
+//     virtual ~AbstractNode() {}
 
     virtual QString title() const = 0;
     virtual QString id() const = 0;
+
+    void setUid(const QString& uid);
+    QString uid() const;
 
     virtual QWidget* widget() const {return nullptr;}
     virtual Mode mode() const {return Mode::PROPERTY;}
@@ -32,11 +38,19 @@ public:
 
     virtual bool createSocket(const QString& name);
 
+    virtual QString remoteObjectName() const;
+    virtual QString remoteModelName() const;
+    virtual QString remoteWidgetType() const;
+
     virtual void write(QJsonObject &parent) const;
     virtual void read(const QJsonObject &parent);
 
 Q_SIGNALS:
     void titleChanged(const QString& title);
+
+private:
+    AbstractNodePrivate* d_ptr;
+    Q_DECLARE_PRIVATE(AbstractNode)
 
 };
 Q_DECLARE_METATYPE(AbstractNode*)

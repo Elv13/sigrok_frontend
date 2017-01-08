@@ -3,15 +3,20 @@
 #include "widgets/lcdmeter.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QIdentityProxyModel>
 
 #include <QtWidgets/QScrollBar>
 #include "widgets/meter.h"
 
 #include "common/pagemanager.h"
 
+#include "remotemanager.h"
+
 #include "proxies/meterproxy.h"
 #include "proxies/columnproxy.h"
 #include "columnserializationadapter.h"
+
+#include <QtCore/QTimer>
 
 #include <QDebug>
 
@@ -24,19 +29,23 @@ public:
     MeterProxy* m_pCheckProxy {new MeterProxy(this)};
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
     QAbstractItemModel* m_pSource {nullptr};
+    mutable QIdentityProxyModel* m_pRemoteModel {nullptr};
+    mutable QString m_Id;
     ColumnSerializationAdapter m_Serializer {m_pCheckProxy, {1,2}, this};
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
     void slotColumnEnabled(int col, bool enabled);
-    void slotRowsInserted();
+//     void slotRowsInserted();
 };
 
 LCDMeterNode::LCDMeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new LCDMeterNodePrivate())
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
-    PageManager::instance()->addPage(&d_ptr->m_Current, "Meter");
+    QTimer::singleShot(0, [this]() {
+        PageManager::instance()->addPage(this, &d_ptr->m_Current, "Meter", uid());
+    });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);
 
@@ -80,15 +89,11 @@ void LCDMeterNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstra
 {
     m_pSource = newModel;
     m_pColumnProxy->setSourceModel(newModel);
+
     m_Current.setModel(newModel);
 
-    if (old) {
-        QObject::disconnect(old, &QAbstractItemModel::rowsInserted,
-                     this, &LCDMeterNodePrivate::slotRowsInserted);
-    }
-
-    QObject::connect(newModel, &QAbstractItemModel::rowsInserted,
-                     this, &LCDMeterNodePrivate::slotRowsInserted);
+    if (m_pRemoteModel)
+        m_pRemoteModel->setSourceModel(newModel);
 }
 
 void LCDMeterNodePrivate::slotColumnEnabled(int col, bool)
@@ -96,15 +101,27 @@ void LCDMeterNodePrivate::slotColumnEnabled(int col, bool)
     Q_UNUSED(col) //FIXME
 }
 
-void LCDMeterNodePrivate::slotRowsInserted()
+QString LCDMeterNode::remoteModelName() const
 {
-    const int main = m_pCheckProxy->mainColumn();
-    const auto idx = m_pSource->index(m_pSource->rowCount()-1,main);
+    if (!d_ptr->m_pRemoteModel) {
+        static int count = 1;
+        d_ptr->m_Id = id()+QString::number(count++);
 
-    m_Current.setValue(
-        idx.data().toFloat()
-    );
+        d_ptr->m_pRemoteModel = new QIdentityProxyModel(const_cast<LCDMeterNode*>(this));
+        d_ptr->m_pRemoteModel->setSourceModel(model());
 
+        RemoteManager::instance()->addModel(d_ptr->m_pRemoteModel, {
+            Qt::DisplayRole,
+            Qt::EditRole,
+        }, d_ptr->m_Id);
+    }
+
+    return d_ptr->m_Id;
+}
+
+QString LCDMeterNode::remoteWidgetType() const
+{
+    return id();
 }
 
 #include "lcdmeternode.moc"

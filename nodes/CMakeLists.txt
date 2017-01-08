@@ -27,7 +27,6 @@ include(../cmake/extrawarnings.cmake)
 # find_package(KChart "2.6.0" REQUIRED) #TODO make optional
 
 SET(libnodes_SRCS
-    abstractnode.cpp
     proxynode.cpp
 #     chartnode.cpp
     curvechartnode.cpp

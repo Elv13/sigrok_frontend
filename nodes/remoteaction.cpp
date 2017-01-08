@@ -5,7 +5,11 @@
 
 #include "common/pagemanager.h"
 
+#include "remotemanager.h"
+
 #include <QDebug>
+
+#include <QtCore/QTimer>
 
 class RemoteActionNodePrivate : public QObject
 {
@@ -14,6 +18,8 @@ public:
     Controls m_Current;
     ControlsChooser* m_pControlCW {nullptr};
     QAbstractItemModel* m_pSource {nullptr};
+    QString m_Id;
+    bool m_IsRegistered {false};
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -21,7 +27,10 @@ public Q_SLOTS:
 
 RemoteActionNode::RemoteActionNode(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteActionNodePrivate())
 {
-    PageManager::instance()->addPage(&d_ptr->m_Current, "Controls");
+    QTimer::singleShot(0, [this]() {
+        PageManager::instance()->addPage(this, &d_ptr->m_Current, "Controls", uid());
+    });
+
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteActionNodePrivate::slotModelChanged);
 }
 
@@ -56,6 +65,31 @@ QWidget* RemoteActionNode::widget() const
 
     return d_ptr->m_pControlCW;
 }
+
+QString RemoteActionNode::remoteModelName() const
+{
+    widget();
+    static int count = 0;
+
+    if (d_ptr->m_Id.isEmpty())
+        d_ptr->m_Id = QStringLiteral("remoteaction")+QString::number(count++);
+
+    if (!d_ptr->m_IsRegistered)
+        RemoteManager::instance()->addModel(d_ptr->m_pControlCW->currentModel(), {
+            Qt::DisplayRole,
+            Qt::EditRole,
+        }, d_ptr->m_Id);
+
+    d_ptr->m_IsRegistered = true;
+
+    return d_ptr->m_Id;
+}
+
+QString RemoteActionNode::remoteWidgetType() const
+{
+    return id();
+}
+
 
 void RemoteActionNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {

@@ -22,6 +22,9 @@ public:
 
     virtual QWidget* widget() const override;
 
+    virtual QString remoteModelName() const override;
+    virtual QString remoteWidgetType() const override;
+
 //     virtual void connectTo(AbstractNode* other, QAbstractItemModel* model, int col) override;
 
 private:

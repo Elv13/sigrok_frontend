@@ -46,30 +46,6 @@ QByteArray generateRandomHash()
     return ret;
 }
 
-void ProxyNodeFactoryAdapter::registerNode(AbstractNode* o)
-{
-
-    GraphicsNode* n2;
-
-    switch (o->mode()) {
-    case AbstractNode::Mode::PROPERTY:
-        n2 = m_pNodeW->addObject(o, o->title(), {}, generateRandomHash());
-        break;
-    case AbstractNode::Mode::MODEL:
-        n2 = m_pNodeW->addModel(o->sourceModel(), o->title(), generateRandomHash());
-        break;
-    }
-    Q_ASSERT(n2 != nullptr);
-
-    n2->setTitle(o->title());
-
-    auto w = o->widget();
-    n2->setCentralWidget(w);
-
-    n2->graphicsItem()->setPos(0,0);
-
-}
-
 QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaObject(const QMetaObject& meta, const QString& uid)
 {
     QObject* o = meta.newInstance();
@@ -77,15 +53,19 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
 
     AbstractNode* anode = qobject_cast<AbstractNode*>(o);
 
+    const auto uid2 = uid.isEmpty() ? generateRandomHash() : uid;
+
+    anode->setUid(uid2);
+
     GraphicsNode* n2;
 
     switch (anode->mode()) {
     case AbstractNode::Mode::PROPERTY:
-        n2 = m_pNodeW->addObject(anode, anode->title(), {}, uid.isEmpty() ? generateRandomHash() : uid);
+        n2 = m_pNodeW->addObject(anode, anode->title(), {}, uid2);
         anode->setParent(m_pNodeW);
         break;
     case AbstractNode::Mode::MODEL:
-        n2 = m_pNodeW->addModel(anode->sourceModel(), anode->title(), uid.isEmpty() ? generateRandomHash() : uid);
+        n2 = m_pNodeW->addModel(anode->sourceModel(), anode->title(), uid2);
         anode->setParent(anode->sourceModel());
         anode->sourceModel()->setParent(m_pNodeW);
         break;

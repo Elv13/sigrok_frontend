@@ -10,7 +10,9 @@
 
 CurveChart::CurveChart(QWidget* parent) : QWidget(parent)
 {
-    
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setMinimumSize(0, 99);
+    setStyleSheet("background-color:red;");
 }
 
 CurveChart::~CurveChart()
@@ -29,11 +31,38 @@ void CurveChart::setModel(QAbstractItemModel* m)
 
     connect(m_pModel, &QAbstractItemModel::rowsInserted,
         this, &CurveChart::slotRowsInserted);
+
+    if (auto rc = m->rowCount())
+        slotRowsInserted({}, 0, rc);
+
+    connect(m_pModel, &QAbstractItemModel::modelReset, [this]() {
+        m_Min = 99999999999999999;
+        m_Max = 0;
+
+        if (auto rc = m_pModel->rowCount())
+            slotRowsInserted({}, 0, rc);
+    });
+
+    connect(m_pModel, &QAbstractItemModel::dataChanged, [this](const QModelIndex&, const QModelIndex& br) {
+        const auto rc = m_pModel->rowCount();
+
+        if (m_Max == 99999999999999999)
+            slotRowsInserted({}, 0, rc);
+
+        if (br.row() == rc -1)
+            update();
+    });
 }
 
 void CurveChart::slotRowsInserted(const QModelIndex& parent, int first, int last)
 {
     Q_UNUSED(parent)
+
+    // Force a reset
+    if (first == 0) {
+        m_Min = 99999999999999999;
+        m_Max = 0;
+    }
 
     for (int i=first; i <= last;i++) {
         const float v = m_pModel->index(i, 1).data().toFloat();
@@ -74,6 +103,14 @@ void CurveChart::paintEvent(QPaintEvent *event)
 
         for (qreal i = 0; i < rc; i++) {
             const float val = m_pModel->index(i, j).data().toFloat();
+
+            // Detect buggy models
+            if (val > m_Max || val < m_Min) {
+                slotRowsInserted({}, 0, rc);
+                update();
+                return;
+            }
+
             path.quadTo(
                 {i*dx-dx/2, rect.height() - (val*rect.height())/range},
                 {i*dx     , rect.height() - (val*rect.height())/range}

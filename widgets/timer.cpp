@@ -4,6 +4,8 @@
 
 #include "nodes/timernode.h"
 
+#include <QtCore/QDebug>
+
 Timer::Timer(const TimerNode* n, QWidget* parent) : QWidget(parent)
 {
     Ui_Timer ui;
@@ -37,8 +39,5 @@ void Timer::slotsMs(int v)
 
 void Timer::slotActivated(bool a)
 {
-    if (m_pCheck->isChecked() == a)
-        return;
-
     Q_EMIT activated(a);
 }

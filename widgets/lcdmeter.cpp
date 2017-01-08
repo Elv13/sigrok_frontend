@@ -27,6 +27,24 @@ void LCDMeter::setModel(const QAbstractItemModel* m)
         m_pValue->display(idx.data().toFloat());
     });
 
+    if (m->rowCount())
+        m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+
+    connect(m, &QAbstractItemModel::modelReset, [this, m]() {
+        if (m->rowCount())
+            m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+    });
+
+    connect(m, &QAbstractItemModel::layoutChanged, [this, m]() {
+        if (m->rowCount())
+            m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+    });
+
+    connect(m, &QAbstractItemModel::dataChanged, [this, m](const QModelIndex&, const QModelIndex& br) {
+        if (br.row() == m->rowCount() -1)
+            m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+    });
+
 }
 
 void LCDMeter::setValue(float v)

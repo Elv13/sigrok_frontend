@@ -40,16 +40,21 @@ SET(libnodewidgets_SRCS
     table.cpp
     memento.cpp
     rowsubset.cpp
-    timer.cpp
     range.cpp
     lcdmeter.cpp
     controls.cpp
     controlschooser.cpp
-    deduplicate.cpp
     curvechart.cpp
     sequence.cpp
-    chrono.cpp
 )
+
+if (NOT BUILD_MOBILE)
+    SET(libnodewidgets_SRCS ${libnodewidgets_SRCS}
+        chrono.cpp
+        timer.cpp
+        deduplicate.cpp
+    )
+endif()
 
 QT5_WRAP_UI(libnodewidgets_SRCS
 #     charttype.ui

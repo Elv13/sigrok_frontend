@@ -18,6 +18,7 @@ include(../cmake/extrawarnings.cmake)
 find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
     Widgets
+    Network
 )
 
 SET(mobile_SRCS
@@ -33,5 +34,7 @@ ADD_LIBRARY( mobile STATIC ${mobile_SRCS} )
 TARGET_LINK_LIBRARIES( mobile
     Qt5::Widgets
     Qt5::Gui
+    Qt5::Network
     common
+    nodewidgets
 )

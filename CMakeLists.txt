@@ -76,12 +76,13 @@ add_subdirectory(Qt-Color-Widgets)
 add_subdirectory(delegates)
 add_subdirectory(proxies)
 
+add_subdirectory(widgets)
+
 # Build the desktop centric (KDE) GUI
 if (NOT BUILD_MOBILE)
     include(KDECompilerSettings)
 
     add_subdirectory(nodes)
-    add_subdirectory(widgets)
     add_subdirectory(desktop)
 endif()
 

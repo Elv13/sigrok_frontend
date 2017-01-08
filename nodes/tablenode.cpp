@@ -6,10 +6,12 @@
 #include <QtWidgets/QTableView>
 
 #include <QtCore/QDebug>
-
+#include <QtCore/QIdentityProxyModel>
+#include <QtCore/QTimer>
 #include "widgets/table.h"
 
 #include "common/pagemanager.h"
+#include "common/remotemanager.h"
 
 class TableNodePrivate : public QObject
 {
@@ -17,6 +19,8 @@ public:
     QTableView* m_pTableView;
 
     Table* m_pTableW {new Table};
+    mutable QIdentityProxyModel* m_pRemoteModel {nullptr};
+    mutable QString m_Id;
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -25,7 +29,10 @@ public Q_SLOTS:
 TableNode::TableNode(QObject* parent) : ProxyNode(parent), d_ptr(new TableNodePrivate())
 {
     d_ptr->m_pTableView  = new QTableView(nullptr);
-    PageManager::instance()->addPage(d_ptr->m_pTableView, "Table");
+
+    QTimer::singleShot(0, [this]() {
+        PageManager::instance()->addPage(this, d_ptr->m_pTableView, "Table", uid());
+    });
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &TableNodePrivate::slotModelChanged);
 }
@@ -69,4 +76,31 @@ void TableNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractI
                 m_pTableView->verticalScrollBar()->maximum()
             );
     });
+
+    if (m_pRemoteModel)
+        m_pRemoteModel->setSourceModel(newModel);
 }
+
+QString TableNode::remoteWidgetType() const
+{
+    return id();
+}
+
+QString TableNode::remoteModelName() const
+{
+    if (!d_ptr->m_pRemoteModel) {
+        static int count = 1;
+        d_ptr->m_Id = id()+QString::number(count++);
+
+        d_ptr->m_pRemoteModel = new QIdentityProxyModel(const_cast<TableNode*>(this));
+        d_ptr->m_pRemoteModel->setSourceModel(model());
+
+        RemoteManager::instance()->addModel(d_ptr->m_pRemoteModel, {
+            Qt::DisplayRole,
+            Qt::EditRole,
+        }, d_ptr->m_Id);
+    }
+
+    return d_ptr->m_Id;
+}
+

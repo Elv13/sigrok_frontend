@@ -101,10 +101,13 @@ bool MementoProxy::setData(const QModelIndex &index, const QVariant &value, int 
 
     n->m_hData[role] = value;
 
-    if (role == Qt::EditRole)
+    if (role == Qt::EditRole) {
         n->m_hData[Qt::DisplayRole] = value;
+        Q_EMIT dataChanged(index, index);
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 int MementoProxy::rowCount(const QModelIndex& parent) const
