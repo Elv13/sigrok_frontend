@@ -1,5 +1,7 @@
 #include "tailproxy.h"
 
+#include <QtCore/QDebug>
+
 class TailProxyPrivate : public QObject
 {
 public:
@@ -212,7 +214,7 @@ void TailProxyPrivate::slotRowsInserted(const QModelIndex &parent, int s, int e)
     if (q_ptr->isCurrentlyLimited())
         Q_EMIT q_ptr->dataChanged(
             q_ptr->index(0,0),
-            q_ptr->index(q_ptr->maximum()-1, q_ptr->columnCount())
+            q_ptr->index(q_ptr->maximum()-1, q_ptr->columnCount()-1)
         );
     else {
         q_ptr->beginInsertRows(parent, s, e);
