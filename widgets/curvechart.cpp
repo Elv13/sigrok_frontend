@@ -96,6 +96,8 @@ void CurveChart::paintEvent(QPaintEvent *event)
     const int   dx    = rect.width()/rc;
     const float range = std::max(0.001f, m_Max - m_Min);
 
+    float newMin(99999999999999999), newMax(0);
+
     for (int j = 1; j < m_pModel->columnCount();j++) {
         QPainterPath path;
 
@@ -103,6 +105,10 @@ void CurveChart::paintEvent(QPaintEvent *event)
 
         for (qreal i = 0; i < rc; i++) {
             const float val = m_pModel->index(i, j).data().toFloat();
+
+            // update the range
+            newMin = std::min(newMin, val);
+            newMax = std::max(newMax, val);
 
             // Detect buggy models
             if (val > m_Max || val < m_Min) {
@@ -117,6 +123,12 @@ void CurveChart::paintEvent(QPaintEvent *event)
             );
         }
         painter.drawPath(path);
+    }
+
+    if (newMax != m_Max || newMin != newMin) {
+        m_Max = newMax;
+        m_Min = newMin;
+        update();
     }
 }
 
