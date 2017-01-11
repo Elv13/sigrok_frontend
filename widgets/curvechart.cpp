@@ -12,7 +12,6 @@ CurveChart::CurveChart(QWidget* parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setMinimumSize(0, 99);
-    setStyleSheet("background-color:red;");
 }
 
 CurveChart::~CurveChart()
@@ -90,18 +89,24 @@ void CurveChart::paintEvent(QPaintEvent *event)
         QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform
     );
 
-    painter.setPen(QPen(QColor(Qt::yellow), 2, Qt::SolidLine,
+    static int dpiX = physicalDpiX();
+
+    static int lineSize = 2*(dpiX/96);
+
+    painter.setPen(QPen(QColor(Qt::yellow), lineSize, Qt::SolidLine,
                         Qt::FlatCap, Qt::MiterJoin));
 
     const int   dx    = rect.width()/rc;
     const float range = std::max(0.001f, m_Max - m_Min);
+
+    const int height = rect.height() - 2*lineSize;
 
     float newMin(99999999999999999), newMax(0);
 
     for (int j = 1; j < m_pModel->columnCount();j++) {
         QPainterPath path;
 
-        path.moveTo(0, rect.height());
+        path.moveTo(0, height+lineSize);
 
         for (qreal i = 0; i < rc; i++) {
             const float val = m_pModel->index(i, j).data().toFloat();
@@ -118,8 +123,8 @@ void CurveChart::paintEvent(QPaintEvent *event)
             }
 
             path.quadTo(
-                {i*dx-dx/2, rect.height() - (val*rect.height())/range},
-                {i*dx     , rect.height() - (val*rect.height())/range}
+                {i*dx-dx/2, height - (val*height)/range},
+                {i*dx     , height - (val*height)/range}
             );
         }
         painter.drawPath(path);

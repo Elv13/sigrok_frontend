@@ -17,7 +17,9 @@ public:
     virtual ~Controls();
 
 private Q_SLOTS:
-    void slowRowsInserted(const QModelIndex& p, int start, int end);
+    void slotRowsInserted(const QModelIndex& p, int start, int end);
+    void slotModelReset();
+    void slotDataChanged(const QModelIndex& tl, const QModelIndex& br);
 
 private:
     QListView* m_pTable;

@@ -36,6 +36,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="mobile.qrc"/>
+ </resources>
  <connections/>
 </ui>

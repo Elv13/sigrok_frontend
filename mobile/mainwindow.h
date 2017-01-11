@@ -8,8 +8,16 @@
 // class RemoteWidgetsReplica;
 class QRemoteObjectNode;
 
+struct RemoteWidget
+{
+    QString m_Type;
+    QString m_Name;
+    QString m_Uid;
+    QAbstractItemModel* m_pModel;
+};
+
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -23,21 +31,23 @@ public:
 //     RemoteWidgetsReplica* rw;
 
 private Q_SLOTS:
-    void addDock(QWidget* w, const QString& title);
     void slotPageInserted(const QModelIndex&, int start, int end);
     void createSection(const QPersistentModelIndex& idx);
+    void enableEditMode(bool edit);
 //     void setMainLabel(float value);
 //     void reloadremotewidgets();
 //     void buttonPressed();
 
 private:
-    Ui::MainWindow *ui;
+//     Ui::MainWindow *ui;
     QAbstractItemModel* m_pPageModelReplica;
     QHash<QPersistentModelIndex, bool> m_hLoaded;
     QRemoteObjectNode* registry {nullptr};
-    QHash<QString, QWidget*> m_lDocks;
+    QHash<QString, QDockWidget*> m_lDocks;
 
-    void addWidget(const QString& type, QAbstractItemModel* model, const QString& uid);
+    void addWidget(RemoteWidget wdg);
+    void initStyle();
+    QWidget* createTitlebar(QWidget* parent);
 };
 
 #endif // MAINWINDOW_H

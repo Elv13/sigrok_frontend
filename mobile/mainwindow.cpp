@@ -1,8 +1,12 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "ui_appbar.h"
+#include "ui_titlebar.h"
 
-#include <QPushButton>
-#include <QDockWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QDockWidget>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QTableView>
+#include <QtCore/QFile>
 #include <QRemoteObjectNode>
 #include <QAbstractItemModelReplica>
 #include "widgets/lcdmeter.h"
@@ -13,23 +17,55 @@
 
 #include "meterdata_replica.h"
 
-void MainWindow::addDock(QWidget* w, const QString& title)
-{
-    static QHash<QString, int> uniqueNames;
+#include "qrc_mobile.cpp"
 
-    ui->m_pWidgetsL->addWidget(w);
+QWidget* MainWindow::createTitlebar(QWidget* parent)
+{
+    auto ret = new QWidget(parent);
+
+    auto ui2 = new Ui_Titlebar();
+    ui2->setupUi(ret);
+
+    return ret;
+}
+
+void MainWindow::initStyle()
+{
+
+    // Use a dark material color theme
+    QPalette p = QApplication::palette();
+
+    p.setColor(QPalette::Window       , QColor("#303030"));
+    p.setColor(QPalette::WindowText   , QColor("#FFFFFF"));
+    p.setColor(QPalette::Foreground   , QColor("#FFFFFF"));
+    p.setColor(QPalette::Base         , QColor("#424242"));
+//     p.setColor(QPalette::AlternateBase, QColor(""));
+//     p.setColor(QPalette::ToolTipBase  , QColor(""));
+//     p.setColor(QPalette::ToolTipText  , QColor(""));
+    p.setColor(QPalette::Text         , QColor("#FFFFFF"));
+    p.setColor(QPalette::Button       , QColor("#CCCCCC"));
+    p.setColor(QPalette::ButtonText   , QColor("#FFFFFF"));
+//     p.setColor(QPalette::BrightText   , QColor(""));
+    QApplication::setPalette(p);
+
+    enableEditMode(false);
 }
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    QMainWindow(parent)
 {
-    auto mw = new QWidget(this);
-    setCentralWidget(mw);
 
-    ui->setupUi(mw);
+    initStyle();
 
-    connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
+    QToolBar* tb = new QToolBar(this);
+    tb->setStyleSheet("background:#212121;height:2em;");
+    addToolBar(Qt::TopToolBarArea, tb);
+
+    auto apw = new QWidget(tb);
+    auto ui2 = new Ui_AppBar();
+    ui2->setupUi(apw);
+    tb->addWidget(apw);
+    connect(ui2->m_pEdit, &QToolButton::toggled, this, &MainWindow::enableEditMode);
 
     registry = new QRemoteObjectNode(QUrl(QStringLiteral("tcp://10.10.10.136:2223")));
 
@@ -39,15 +75,6 @@ MainWindow::MainWindow(QWidget *parent) :
     const bool ret2 = registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2225")));
 
     m_pPageModelReplica = registry->acquireModel(QStringLiteral("PageManager"));
-//     ui->pushButton->setText(model == nullptr ? "NO" : "YES"+ (QString::number(model->rowCount())));
-    ui->tableView->setModel(m_pPageModelReplica);
-
-    connect(m_pPageModelReplica, &QAbstractItemModel::modelReset, [this]() {
-        ui->pushButton->setText(
-            "MODEL RESET "+QString::number(m_pPageModelReplica->rowCount())
-        );
-        slotPageInserted({}, 0, m_pPageModelReplica->rowCount()-1);
-    });
 
     connect(m_pPageModelReplica, &QAbstractItemModel::dataChanged, [this](const QModelIndex& tl,const QModelIndex& br) {
 
@@ -57,12 +84,17 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
+    connect(m_pPageModelReplica, &QAbstractItemModel::modelReset, [this]() {
+        slotPageInserted({}, 0, m_pPageModelReplica->rowCount()-1);
+    });
+
     connect(m_pPageModelReplica, &QAbstractItemModel::rowsAboutToBeRemoved, [this](const QModelIndex& tl, int first, int last) {
         for (int i = first; i <= last; i++) {
             const auto uid = PageManager::instance()->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
+            //FIXME Q_ASSERT(!uid.isEmpty());
 
             if (m_lDocks.contains(uid)) {
-                ui->m_pWidgetsL->removeWidget(m_lDocks[uid]);
+                removeDockWidget(m_lDocks[uid]);
                 m_lDocks[uid] = nullptr;
             }
         }
@@ -70,7 +102,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-void MainWindow::addWidget(const QString& type, QAbstractItemModel* model, const QString& uid)
+void MainWindow::addWidget(RemoteWidget wdg)
 {
     static QHash<QString, std::function<QWidget*(QAbstractItemModel*)> > t {
         {"lcdmeter_node", [this](QAbstractItemModel* model) {
@@ -100,18 +132,15 @@ void MainWindow::addWidget(const QString& type, QAbstractItemModel* model, const
         }},
     };
 
-    if (t.contains(type)) {
-        auto w = t[type](model);
-//         ui->m_pWidgetsL->addWidget(w);
-
-
-        auto dock = new QDockWidget("ASDSAD", this);
+    if (t.contains(wdg.m_Type)) {
+        auto w = t[wdg.m_Type](wdg.m_pModel);
+        auto dock = new QDockWidget(wdg.m_Name, this);
+//         dock->setTitleBarWidget(createTitlebar(dock));
 
         dock->setWidget(w);
-//         dock->setObjectName("ASDSAD"+QString::number(uniqueNames["ASDSAD"]++));
 
-        addDockWidget(Qt::BottomDockWidgetArea, dock);
-        m_lDocks[uid] = w;
+        addDockWidget(Qt::LeftDockWidgetArea, dock);
+        m_lDocks[wdg.m_Uid] = dock;
     }
 }
 
@@ -124,16 +153,20 @@ void MainWindow::createSection(const QPersistentModelIndex& idx)
     const QString type = idx.data(PageManager::Role::REMOTE_WIDGET_TYPE).toString();
     const QString uid  = idx.data(PageManager::Role::REMOTE_OBJECT_UID ).toString();
 
-    if (name.isEmpty() || type.isEmpty())
+    if (name.isEmpty() || type.isEmpty() || uid.isEmpty())
         return;
-    Q_ASSERT(!type.isEmpty());
 
     auto m = registry->acquireModel(name);
 
     if (!m)
         return;
 
-    addWidget(type, m, uid);
+    addWidget({
+        type,
+        name,
+        uid,
+        m
+    });
 
     m_hLoaded[idx] = true;
 }
@@ -148,6 +181,29 @@ void MainWindow::slotPageInserted(const QModelIndex&, int start, int end)
 
         if (!remModel.isEmpty())
             createSection(idx);
+    }
+}
+
+void MainWindow::enableEditMode(bool edit)
+{
+    static const QResource ss(":/css/default.css");
+    static const QResource ess(":/css/edit.css");
+
+    static QByteArray normalCss((char*)ss.data(),ss.size());
+    static QByteArray editCss = normalCss+QByteArray((char*)ess.data(),ess.size());
+
+    setStyleSheet(edit ? editCss : normalCss);
+
+    Q_FOREACH(QDockWidget* dock, m_lDocks) {
+        if (dock) {
+            dock->setFeatures( edit ?
+                QDockWidget::DockWidgetMovable : QDockWidget::NoDockWidgetFeatures
+            );
+            if (dock->titleBarWidget()) {
+//                 dock->titleBarWidget()->setMaximumSize(9999999, edit ? 99999999 : 0);
+                //dock->titleBarWidget()->setVisible(edit);
+            }
+        }
     }
 }
 

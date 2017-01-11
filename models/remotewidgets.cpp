@@ -61,6 +61,8 @@ QVariant RemoteWidgets::data(const QModelIndex& idx, int role) const
             return 100; //TODO
         case Role::TYPE_NAME:
             return "bool"; //TODO
+        case Role::IS_CONNECTED:
+            return dh->init;
     }
 
     return {};
@@ -126,25 +128,24 @@ RemoteWidgetsClient* RemoteWidgets::clientModel() const
     return d_ptr->m_pClient;
 }
 
-RemoteWidgetsClient::RemoteWidgetsClient(RemoteWidgets* src) : QIdentityProxyModel(src)
+RemoteWidgetsClient::RemoteWidgetsClient(RemoteWidgets* src) : QSortFilterProxyModel(src)
 {
     setSourceModel(src);
 }
 
+bool RemoteWidgetsClient::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+{
+    return sourceModel()->index(source_row, 0, source_parent)
+        .data(RemoteWidgets::Role::IS_CONNECTED).toBool();
+}
+
 QVariant RemoteWidgetsClient::data(const QModelIndex& idx, int role) const
 {
-    return QIdentityProxyModel::data(
+    return QSortFilterProxyModel::data(
         idx,
         (role == Qt::DisplayRole || role == Qt::EditRole) ?
             RemoteWidgets::Role::VALUE : role
     );
-}
-
-int RemoteWidgetsClient::rowCount(const QModelIndex& parent) const
-{
-    const int rc = QIdentityProxyModel::rowCount(parent);
-
-    return rc ? rc-1 : 0;
 }
 
 void RemoteWidgets::write(QJsonObject &parent) const
@@ -163,13 +164,14 @@ void RemoteWidgets::write(QJsonObject &parent) const
     parent["properties"] = a;
 }
 
-bool RemoteWidgets::addRow(const QModelIndex& idx)
-{
-    return setData(index(0,0), idx, 999);
-}
-
 bool RemoteWidgets::addRow(const QString& name)
 {
+//     if (d_ptr->m_lRows.size() == 1 && !d_ptr->m_lRows[0]->init) {
+//         d_ptr->m_lRows[0]->init = true;
+//         d_ptr->m_lRows[0]->name = name;
+//         return true;
+//     }
+
     auto dh  = new DataHolder;
     dh->name = name;
     dh->init = true;

@@ -14,6 +14,7 @@ public:
 
     void setModel(const QAbstractItemModel* m);
     void setValue(float v);
+    void setValue(const QModelIndex& idx);
 
     virtual ~LCDMeter();
 

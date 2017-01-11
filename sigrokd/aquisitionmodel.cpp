@@ -304,13 +304,13 @@ void AquisitionModel::start()
 
     try {
         d_ptr->m_pSess->add_device(d_ptr->m_pDev);
+        d_ptr->m_pDev->open();
+        d_ptr->m_pSess->start();
     }
     catch (const sigrok::Error& e) {
         qWarning() << "Starting device failed because:" << e.what();
     }
 
-    d_ptr->m_pDev->open();
-    d_ptr->m_pSess->start();
 }
 
 void AquisitionModel::stop()

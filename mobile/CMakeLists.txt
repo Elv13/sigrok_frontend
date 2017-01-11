@@ -27,6 +27,12 @@ SET(mobile_SRCS
 
 QT5_WRAP_UI(mobile_SRCS
     mainwindow.ui
+    appbar.ui
+    titlebar.ui
+)
+
+QT5_ADD_RESOURCES(mobile_SRCS
+    mobile.qrc
 )
 
 ADD_LIBRARY( mobile STATIC ${mobile_SRCS} )

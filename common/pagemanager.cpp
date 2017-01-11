@@ -75,7 +75,7 @@ PageManager::PageManager() : d_ptr(new PageManagerPrivate)
         Role::REMOTE_WIDGET_TYPE,
         Role::REMOTE_MODEL_NAME,
         Role::REMOTE_OBJECT_NAME,
-        Role::REMOTE_WIDGET_TYPE
+        Role::REMOTE_OBJECT_UID
     }, QStringLiteral("PageManager"));
 }
 
@@ -105,6 +105,7 @@ QVariant PageManager::data(const QModelIndex& idx, int role) const
         case Role::REMOTE_WIDGET_TYPE:
             return i->n->remoteWidgetType();
         case Role::REMOTE_OBJECT_UID:
+            Q_ASSERT(!i->n->uid().isEmpty());
             return i->n->uid();
     }
 

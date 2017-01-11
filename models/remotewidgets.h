@@ -1,13 +1,13 @@
 #pragma once
 
 #include <QtCore/QAbstractItemModel>
-#include <QtCore/QIdentityProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 
 class RemoteWidgetsPrivate;
 class RemoteWidgets;
 class QJsonObject;
 
-class RemoteWidgetsClient : public QIdentityProxyModel
+class RemoteWidgetsClient : public QSortFilterProxyModel
 {
     friend class RemoteWidgets; // for the constructor
 
@@ -15,8 +15,9 @@ class RemoteWidgetsClient : public QIdentityProxyModel
 
 public:
     virtual QVariant data(const QModelIndex& idx, int role) const override;
-    virtual int rowCount(const QModelIndex& parent = {}) const override;
+//     virtual int rowCount(const QModelIndex& parent = {}) const override;
 //     virtual bool setData(const QModelIndex &i, const QVariant &value, int role) override;
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
 
 private:
     explicit RemoteWidgetsClient(RemoteWidgets* src);
@@ -31,6 +32,7 @@ public:
         MIN_VALUE,
         MAX_VALUE,
         TYPE_NAME,
+        IS_CONNECTED,
     };
 
     enum class Mode {
@@ -48,7 +50,7 @@ public:
     virtual bool setData(const QModelIndex& idx, const QVariant& value, int role) override;
     virtual Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
-    bool addRow(const QModelIndex& idx);
+//     bool addRow(const QModelIndex& idx);
     bool addRow(const QString& name);
 
     void write(QJsonObject &parent) const;

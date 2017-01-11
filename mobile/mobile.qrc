@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="css">
+    <file>edit.css</file>
+    <file>default.css</file>
+  </qresource>
+</RCC>

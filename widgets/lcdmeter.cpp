@@ -24,25 +24,25 @@ void LCDMeter::setModel(const QAbstractItemModel* m)
 
     QObject::connect(m, &QAbstractItemModel::rowsInserted, [m, this]() {
         const auto idx = m->index(m->rowCount()-1, 1);
-        m_pValue->display(idx.data().toFloat());
+        setValue(idx);
     });
 
     if (m->rowCount())
-        m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+        setValue(m->index(m->rowCount()-1, 1));
 
     connect(m, &QAbstractItemModel::modelReset, [this, m]() {
         if (m->rowCount())
-            m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+            setValue(m->index(m->rowCount()-1, 1));
     });
 
     connect(m, &QAbstractItemModel::layoutChanged, [this, m]() {
         if (m->rowCount())
-            m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+            setValue(m->index(m->rowCount()-1, 1));
     });
 
     connect(m, &QAbstractItemModel::dataChanged, [this, m](const QModelIndex&, const QModelIndex& br) {
         if (br.row() == m->rowCount() -1)
-            m_pValue->display(m->index(m->rowCount()-1, 1).data().toFloat());
+            setValue(m->index(m->rowCount()-1, 1));
     });
 
 }
@@ -50,4 +50,11 @@ void LCDMeter::setModel(const QAbstractItemModel* m)
 void LCDMeter::setValue(float v)
 {
     m_pValue->display(v);
+}
+
+void LCDMeter::setValue(const QModelIndex& idx)
+{
+    const auto dt = idx.data();
+    if (idx.isValid() && dt.canConvert<float>())
+        m_pValue->display(dt.toFloat());
 }

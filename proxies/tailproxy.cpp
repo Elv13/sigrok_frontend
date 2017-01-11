@@ -196,7 +196,13 @@ void TailProxy::setMaximum(int max)
 
     d_ptr->m_Maximum = max;
 
-    if (sourceModel() && sourceModel()->rowCount() > max)
+    const int rc = sourceModel() ? sourceModel()->rowCount() : 0;
+
+    if (!rc) {
+        beginResetModel();
+        endResetModel();
+    }
+    else if (sourceModel() && rc > max)
         Q_EMIT layoutChanged();
 }
 

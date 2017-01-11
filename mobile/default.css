@@ -1,0 +1,13 @@
+
+
+
+
+/*QTableView::item {
+    font-size: 14pt;
+    padding: 0.5em;
+}*/
+
+QDockWidget::title {
+    height: 0px;
+    padding: 0px;
+}
