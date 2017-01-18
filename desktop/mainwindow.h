@@ -13,9 +13,11 @@ class ProxyNodeFactoryAdapter;
 class KTextEdit;
 class QDockWidget;
 class KJob;
+class DesktopSerializer;
 
 class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
 {
+    friend class DesktopSerializer;
     Q_OBJECT
 
   public:
@@ -29,6 +31,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     ProxyNodeFactoryAdapter* m_pSession;
     void setupActions();
     QHash<QString, QDockWidget*> m_lDocks;
+    DesktopSerializer* m_pInterfaceSerializer;
 
     QUrl fileName;
 

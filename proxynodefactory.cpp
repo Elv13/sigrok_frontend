@@ -9,6 +9,8 @@
 #include "qt5-node-editor/src/qnodewidget.h"
 #include "qt5-node-editor/src/qreactiveproxymodel.h"
 
+#include "common/interfaceserializer.h"
+
 #if QT_VERSION < 0x050700
 //Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
 template<typename T>
@@ -21,11 +23,11 @@ const T& qAsConst(const T& v)
 class ProxyNodeFactoryAdapterPrivate
 {
 public:
-    
+    QList<InterfaceSerializer*> m_lIS;
 };
 
 ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
-    m_pNodeW(w)
+    m_pNodeW(w), d_ptr(new ProxyNodeFactoryAdapterPrivate)
 {
     m_pNodeW->reactiveModel()->setExtraRole(
         QReactiveProxyModel::ExtraRoles::SourceConnectionNotificationRole, 999
@@ -35,6 +37,14 @@ ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
     );
 }
 
+void ProxyNodeFactoryAdapter::registerInterfaceSerializer(InterfaceSerializer* ser)
+{
+    d_ptr->m_lIS << ser;
+}
+
+// Ensure that UIDs are unique
+static QHash<QString, bool> g_Used;
+
 QByteArray generateRandomHash();
 QByteArray generateRandomHash()
 {
@@ -42,6 +52,10 @@ QByteArray generateRandomHash()
 
     for (int i=0; i < 8; i++)
         ret[i] = (char) (qrand() % 42) + '0';
+
+    // Avoids duplicate
+    if (g_Used.contains(ret))
+        return generateRandomHash();
 
     return ret;
 }
@@ -226,11 +240,11 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
 
     QJsonArray levelArray;
 
-    for (const auto& cat : cats) {
+    for (const auto& cat : qAsConst(cats)) {
         const auto types = cat->m_lTypes;
-        for (const auto& type : types) {
+        for (const auto& type : qAsConst(types)) {
             const auto& nodes = type->m_lInstances;
-            for (const auto& nodeJ : nodes) {
+            for (const auto& nodeJ : qAsConst(nodes)) {
                 QJsonObject data;
                 nodeJ.second->write(data);
 
@@ -264,6 +278,16 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
     }
 
     session["nodes"] = levelArray;
+
+    QJsonArray views;
+
+    for (const auto is : qAsConst(d_ptr->m_lIS)) {
+        QJsonObject view;
+        is->write(view);
+        views.append(view);
+    }
+
+    session["views"] = views;
 
     dev->write(QJsonDocument(session).toJson());
 }
@@ -320,6 +344,7 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
         const auto data2  = nodeJ [ "data"   ].toObject();
         const auto type   = data2 [ "id"     ].toString();
         const auto uid    = widget[ "UID"    ].toString();
+        g_Used[uid] = true;
 
         if (uid.isEmpty()) {
             qWarning() << "Failed to properly load a node, some links may be missing";
@@ -422,6 +447,16 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
             delete otherconn;
         }
     }
+
+    const QJsonArray views = obj["views"].toArray();
+
+    for (int i = 0; i < views.size(); ++i) {
+        if (!d_ptr->m_lIS.isEmpty()) { //FIXME
+            d_ptr->m_lIS[0]->read(views[i].toObject());
+            d_ptr->m_lIS[0]->reflow();
+        }
+    }
+
 }
 
 void ProxyNodeFactoryAdapter::load(QIODevice *dev)

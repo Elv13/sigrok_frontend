@@ -66,20 +66,134 @@
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 
 #include "common/pagemanager.h"
+#include "common/interfaceserializer.h"
 
 static MainWindow* ins; //FIXME
+
+class DesktopSerializer : public InterfaceSerializer
+{
+public:
+    explicit DesktopSerializer(MainWindow* mw) :
+        InterfaceSerializer("desktop"), m_pMain(mw) {}
+    virtual ~DesktopSerializer() {}
+
+    virtual void reflow() const override;
+
+protected:
+    virtual void writeWidget(QJsonObject &parent, const QString& id) const override;
+
+private:
+    MainWindow* m_pMain;
+};
+
+void DesktopSerializer::writeWidget(QJsonObject &parent, const QString& id) const
+{
+    QDockWidget* dock = m_pMain->m_lDocks[id];
+
+    if (Q_UNLIKELY(!dock)) {
+        qWarning() << "Trying to save a widget that doesn't exist";
+        return;
+    }
+
+    const auto area = m_pMain->dockWidgetArea(dock);
+    const float ratio = (float) ( (float)
+            (area & (Qt::DockWidgetArea::TopDockWidgetArea | Qt::DockWidgetArea::BottomDockWidgetArea)) ?
+                dock->width() : dock->height()
+        ) / (float) ( (float)
+            (area & (Qt::DockWidgetArea::TopDockWidgetArea | Qt::DockWidgetArea::BottomDockWidgetArea)) ?
+                m_pMain->centralWidget()->width() : m_pMain->centralWidget()->height()
+        );
+
+    const int pos = (area & (Qt::DockWidgetArea::TopDockWidgetArea | Qt::DockWidgetArea::BottomDockWidgetArea)) ?
+        dock->x() : dock->y();
+
+    parent[ "name"  ] = dock->objectName(); //TODO REMOVE
+    parent[ "pos"   ] = pos;
+    parent[ "area"  ] = area;
+    parent[ "ratio" ] = ratio;
+    parent[ "uid"   ] = id;
+}
+
+void DesktopSerializer::reflow() const
+{
+    struct info_t {
+        int          pos;
+        float        ratio;
+        QDockWidget* dock;
+    };
+
+    // QMap are ordered, this allows resizeDocks to work
+    QMap<int, QMap<int, info_t>> docksByArea;
+    //resizeDocks(const QList<QDockWidget *> &docks, const QList<int> &sizes, Qt::Orientation orientation)
+
+    QJsonArray arr;
+
+    // Sort each docks (per area)
+    for (const auto e : elements()) {
+        const auto  uid = e["uid"].toString();
+        Q_ASSERT(!uid.isEmpty());
+
+        if (!m_pMain->m_lDocks.contains(uid))
+            continue;
+
+        const int area = e["area"].toInt();
+
+        info_t i {
+            e["pos"].toInt(),
+            e["ratio"].toDouble(),
+            m_pMain->m_lDocks[uid]
+        };
+
+        Q_ASSERT(dynamic_cast<QDockWidget*>(i.dock));
+
+        docksByArea[area][i.pos] = i;
+    }
+
+    typedef Qt::DockWidgetArea DWA;
+
+    // Place the docks
+    for (auto area : {
+        DWA::TopDockWidgetArea , DWA::BottomDockWidgetArea,
+        DWA::LeftDockWidgetArea, DWA::RightDockWidgetArea
+    }) {
+        //TODO check if its present
+        const int total = area > 1 ?
+            m_pMain->centralWidget()->height() :m_pMain->centralWidget()->width();
+
+        QList<QDockWidget*> docks;
+        QList<int> sizes;
+
+        for (const auto& i : docksByArea[area]) {
+            m_pMain->addDockWidget(area, i.dock);
+            docks << i.dock;
+            sizes << (i.ratio*total);
+        }
+        m_pMain->resizeDocks(docks, sizes, Qt::Horizontal);
+    }
+
+}
 
 QDockWidget* MainWindow::addDock(QWidget* w, const QString& title, const QString& uid)
 {
     static QHash<QString, int> uniqueNames;
 
-    auto dock = new QDockWidget(title, ins);
+    auto dock = new QDockWidget(title, this);
 
     dock->setWidget(w);
     dock->setObjectName(title+QString::number(uniqueNames[title]++));
-    ins->addDockWidget(Qt::TopDockWidgetArea, dock);
+    addDockWidget(Qt::TopDockWidgetArea, dock);
+
+    if (Q_UNLIKELY(m_lDocks.contains(uid)))
+        qWarning() << "A Widget with the same ID already exist" << uid;
 
     m_lDocks[uid] = dock;
+    m_pInterfaceSerializer->add(uid);
+    m_pInterfaceSerializer->reflow();
+
+
+    connect(dock, &QObject::destroyed, [this, uid] {
+        m_lDocks.remove(uid);
+    });
 
     return dock;
 }
@@ -108,12 +222,15 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
             if (m_lDocks.contains(uid)) {
                 removeDockWidget(m_lDocks[uid]);
-                m_lDocks[uid] = nullptr;
+                m_lDocks.remove(uid);
             }
         }
     });
 
     m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
+
+    m_pInterfaceSerializer = new DesktopSerializer(this);
+    m_pSession->registerInterfaceSerializer(m_pInterfaceSerializer);
 
     setCentralWidget(w);
 

@@ -18,6 +18,9 @@ class QAbstractItemModel;
 class GraphicsNodeScene;
 class QIODevice;
 
+class InterfaceSerializer;
+class ProxyNodeFactoryAdapterPrivate;
+
 class ProxyNodeFactoryAdapter : public QAbstractItemModel
 {
 public:
@@ -26,6 +29,7 @@ public:
     template<typename T>
     void registerType(const QString& name, const QString& id, const QString& cat, const QIcon& icon = {});
 
+    void registerInterfaceSerializer(InterfaceSerializer* ser);
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
@@ -61,6 +65,7 @@ private:
 
     QVector<Category*> m_slCategory;
     QHash<QString, MetaInfo*> m_hIdToType;
+    ProxyNodeFactoryAdapterPrivate* d_ptr;
 };
 
 template<typename T>

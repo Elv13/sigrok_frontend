@@ -23,6 +23,7 @@ SET(libcommon_SRCS
     pagemanager.cpp
     abstractnode.cpp
     remotemanager.cpp
+    interfaceserializer.cpp
 )
 
 qt5_generate_repc(libcommon_SRCS
