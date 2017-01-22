@@ -40,6 +40,11 @@ void InterfaceSerializer::add(const QString& uid)
     d_ptr->m_hById[uid] = o;
 }
 
+void InterfaceSerializer::rename(const QString& id, const QString& newName)
+{
+    // nothing
+}
+
 void InterfaceSerializer::writeWidget(QJsonObject &parent, const QString& id) const
 {
 

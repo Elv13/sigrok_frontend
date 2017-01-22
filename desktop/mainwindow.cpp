@@ -78,6 +78,7 @@ public:
     virtual ~DesktopSerializer() {}
 
     virtual void reflow() const override;
+    virtual void rename(const QString& id, const QString& newName) override;
 
 protected:
     virtual void writeWidget(QJsonObject &parent, const QString& id) const override;
@@ -171,6 +172,14 @@ void DesktopSerializer::reflow() const
         m_pMain->resizeDocks(docks, sizes, Qt::Horizontal);
     }
 
+}
+
+void DesktopSerializer::rename(const QString& id, const QString& newName)
+{
+    if (!m_pMain->m_lDocks.contains(id))
+        return;
+
+    m_pMain->m_lDocks[id]->setWindowTitle(newName);
 }
 
 QDockWidget* MainWindow::addDock(QWidget* w, const QString& title, const QString& uid)

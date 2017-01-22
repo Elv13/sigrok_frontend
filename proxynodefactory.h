@@ -23,6 +23,7 @@ class ProxyNodeFactoryAdapterPrivate;
 
 class ProxyNodeFactoryAdapter : public QAbstractItemModel
 {
+    Q_OBJECT
 public:
     explicit ProxyNodeFactoryAdapter(QNodeWidget* w);
 
@@ -47,6 +48,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void remove(const QObject* o, const QString& id);
+    void renameN(const QString& n, const QString& name);
 
 private:
     QNodeWidget* m_pNodeW;

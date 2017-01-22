@@ -35,6 +35,7 @@ ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
     m_pNodeW->reactiveModel()->setExtraRole(
         QReactiveProxyModel::ExtraRoles::DestinationConnectionNotificationRole, 998
     );
+    connect(w, SIGNAL(nodeRenamed(QString, QString, QString)), this, SLOT(renameN(QString, QString)));
 }
 
 void ProxyNodeFactoryAdapter::registerInterfaceSerializer(InterfaceSerializer* ser)
@@ -45,7 +46,7 @@ void ProxyNodeFactoryAdapter::registerInterfaceSerializer(InterfaceSerializer* s
 // Ensure that UIDs are unique
 static QHash<QString, bool> g_Used;
 
-QByteArray generateRandomHash();
+static QByteArray generateRandomHash();
 QByteArray generateRandomHash()
 {
     QByteArray ret(8, '\0');
@@ -56,6 +57,8 @@ QByteArray generateRandomHash()
     // Avoids duplicate
     if (g_Used.contains(ret))
         return generateRandomHash();
+
+    g_Used[ret] = true;
 
     return ret;
 }
@@ -116,7 +119,7 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QM
     if ((!idx.isValid()) || !idx.parent().isValid())
         return {};
 
-    auto mi = m_slCategory[idx.parent().row()]->m_lTypes[idx.row()];
+    auto mi   = m_slCategory[idx.parent().row()]->m_lTypes[idx.row()];
     auto meta = mi->m_spMetaObj;
 
     auto ret = addToSceneFromMetaObject(meta);
@@ -150,6 +153,12 @@ void ProxyNodeFactoryAdapter::remove(const QObject* n, const QString& id)
     const auto midx = createIndex(i->m_Index, 0, -1 );
 
     Q_EMIT dataChanged(midx, midx);
+}
+
+void ProxyNodeFactoryAdapter::renameN(const QString& uid, const QString& name)
+{
+    for (const auto is : qAsConst(d_ptr->m_lIS))
+        is->rename(uid, name);
 }
 
 QVariant ProxyNodeFactoryAdapter::data(const QModelIndex& idx, int role) const
@@ -231,7 +240,7 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
             o[ "direction"    ] = name;
             o[ "own_socket"   ] = sockI.data ().toString();
             o[ "other_socket" ] = rsockI.data().toString();
-            o[ "id"           ] = edgeI.data ().toInt();
+            o[ "id"           ] = edgeI.data ().toInt   ();
             o[ "other_node"   ] = nodeid;
 
             ret.append(o);
@@ -251,7 +260,7 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
                 QJsonObject node;
                 node["data"] = data;
 
-                const auto nodeW = nodeJ.first;
+                const auto nodeW       = nodeJ.first;
                 const auto sinkModel   = m_pNodeW->sinkSocketModel(nodeW->index());
                 const auto sourceModel = m_pNodeW->sourceSocketModel(nodeW->index());
 

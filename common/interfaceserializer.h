@@ -12,6 +12,7 @@ public:
     virtual void reflow() const = 0;
     QJsonObject byId(const QString& id) const;
     void add(const QString& uid);
+    virtual void rename(const QString& id, const QString& newName);
 
     QHash<QString, QJsonObject> elements() const;
 
