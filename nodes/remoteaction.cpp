@@ -28,7 +28,7 @@ public Q_SLOTS:
 RemoteActionNode::RemoteActionNode(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteActionNodePrivate())
 {
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, &d_ptr->m_Current, "Controls", uid());
+        PageManager::instance()->addPage(this, &d_ptr->m_Current, title(), uid());
     });
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteActionNodePrivate::slotModelChanged);

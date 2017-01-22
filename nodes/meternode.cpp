@@ -39,7 +39,7 @@ MeterNode::MeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new MeterNodePr
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, d_ptr->m_pCurrent, "Meter", uid());
+        PageManager::instance()->addPage(this, d_ptr->m_pCurrent, title(), uid());
     });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);

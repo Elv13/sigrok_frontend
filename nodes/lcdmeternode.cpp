@@ -44,7 +44,7 @@ LCDMeterNode::LCDMeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new LCDMe
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, &d_ptr->m_Current, "Meter", uid());
+        PageManager::instance()->addPage(this, &d_ptr->m_Current, title(), uid());
     });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);

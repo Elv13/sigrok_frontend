@@ -7,11 +7,13 @@
 #include <QTextCursor>
 #include <QPainterPath>
 #include <QGraphicsProxyWidget>
+#include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsTextItem>
 #include <QGraphicsDropShadowEffect>
 #include <QtWidgets/QWidget>
 #include <QtGui/QFontMetrics>
+#include <QtGui/QIcon>
 
 #include <algorithm>
 
@@ -88,8 +90,11 @@ public:
     QBrush m_brushSinks      {QColor("#FF0077FF")};
 
     //TODO lazy load, add option to disable, its nice, but sllooowwww
-//     QGraphicsDropShadowEffect *_effect        {new QGraphicsDropShadowEffect()};
+#if 0
+    QGraphicsDropShadowEffect *_effect        {new QGraphicsDropShadowEffect()};
+#endif
     NodeTitle            *_title_item    {nullptr};
+    QGraphicsPixmapItem  *_deco_item     {nullptr};
     CloseButton          *_close_item    {nullptr};
     QGraphicsProxyWidget *_central_proxy {nullptr};
 
@@ -179,6 +184,9 @@ GraphicsNode::GraphicsNode(QNodeEditorSocketModel* model, const QPersistentModel
     d_ptr->m_pGraphicsItem->d_ptr = d_ptr;
     d_ptr->m_pGraphicsItem->q_ptr = this;
 
+    d_ptr->_deco_item = new QGraphicsPixmapItem(d_ptr->m_pGraphicsItem);
+    d_ptr->_deco_item->setPos(2, 4);
+
     d_ptr->_title_item = new NodeTitle(d_ptr);
 
     for (auto p : {
@@ -196,17 +204,21 @@ GraphicsNode::GraphicsNode(QNodeEditorSocketModel* model, const QPersistentModel
     d_ptr->_close_item->setPos(d_ptr->m_Size.width() - d_ptr->_close_item->width(), 0);
 
     d_ptr->_title_item->setDefaultTextColor(Qt::white);
-    d_ptr->_title_item->setPos(0, 0);
+
+    d_ptr->_title_item->setPos(20, 0);
     d_ptr->_title_item->setTextWidth(
         d_ptr->m_Size.width()
         - 2*d_ptr->_lr_padding
         - d_ptr->_close_item->width()
+        - 20 //icon
     );
 
-//     d_ptr->_effect->setBlurRadius(13.0);
-//     d_ptr->_effect->setColor(QColor("#99121212"));
+#if 0
+    d_ptr->_effect->setBlurRadius(13.0);
+    d_ptr->_effect->setColor(QColor("#99121212"));
 
-//     d_ptr->m_pGraphicsItem->setGraphicsEffect(d_ptr->_effect);
+    d_ptr->m_pGraphicsItem->setGraphicsEffect(d_ptr->_effect);
+#endif
 }
 
 
@@ -220,10 +232,99 @@ setTitle(const QString &title)
     d_ptr->_title_item->setPlainText(d_ptr->m_Index.data().toString());
 }
 
+void GraphicsNode::
+setDecoration(const QVariant& deco)
+{
+    if (!deco.isValid())
+        return;
+
+    if (deco.canConvert<QIcon>()) {
+        const auto px = qvariant_cast<QIcon>(deco).pixmap(16,16);
+        d_ptr->_deco_item->setPixmap(px);
+    }
+    else if (deco.canConvert<QPixmap>()) {
+        d_ptr->_deco_item->setPixmap(qvariant_cast<QPixmap>(deco));
+    }
+}
+
+void GraphicsNode::
+setBackground(const QString& brush)
+{
+    if (auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model()))
+        m->setData(d_ptr->m_Index, QColor(brush), Qt::BackgroundRole);
+}
+
+void GraphicsNode::
+setBackground(const QBrush& brush)
+{
+    if (auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model()))
+        m->setData(d_ptr->m_Index, brush, Qt::BackgroundRole);
+}
+
+void GraphicsNode::
+setForeground(const QString& pen)
+{
+    setForeground(QColor(pen));
+}
+
+void GraphicsNode::
+setForeground(const QPen& pen)
+{
+    if (auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model()))
+        m->setData(d_ptr->m_Index, pen, Qt::ForegroundRole);
+
+    //FIXME this should be removed once dataChanged really reload it
+    const auto fgVar = d_ptr->m_Index.data(Qt::ForegroundRole);
+
+    d_ptr->_title_item->setDefaultTextColor(fgVar.canConvert<QColor>() ?
+        qvariant_cast<QColor>(fgVar) : Qt::white
+    );
+
+    // Update the palette
+    if (d_ptr->_central_proxy) {
+        auto pal = d_ptr->_central_proxy->palette();
+        pal.setColor(QPalette::Foreground, pen.color());
+        d_ptr->_central_proxy->setPalette(pal);
+    }
+}
+
+void GraphicsNode::
+setForeground(const QColor& pen)
+{
+    if (auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model()))
+        m->setData(d_ptr->m_Index, pen, Qt::ForegroundRole);
+
+    //FIXME this should be removed once dataChanged really reload it
+    const auto fgVar = d_ptr->m_Index.data(Qt::ForegroundRole);
+
+    d_ptr->_title_item->setDefaultTextColor(fgVar.canConvert<QColor>() ?
+        qvariant_cast<QColor>(fgVar) : Qt::white
+    );
+
+    // Update the palette
+    if (d_ptr->_central_proxy) {
+        auto pal = d_ptr->_central_proxy->palette();
+        pal.setColor(QPalette::Foreground, pen);
+        d_ptr->_central_proxy->setPalette(pal);
+    }
+}
+
 QString GraphicsNode::
 title() const
 {
     return d_ptr->m_Index.data().toString();
+}
+
+QBrush GraphicsNode::
+background() const
+{
+    return qvariant_cast<QBrush>(d_ptr->m_Index.data(Qt::BackgroundRole));
+}
+
+QPen GraphicsNode::
+foreground() const
+{
+    return qvariant_cast<QPen>(d_ptr->m_Index.data(Qt::ForegroundRole));
 }
 
 QAbstractItemModel *GraphicsNode::
@@ -280,7 +381,10 @@ GraphicsNode::
     }
 
     delete d_ptr->_title_item;
-//     delete d_ptr->_effect;
+    delete d_ptr->_deco_item;
+#if 0
+    delete d_ptr->_effect;
+#endif
     delete d_ptr->m_pGraphicsItem;
     delete d_ptr;
 }
@@ -321,7 +425,13 @@ paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     path_content.addRect(0, title_height, edge_size, edge_size);
     path_content.addRect(d_ptr->m_Size.width() - edge_size, title_height, edge_size, edge_size);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(d_ptr->_brush_background);
+
+    const auto bgVar = d_ptr->m_Index.data(Qt::BackgroundRole);
+
+    painter->setBrush(bgVar.canConvert<QBrush>() ?
+        qvariant_cast<QBrush>(bgVar) : d_ptr->_brush_background
+    );
+
     painter->drawPath(path_content.simplified());
 
     // path for the outline
@@ -527,6 +637,20 @@ setCentralWidget (QWidget *widget)
     }
 
     d_ptr->_central_proxy = new QGraphicsProxyWidget(d_ptr->m_pGraphicsItem);
+
+    // Update the palette
+    auto pal = d_ptr->_central_proxy->palette();
+
+    const auto fgVar = d_ptr->m_Index.data(Qt::ForegroundRole);
+
+    if (fgVar.isValid()) {
+        if(fgVar.canConvert<QColor>())
+            pal.setColor(QPalette::Foreground, qvariant_cast<QColor>(fgVar));
+    }
+
+    pal.setColor(QPalette::Background, Qt::transparent);
+    d_ptr->_central_proxy->setPalette(pal);
+
     d_ptr->_central_proxy->setWidget(widget);
     d_ptr->_changed = true;
     d_ptr->m_pGraphicsItem->prepareGeometryChange();

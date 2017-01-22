@@ -31,7 +31,7 @@ TableNode::TableNode(QObject* parent) : ProxyNode(parent), d_ptr(new TableNodePr
     d_ptr->m_pTableView  = new QTableView(nullptr);
 
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, d_ptr->m_pTableView, "Table", uid());
+        PageManager::instance()->addPage(this, d_ptr->m_pTableView, title(), uid());
     });
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &TableNodePrivate::slotModelChanged);

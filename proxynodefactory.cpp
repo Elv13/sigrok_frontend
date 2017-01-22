@@ -124,6 +124,8 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QM
 
     auto ret = addToSceneFromMetaObject(meta);
 
+    ret.first->setDecoration(mi->m_Icon);
+
     Q_EMIT dataChanged(idx, idx);
 
     return ret;
@@ -382,10 +384,22 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
                 widget[ "height" ].toDouble()
             );
 
-            const auto title = widget["title"].toString();
+            nodeW->setDecoration(metaInfo->m_Icon);
 
-            if (!title.isEmpty())
-                nodeW->setTitle(title);
+            typedef void (GraphicsNode::*NodeSetter)(const QString&);
+
+            auto get = [&widget](const QString& n) -> const QString
+                {return widget[n].toString();};
+
+            const QList<QPair<QString, NodeSetter>> mapper {
+                {get("title"), &GraphicsNode::setTitle     },
+                {get("bg"   ), &GraphicsNode::setBackground},
+                {get("fg"   ), &GraphicsNode::setForeground}
+            };
+
+            for (const auto& prop : qAsConst(mapper) )
+                if (!prop.first.isEmpty())
+                    (nodeW->*prop.second)(prop.first);
 
             loadConnections(widget["connections"].toArray(), nodeW);
 

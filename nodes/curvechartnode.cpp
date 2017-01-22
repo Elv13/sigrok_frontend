@@ -32,7 +32,7 @@ CurveChartNode::CurveChartNode(QObject* parent) : ProxyNode(parent), d_ptr(new C
     d_ptr->m_pPlotter = new CurveChart();
 
     QTimer::singleShot(0, [this](){
-        PageManager::instance()->addPage(this, d_ptr->m_pPlotter, "Chart", uid());
+        PageManager::instance()->addPage(this, d_ptr->m_pPlotter, title(), uid());
     });
 //     auto coordinatePlane = dynamic_cast<KChart::CartesianCoordinatePlane*>(
 //         chart->coordinatePlane()
