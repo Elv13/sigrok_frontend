@@ -9,6 +9,8 @@
 
 QStringListModel* RangeProxyPrivate::s_pDelimiterModel = nullptr;
 
+QHash<QString, int> RangeProxyPrivate::DELIMITERVALUES;
+
 QStringList RangeProxyPrivate::DELIMITERNAMES = ([]() -> QStringList {
     QVector<QString> ret;
     ret.resize((int) RangeProxy::Delimiter::GREATER_EQUAL+1);
@@ -21,6 +23,9 @@ QStringList RangeProxyPrivate::DELIMITERNAMES = ([]() -> QStringList {
     ret[(int) RangeProxy::Delimiter::GREATER       ] = QStringLiteral( ">"    );
     ret[(int) RangeProxy::Delimiter::LESSER_EQUAL  ] = QStringLiteral( "<="   );
     ret[(int) RangeProxy::Delimiter::GREATER_EQUAL ] = QStringLiteral( ">="   );
+
+    for (int i=0;i < ret.size();i++)
+        DELIMITERVALUES[ret[i]] = i;
 
     return ret.toList();
 })();
@@ -83,6 +88,8 @@ QModelIndex RangeProxy::index(int row, int column, const QModelIndex &parent) co
 
     if ((!parent.isValid()) && row < d_ptr->m_lRows.size()) {
         Q_ASSERT(d_ptr->m_lRows[row]);
+        Q_ASSERT(d_ptr->m_lRows[row]->m_Index == row);
+        Q_ASSERT(row == 0 || d_ptr->m_lRows[row] != d_ptr->m_lRows[row] -1);
         return createIndex(row, column, d_ptr->m_lRows[row]);
     }
     else if (parent.isValid()) {
@@ -90,6 +97,10 @@ QModelIndex RangeProxy::index(int row, int column, const QModelIndex &parent) co
 
         if (row >= node->m_lChildren.size())
             return {};
+
+        Q_ASSERT(row == 0 || node->m_lChildren[row] != node->m_lChildren[row] -1);
+        Q_ASSERT(node->m_lChildren[row]->m_pParent == node);
+        Q_ASSERT(node->m_lChildren[row]->m_Index == row);
 
         return createIndex(row, column, node->m_lChildren[row]);
     }
@@ -256,7 +267,6 @@ QModelIndex RangeProxyPrivate::matchSourceIndex(const QModelIndex& srcIdx) const
         const auto rule = colNode->m_lChildren[i];
 
         bool match = false;
-
         // C++14 has a cooler and more functional way to do this, but it ain't
         // supported by all compilers yet
         switch(rule->m_Delim) {
@@ -306,27 +316,35 @@ QModelIndex RangeProxy::matchSourceIndex(const QModelIndex& srcIdx) const
 }
 
 
-void RangeProxy::addFilter(const QModelIndex& idx, RangeProxy::Delimiter delim)
+QModelIndex RangeProxy::addFilter(const QModelIndex& idx, RangeProxy::Delimiter delim)
 {
     if ((!idx.isValid()) || (idx.model() != this))
-        return;
+        return {};
 
     auto i = idx.parent().isValid() ? idx.parent() : idx;
 
     const auto node = static_cast<Node*>(i.internalPointer());
 
-    const int index = node->m_lChildren.size();
+    const int idx2 = node->m_lChildren.size();
 
-    beginInsertRows(i, index, index);
+    beginInsertRows(i, idx2, idx2);
 
     Node* nc      = new Node;
     nc->m_Mode    = Node::Mode::CHILD;
-    nc->m_Index   = index;
+    nc->m_Index   = idx2;
     nc->m_Delim   = delim;
     nc->m_pParent = node;
     node->m_lChildren << nc;
 
     endInsertRows();
+
+    return index(idx2, 0, idx);
+}
+
+QModelIndex RangeProxy::addFilter(const QModelIndex& idx, const QString& delimiter)
+{
+    Q_ASSERT(d_ptr->DELIMITERVALUES.contains(delimiter));
+    return addFilter(idx, (RangeProxy::Delimiter)d_ptr->DELIMITERVALUES[delimiter]);
 }
 
 void RangeProxyPrivate::slotLayoutChanged()

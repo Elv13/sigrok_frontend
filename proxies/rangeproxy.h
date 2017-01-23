@@ -58,7 +58,8 @@ public:
     bool matchAllFilters() const;
     void setMatchAllFilters(bool value);
 
-    void addFilter(const QModelIndex& idx, Delimiter delim = Delimiter::ANY);
+    QModelIndex addFilter(const QModelIndex& idx, Delimiter delim = Delimiter::ANY);
+    QModelIndex addFilter(const QModelIndex& idx, const QString& delimiter);
 
     QAbstractItemModel* delimiterModel() const;
 

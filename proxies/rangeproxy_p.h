@@ -36,6 +36,7 @@ public:
 
     static QStringListModel* s_pDelimiterModel;
     static QStringList DELIMITERNAMES;
+    static QHash<QString, int> DELIMITERVALUES;
 
     RangeProxy* q_ptr;
 

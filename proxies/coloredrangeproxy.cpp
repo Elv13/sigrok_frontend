@@ -57,7 +57,12 @@ QVariant ColoredRangeProxy::data(const QModelIndex& idx, int role) const
     const auto n = static_cast<Node*>(idx.internalPointer());
 
     switch (role) {
+        case Qt::UserRole+1:
+            return (*n->m_hExtraValues)[Qt::BackgroundRole];
+        case Qt::UserRole+2:
+            return (*n->m_hExtraValues)[Qt::ForegroundRole];
         case Qt::ForegroundRole:
+
         case Qt::BackgroundRole:
             if (idx.column() == 1)
                 return (*n->m_hExtraValues)[Qt::BackgroundRole];
@@ -98,13 +103,13 @@ QVariant ColoredProxy::data(const QModelIndex& idx, int role) const
 #endif
         case Qt::BackgroundRole:
             return d_ptr->q_ptr->matchSourceIndex(mapToSource(idx))
-                .data(Qt::BackgroundRole);
+                .data(Qt::UserRole+1);
 #ifdef ENABLE_KCHART
         case KChart::DatasetPenRole:
 #endif
         case Qt::ForegroundRole:
             return d_ptr->q_ptr->matchSourceIndex(mapToSource(idx))
-                .data(Qt::ForegroundRole);
+                .data(Qt::UserRole+2);
 #ifdef ENABLE_KCHART
         case KChart::LineAttributesRole:
             static KChart::LineAttributes attributes;
