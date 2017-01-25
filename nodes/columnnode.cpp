@@ -50,7 +50,7 @@ ColumnNode::~ColumnNode()
 {
     d_ptr->m_pColumnW->setModel(nullptr);
     d_ptr->m_pCheckable->setSourceModel(nullptr);
-    
+    delete d_ptr;
 }
 
 QString ColumnNode::title() const

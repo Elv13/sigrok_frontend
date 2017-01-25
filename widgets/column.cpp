@@ -17,5 +17,8 @@ Column::~Column()
 
 void Column::setModel(QAbstractItemModel* m)
 {
+    if (!m)
+        return;
+
     m_pListView->setModel(m);
 }

@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include <QResizeEvent>
 #include <QMimeData>
+#include <QDebug>
 #include <QGraphicsDropShadowEffect>
 #include <QResizeEvent>
 #include <QGraphicsItem>
@@ -54,7 +55,46 @@ resizeEvent(QResizeEvent *event)
 	QGraphicsView::resizeEvent(event);
 }
 
+void GraphicsNodeView::
+dragEnterEvent(QDragEnterEvent *event)
+{
+    const auto md = event->mimeData();
 
+    if (md->hasFormat(QStringLiteral("x-qnodeview/node-index"))) {
+        event->accept();
+        return;
+    }
+
+    event->ignore();
+}
+
+void GraphicsNodeView::
+dragMoveEvent(QDragMoveEvent *event)
+{
+    const auto md = event->mimeData();
+
+    if (md->hasFormat(QStringLiteral("x-qnodeview/node-index"))) {
+        event->accept();
+        return;
+    }
+
+    event->ignore();
+}
+
+void GraphicsNodeView::
+dropEvent(QDropEvent *event)
+{
+	auto md = const_cast<QMimeData*>(event->mimeData());
+	const auto pos = mapToScene(event->pos());
+
+	// A little cheap, but will do until I implement a better way
+	md->setProperty("x-qnodeview/position-x", pos.x());
+	md->setProperty("x-qnodeview/position-y", pos.y());
+
+	// The QMimeData retrieveData will be called and should create and place
+	// the node.
+	const auto dt = md->data("x-qnodeview/node-index");
+}
 
 void GraphicsNodeView::
 wheelEvent(QWheelEvent *event) {

@@ -285,6 +285,8 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     auto tab  = new CategorizedTree( dock     );
     dock->setObjectName("ToolBox");
     tab->setModel(m_pSession);
+    tab->setDragEnabled(true);
+    tab->setDragDropMode(QAbstractItemView::DragOnly);
     auto del = new CategorizedDelegate(tab);
     del->setChildDelegate(new AutoCompletionDelegate());
     tab->setItemDelegate(del);

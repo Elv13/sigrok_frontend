@@ -37,6 +37,9 @@ public:
     virtual int columnCount(const QModelIndex& parent = {}) const override;
     virtual QModelIndex index(int row, int column, const QModelIndex& parent ={}) const override;
     virtual QModelIndex parent(const QModelIndex& idx) const override;
+    virtual Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    virtual QMimeData* mimeData(const QModelIndexList &indexes) const override;
+    virtual QStringList mimeTypes() const override;
 
     void serialize(QIODevice *dev) const;
     void load(QIODevice *dev);

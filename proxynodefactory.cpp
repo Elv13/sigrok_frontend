@@ -1,6 +1,7 @@
 #include "proxynodefactory.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QMimeData>
 #include <QtCore/QTimer>
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
@@ -19,6 +20,41 @@ const T& qAsConst(const T& v)
     return const_cast<const T&>(v);
 }
 #endif
+
+class NodeMimeData : public QMimeData
+{
+public:
+    explicit NodeMimeData(ProxyNodeFactoryAdapter* f, const QModelIndex& idx) :
+    QMimeData(), m_pParent(f), m_Index(idx) {}
+
+    virtual bool hasFormat(const QString &mimeType) const override {
+        return mimeType == QStringLiteral("x-qnodeview/node-index");
+    }
+
+protected:
+    virtual QVariant retrieveData(const QString &mt, QVariant::Type t) const override
+    {
+
+        if (mt != QLatin1String("x-qnodeview/node-index"))
+            return {};
+
+        Q_ASSERT(m_Index.isValid());
+        Q_ASSERT(m_Index.parent().isValid());
+
+        auto node = m_pParent->addToScene(m_Index);
+
+        const auto  rect = node.first->rect();
+        const float x    = property("x-qnodeview/position-x").toFloat();
+        const float y    = property("x-qnodeview/position-y").toFloat();
+
+        node.first->graphicsItem()->setPos(x-rect.width()/2,y-rect.height()/2);
+
+        return {};
+    }
+
+    const QPersistentModelIndex m_Index;
+    ProxyNodeFactoryAdapter* m_pParent;
+};
 
 class ProxyNodeFactoryAdapterPrivate
 {
@@ -209,6 +245,35 @@ QModelIndex ProxyNodeFactoryAdapter::parent(const QModelIndex& idx) const
     if (!idx.isValid()) return {};
     const int id = (int)idx.internalId();
     return id==-1 ? QModelIndex() : index(id, 0);
+}
+
+Qt::ItemFlags ProxyNodeFactoryAdapter::flags(const QModelIndex& idx) const
+{
+    if (idx.parent().isValid())
+        return QAbstractItemModel::flags(idx) | Qt::ItemIsDragEnabled;
+
+    return QAbstractItemModel::flags(idx);
+}
+
+QStringList ProxyNodeFactoryAdapter::mimeTypes() const
+{
+    return {QStringLiteral("x-qnodeview/node-index")};
+}
+
+QMimeData* ProxyNodeFactoryAdapter::mimeData(const QModelIndexList& indexes) const
+{
+    if (indexes.size() != 1)
+        return nullptr;
+
+    const auto idx = indexes.first();
+
+    // Categories can't be dragged
+    if (!idx.parent().isValid())
+        return nullptr;
+
+    auto dt = new NodeMimeData(const_cast<ProxyNodeFactoryAdapter*>(this), idx);
+
+    return dt;
 }
 
 QModelIndex ProxyNodeFactoryAdapter::index(int row, int column, const QModelIndex& parent) const

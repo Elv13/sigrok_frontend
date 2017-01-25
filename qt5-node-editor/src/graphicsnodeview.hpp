@@ -46,12 +46,17 @@ public:
 	explicit GraphicsNodeView(QWidget *parent = nullptr);
 	GraphicsNodeView(QGraphicsScene *scene, QWidget *parent = nullptr);
 
+    void forceDrag(GraphicsNode* node);
+
 protected:
-	virtual void wheelEvent(QWheelEvent *event);
-	virtual void mouseMoveEvent(QMouseEvent *event);
-	virtual void mousePressEvent(QMouseEvent *event);
-	virtual void mouseReleaseEvent(QMouseEvent *event);
-	virtual void resizeEvent(QResizeEvent *event);
+	virtual void wheelEvent(QWheelEvent *event) override;
+	virtual void mouseMoveEvent(QMouseEvent *event) override;
+	virtual void mousePressEvent(QMouseEvent *event) override;
+	virtual void mouseReleaseEvent(QMouseEvent *event) override;
+	virtual void resizeEvent(QResizeEvent *event) override;
+	virtual void dragEnterEvent(QDragEnterEvent *event) override;
+	virtual void dragMoveEvent(QDragMoveEvent *event) override;
+	virtual void dropEvent(QDropEvent *event) override;
 
     QNodeEditorSocketModel* m_pModel {nullptr}; //HACK evil workaround until the QAbstractItemView is added
 
