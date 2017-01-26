@@ -8,6 +8,7 @@
 #include "widgets/meter.h"
 
 #include "common/pagemanager.h"
+#include "common/abstractsession.h"
 
 #include "proxies/meterproxy.h"
 #include "proxies/columnproxy.h"
@@ -34,12 +35,12 @@ public Q_SLOTS:
     void slotRowsInserted();
 };
 
-MeterNode::MeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new MeterNodePrivate())
+MeterNode::MeterNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new MeterNodePrivate())
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, d_ptr->m_pCurrent, title(), uid());
+        session()->pages()->addPage(this, d_ptr->m_pCurrent, title(), uid());
     });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);

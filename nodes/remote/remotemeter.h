@@ -12,7 +12,7 @@ class RemoteMeter : public ProxyNode
 
 public:
 
-    Q_INVOKABLE explicit RemoteMeter(QObject* parent = nullptr);
+    Q_INVOKABLE explicit RemoteMeter(AbstractSession* sess);
     virtual ~RemoteMeter();
 
     virtual QString title() const override;

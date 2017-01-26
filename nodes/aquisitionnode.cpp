@@ -31,8 +31,8 @@ public Q_SLOTS:
     void slotStart();
 };
 
-AquisitionNode::AquisitionNode(QObject* parent) :
-    AbstractNode(parent), d_ptr(new AquisitionNodePrivate())
+AquisitionNode::AquisitionNode(AbstractSession* sess) :
+    AbstractNode(sess), d_ptr(new AquisitionNodePrivate())
 {
     d_ptr->q_ptr = this;
 }

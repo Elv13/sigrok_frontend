@@ -15,7 +15,7 @@ class Q_DECL_EXPORT ProxyNode : public AbstractNode
 public:
     Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged USER true)
 
-    Q_INVOKABLE explicit ProxyNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit ProxyNode(AbstractSession* sess);
     virtual ~ProxyNode();
 
     virtual QString title() const override;

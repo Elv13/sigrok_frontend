@@ -13,7 +13,7 @@ public:
 };
 
 
-ProxyNode::ProxyNode(QObject* parent) : AbstractNode(parent),
+ProxyNode::ProxyNode(AbstractSession* sess) : AbstractNode(sess),
     d_ptr(new ProxyNodePrivate())
 {
 }

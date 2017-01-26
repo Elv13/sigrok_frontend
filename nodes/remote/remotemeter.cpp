@@ -31,7 +31,7 @@ public Q_SLOTS:
     void slotRowsInserted();
 };
 
-RemoteMeter::RemoteMeter(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteMeterPrivate())
+RemoteMeter::RemoteMeter(AbstractSession* sess) : ProxyNode(sess), d_ptr(new RemoteMeterPrivate())
 {
     d_ptr->q_ptr = this;
 

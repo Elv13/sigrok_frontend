@@ -43,7 +43,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-CurrentValues::CurrentValues(QObject* parent) : ProxyNode(parent), d_ptr(new CurrentValuesPrivate(this))
+CurrentValues::CurrentValues(AbstractSession* sess) : ProxyNode(sess), d_ptr(new CurrentValuesPrivate(this))
 {
     d_ptr->m_Proxy.setUsingHeaderAsDisplayRole(true);
     d_ptr->m_Concat.addSourceModel(&d_ptr->m_Proxy);

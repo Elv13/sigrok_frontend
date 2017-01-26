@@ -23,13 +23,6 @@ public:
     QList<PageNode*> pages;
 };
 
-PageManager* PageManager::instance()
-{
-    static auto i = new PageManager;
-
-    return i;
-}
-
 void PageManager::addPage(AbstractNode* n, QWidget* w, const QString& title, const QString& uid)
 {
     beginInsertRows({}, d_ptr->pages.size(), d_ptr->pages.size());

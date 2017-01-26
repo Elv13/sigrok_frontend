@@ -10,7 +10,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-MultiplexerNode::MultiplexerNode(QObject* parent) : ProxyNode(parent), d_ptr(new MultiplexerNodePrivate())
+MultiplexerNode::MultiplexerNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new MultiplexerNodePrivate())
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &MultiplexerNodePrivate::slotModelChanged);

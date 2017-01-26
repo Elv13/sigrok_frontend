@@ -11,7 +11,7 @@ class Q_DECL_EXPORT ChartNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_INVOKABLE explicit ChartNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit ChartNode(AbstractSession* sess);
     virtual ~ChartNode();
 
     virtual QString title() const override;

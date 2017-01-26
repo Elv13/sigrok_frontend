@@ -123,7 +123,7 @@ bool MementosList::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-MementoNode::MementoNode(QObject* parent) : ProxyNode(parent), d_ptr(new MementoNodePrivate())
+MementoNode::MementoNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new MementoNodePrivate())
 {
     d_ptr->q_ptr = this;
     d_ptr->m_pMementoList->q_ptr = this;

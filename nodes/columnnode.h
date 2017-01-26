@@ -14,7 +14,7 @@ class Q_DECL_EXPORT ColumnNode : public ProxyNode
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
-    Q_INVOKABLE explicit ColumnNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit ColumnNode(AbstractSession* sess);
     virtual ~ColumnNode();
 
     virtual QString title() const override;

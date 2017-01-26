@@ -4,6 +4,7 @@
 #include "widgets/controlschooser.h"
 
 #include "common/pagemanager.h"
+#include "common/abstractsession.h"
 
 #include "remotemanager.h"
 
@@ -25,10 +26,10 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-RemoteActionNode::RemoteActionNode(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteActionNodePrivate())
+RemoteActionNode::RemoteActionNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new RemoteActionNodePrivate())
 {
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, &d_ptr->m_Current, title(), uid());
+        session()->pages()->addPage(this, &d_ptr->m_Current, title(), uid());
     });
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteActionNodePrivate::slotModelChanged);

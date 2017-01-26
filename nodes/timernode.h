@@ -16,7 +16,7 @@ public:
     Q_PROPERTY(int seconds WRITE setSeconds USER true)
     Q_PROPERTY(bool tick READ dummy NOTIFY tick USER true)
 
-    Q_INVOKABLE explicit TimerNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit TimerNode(AbstractSession* sess);
     virtual ~TimerNode();
 
     virtual QString title() const override;

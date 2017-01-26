@@ -9,6 +9,8 @@ class QWidget;
 typedef bool TRIGGER;
 typedef bool PULSE;
 
+class AbstractSession;
+
 class AbstractNodePrivate;
 
 class Q_DECL_EXPORT AbstractNode : public QObject
@@ -20,7 +22,7 @@ public:
         MODEL,
     };
 
-    explicit AbstractNode(QObject* parent = nullptr);
+    explicit AbstractNode(AbstractSession* sess);
     virtual ~AbstractNode();
 //     virtual ~AbstractNode() {}
 
@@ -47,6 +49,9 @@ public:
 
 Q_SIGNALS:
     void titleChanged(const QString& title);
+
+protected:
+    AbstractSession* session() const;
 
 private:
     AbstractNodePrivate* d_ptr;

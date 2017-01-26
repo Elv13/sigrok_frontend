@@ -15,7 +15,7 @@ public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
     Q_PROPERTY(qreal threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged USER true)
 
-    Q_INVOKABLE explicit DeduplicateNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit DeduplicateNode(AbstractSession* sess);
     virtual ~DeduplicateNode();
 
     virtual QString title() const override;

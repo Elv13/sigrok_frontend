@@ -14,7 +14,7 @@ public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
 
-    Q_INVOKABLE explicit TailNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit TailNode(AbstractSession* sess);
     virtual ~TailNode();
 
     virtual QString title() const override;

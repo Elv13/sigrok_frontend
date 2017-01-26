@@ -21,7 +21,7 @@ public:
     Q_PROPERTY(int currentIndex READ currentIndex WRITE setCurrent NOTIFY currentIndexChanged USER true)
     Q_PROPERTY(bool hasEnded READ hasEnded NOTIFY endedChanged USER true)
 
-    Q_INVOKABLE explicit SequenceNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit SequenceNode(AbstractSession* sess);
     virtual ~SequenceNode();
 
     virtual QString  title () const override;

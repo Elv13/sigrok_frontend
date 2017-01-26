@@ -18,7 +18,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-ChronoNode::ChronoNode(QObject* parent) : ProxyNode(parent), d_ptr(new ChronoNodePrivate())
+ChronoNode::ChronoNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new ChronoNodePrivate())
 {
     d_ptr->q_ptr = this;
     d_ptr->m_Proxy.setTimeSourceColumn(0);

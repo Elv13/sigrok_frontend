@@ -12,7 +12,7 @@ class Q_DECL_EXPORT MeterNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_INVOKABLE explicit MeterNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit MeterNode(AbstractSession* sess);
     virtual ~MeterNode();
 
     virtual QString title() const override;

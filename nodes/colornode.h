@@ -14,7 +14,7 @@ class Q_DECL_EXPORT ColorNode : public ProxyNode
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
-    Q_INVOKABLE explicit ColorNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit ColorNode(AbstractSession* sess);
     virtual ~ColorNode();
 
     virtual QString title() const override;

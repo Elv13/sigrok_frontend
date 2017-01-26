@@ -12,7 +12,7 @@ class RemoteTable : public ProxyNode
 
 public:
 
-    Q_INVOKABLE explicit RemoteTable(QObject* parent = nullptr);
+    Q_INVOKABLE explicit RemoteTable(AbstractSession* sess);
     virtual ~RemoteTable();
 
     virtual QString title() const override;

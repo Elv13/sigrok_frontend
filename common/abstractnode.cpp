@@ -1,6 +1,7 @@
 #include "abstractnode.h"
 
 #include "pagemanager.h"
+#include "abstractsession.h"
 
 #ifndef DECL_QAbstractItemModel
 #define DECL_QAbstractItemModel
@@ -11,17 +12,24 @@ class AbstractNodePrivate
 {
 public:
     QString m_Uid;
+    AbstractSession* m_pSession;
 };
 
-AbstractNode::AbstractNode(QObject* parent) : QObject(parent),
+AbstractNode::AbstractNode(AbstractSession* sess) : QObject(sess),
     d_ptr(new AbstractNodePrivate)
 {
-    
+    Q_ASSERT(sess);
+    d_ptr->m_pSession = sess;
 }
 
 AbstractNode::~AbstractNode()
 {
-    PageManager::instance()->removePage(this);
+    session()->pages()->removePage(this);
+}
+
+AbstractSession* AbstractNode::session() const
+{
+    return d_ptr->m_pSession;
 }
 
 void AbstractNode::write(QJsonObject &parent) const

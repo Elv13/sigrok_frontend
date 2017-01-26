@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/abstractsession.h"
+
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 #include "qt5-node-editor/src/graphicsbezieredge.hpp"
@@ -19,13 +21,13 @@ class GraphicsNodeScene;
 class QIODevice;
 
 class InterfaceSerializer;
-class ProxyNodeFactoryAdapterPrivate;
+class SessionPrivate;
 
-class ProxyNodeFactoryAdapter : public QAbstractItemModel
+class Session : public AbstractSession
 {
     Q_OBJECT
 public:
-    explicit ProxyNodeFactoryAdapter(QNodeWidget* w);
+    explicit Session(QNodeWidget* w);
 
     template<typename T>
     void registerType(const QString& name, const QString& id, const QString& cat, const QIcon& icon = {});
@@ -44,7 +46,8 @@ public:
     void serialize(QIODevice *dev) const;
     void load(QIODevice *dev);
     void load(const QByteArray& data);
-    QPair<GraphicsNode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});
+
+    virtual PageManager* pages() const override;
 
 public Q_SLOTS:
     QPair<GraphicsNode*, AbstractNode*> addToScene(const QModelIndex& idx);
@@ -54,6 +57,8 @@ private Q_SLOTS:
     void renameN(const QString& n, const QString& name);
 
 private:
+    QPair<GraphicsNode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});
+
     QNodeWidget* m_pNodeW;
     struct MetaInfo {
         int m_Index;
@@ -70,11 +75,13 @@ private:
 
     QVector<Category*> m_slCategory;
     QHash<QString, MetaInfo*> m_hIdToType;
-    ProxyNodeFactoryAdapterPrivate* d_ptr;
+    SessionPrivate* d_ptr;
 };
 
+Q_DECLARE_METATYPE(Session*)
+
 template<typename T>
-void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& category, const QString& id, const QIcon& icon )
+void Session::registerType(const QString& name, const QString& category, const QString& id, const QIcon& icon )
 {
     // Look for the category
     Category* cat = nullptr;
@@ -93,7 +100,7 @@ void ProxyNodeFactoryAdapter::registerType(const QString& name, const QString& c
         m_slCategory << cat;
     }
 
-    auto mi = new ProxyNodeFactoryAdapter::MetaInfo {
+    auto mi = new Session::MetaInfo {
         cat->m_lTypes.size(), T::staticMetaObject, name, icon, {}
     };
 

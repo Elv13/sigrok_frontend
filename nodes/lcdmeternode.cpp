@@ -9,6 +9,7 @@
 #include "widgets/meter.h"
 
 #include "common/pagemanager.h"
+#include "common/abstractsession.h"
 
 #include "remotemanager.h"
 
@@ -39,12 +40,12 @@ public Q_SLOTS:
 //     void slotRowsInserted();
 };
 
-LCDMeterNode::LCDMeterNode(QObject* parent) : ProxyNode(parent), d_ptr(new LCDMeterNodePrivate())
+LCDMeterNode::LCDMeterNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new LCDMeterNodePrivate())
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
     QTimer::singleShot(0, [this]() {
-        PageManager::instance()->addPage(this, &d_ptr->m_Current, title(), uid());
+        session()->pages()->addPage(this, &d_ptr->m_Current, title(), uid());
     });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);

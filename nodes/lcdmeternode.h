@@ -12,7 +12,7 @@ class Q_DECL_EXPORT LCDMeterNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_INVOKABLE explicit LCDMeterNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit LCDMeterNode(AbstractSession* sess);
     virtual ~LCDMeterNode();
 
     virtual QString title() const override;

@@ -11,7 +11,7 @@ class Q_DECL_EXPORT TableNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_INVOKABLE explicit TableNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit TableNode(AbstractSession* sess);
     virtual ~TableNode();
 
     virtual QString title() const override;

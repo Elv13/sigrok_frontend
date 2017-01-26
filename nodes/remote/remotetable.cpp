@@ -13,7 +13,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-RemoteTable::RemoteTable(QObject* parent) : ProxyNode(parent), d_ptr(new RemoteTablePrivate())
+RemoteTable::RemoteTable(AbstractSession* sess) : ProxyNode(sess), d_ptr(new RemoteTablePrivate())
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteTablePrivate::slotModelChanged);

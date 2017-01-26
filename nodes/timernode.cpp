@@ -18,7 +18,7 @@ public Q_SLOTS:
     void timeout();
 };
 
-TimerNode::TimerNode(QObject* parent) : AbstractNode(parent), d_ptr(new TimerNodePrivate())
+TimerNode::TimerNode(AbstractSession* sess) : AbstractNode(sess), d_ptr(new TimerNodePrivate())
 {
     d_ptr->q_ptr = this;
     connect(&d_ptr->m_Timer, &QTimer::timeout, d_ptr, &TimerNodePrivate::timeout);

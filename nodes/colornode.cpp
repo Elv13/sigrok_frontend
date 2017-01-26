@@ -50,7 +50,7 @@ public Q_SLOTS:
     void slotModelReset();
 };
 
-ColorNode::ColorNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColorNodePrivate(this))
+ColorNode::ColorNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new ColorNodePrivate(this))
 {
     d_ptr->q_ptr = this;
     connect(this, &ProxyNode::modelChanged, d_ptr, &ColorNodePrivate::slotModelChanged);

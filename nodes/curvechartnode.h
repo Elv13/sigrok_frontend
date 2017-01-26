@@ -11,7 +11,7 @@ class Q_DECL_EXPORT CurveChartNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_INVOKABLE explicit CurveChartNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit CurveChartNode(AbstractSession* sess);
     virtual ~CurveChartNode();
 
     virtual QString title() const override;

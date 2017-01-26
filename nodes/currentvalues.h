@@ -12,7 +12,7 @@ class Q_DECL_EXPORT CurrentValues : public ProxyNode
 
 public:
 
-    Q_INVOKABLE explicit CurrentValues(QObject* parent = nullptr);
+    Q_INVOKABLE explicit CurrentValues(AbstractSession* sess);
     virtual ~CurrentValues();
 
     virtual QString title() const override;

@@ -24,6 +24,7 @@ SET(libcommon_SRCS
     abstractnode.cpp
     remotemanager.cpp
     interfaceserializer.cpp
+    abstractsession.cpp
 )
 
 qt5_generate_repc(libcommon_SRCS

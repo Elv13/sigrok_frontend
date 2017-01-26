@@ -12,7 +12,7 @@ class Q_DECL_EXPORT DeviceListNode : public AbstractNode
 
 public:
 
-    Q_INVOKABLE explicit DeviceListNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit DeviceListNode(AbstractSession* sess);
     virtual ~DeviceListNode();
 
     virtual QString title() const override;

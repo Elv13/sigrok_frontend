@@ -14,7 +14,7 @@ public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
 
-    Q_INVOKABLE explicit ChronoNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit ChronoNode(AbstractSession* sess);
     virtual ~ChronoNode();
 
     virtual QString title() const override;

@@ -15,7 +15,7 @@ public:
     Q_PROPERTY(QAbstractItemModel* model3 READ model NOTIFY modelChangedCopy USER true)
     Q_PROPERTY(QAbstractItemModel* model4 READ model NOTIFY modelChangedCopy USER true)
 
-    Q_INVOKABLE explicit MultiplexerNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit MultiplexerNode(AbstractSession* sess);
     virtual ~MultiplexerNode();
 
     virtual QString title() const override;

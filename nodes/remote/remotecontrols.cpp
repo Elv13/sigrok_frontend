@@ -12,7 +12,7 @@ public:
     RemoteControls* q_ptr;
 };
 
-RemoteControls::RemoteControls(QObject* parent) : AbstractNode(parent), d_ptr(new RemoteControlsPrivate(this))
+RemoteControls::RemoteControls(AbstractSession* sess) : AbstractNode(sess), d_ptr(new RemoteControlsPrivate(this))
 {
     d_ptr->m_Model.setObjectName("RemoteControl");
 }

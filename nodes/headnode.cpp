@@ -17,7 +17,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-HeadNode::HeadNode(QObject* parent) : ProxyNode(parent), d_ptr(new HeadNodePrivate(this))
+HeadNode::HeadNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new HeadNodePrivate(this))
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &HeadNodePrivate::slotModelChanged);

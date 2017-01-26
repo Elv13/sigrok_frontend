@@ -9,6 +9,9 @@ class AbstractNode;
 
 class Q_DECL_EXPORT PageManager : public QAbstractListModel
 {
+    friend class AbstractSession;
+    friend class SessionPrivate;
+
     Q_OBJECT
 
 public:
@@ -18,8 +21,6 @@ public:
         REMOTE_WIDGET_TYPE,
         REMOTE_OBJECT_UID,
     };
-
-    static PageManager* instance();
 
     void addPage(AbstractNode* n, QWidget* w, const QString& title = QString(), const QString& uid = QString());
     void removePage(AbstractNode* n);

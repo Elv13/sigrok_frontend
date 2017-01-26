@@ -12,7 +12,7 @@ class Q_DECL_EXPORT RemoteActionNode : public ProxyNode
     Q_OBJECT
 
 public:
-    Q_INVOKABLE explicit RemoteActionNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit RemoteActionNode(AbstractSession* sess);
     virtual ~RemoteActionNode();
 
     virtual QString title() const override;

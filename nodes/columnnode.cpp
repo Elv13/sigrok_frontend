@@ -35,7 +35,7 @@ public Q_SLOTS:
     void slotDataChanged();
 };
 
-ColumnNode::ColumnNode(QObject* parent) : ProxyNode(parent), d_ptr(new ColumnNodePrivate())
+ColumnNode::ColumnNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new ColumnNodePrivate())
 {
 
     d_ptr->m_pCheckable->setSourceModel(d_ptr->m_pColumnProxy);

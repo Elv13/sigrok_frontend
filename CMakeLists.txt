@@ -112,7 +112,7 @@ set(tutorial4_SRCS
 if (NOT BUILD_MOBILE) #FIXME
     set(tutorial4_SRCS ${tutorial4_SRCS}
         # Session
-        proxynodefactory.cpp
+        session.cpp
         columnserializationadapter.cpp
     )
 endif()

@@ -24,7 +24,7 @@ public:
     Q_PROPERTY(bool aquire WRITE aquireSample USER true)
     Q_PROPERTY(QString aquireAs WRITE aquireSampleAs USER true)
 
-    Q_INVOKABLE explicit ManualAquisitionNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit ManualAquisitionNode(AbstractSession* sess);
 
     bool dummy() const;
 

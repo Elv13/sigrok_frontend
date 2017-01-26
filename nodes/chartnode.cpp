@@ -28,10 +28,10 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-ChartNode::ChartNode(QObject* parent) : ProxyNode(parent), d_ptr(new ChartNodePrivate())
+ChartNode::ChartNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new ChartNodePrivate())
 {
     auto chart = new KChart::Chart(nullptr);
-    PageManager::instance()->addPage(this, chart, title(), uid());
+    session()->pages()->addPage(this, chart, title(), uid());
 
     auto coordinatePlane = dynamic_cast<KChart::CartesianCoordinatePlane*>(
         chart->coordinatePlane()

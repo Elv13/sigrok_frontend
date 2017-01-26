@@ -17,7 +17,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-TailNode::TailNode(QObject* parent) : ProxyNode(parent), d_ptr(new TailNodePrivate(this))
+TailNode::TailNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new TailNodePrivate(this))
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &TailNodePrivate::slotModelChanged);

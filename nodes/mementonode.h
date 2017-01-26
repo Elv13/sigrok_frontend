@@ -15,7 +15,7 @@ public:
     Q_PROPERTY(QAbstractItemModel* lastestMemento READ lastestMemento NOTIFY mementoAdded USER true)
     Q_PROPERTY(TRIGGER trigger WRITE takeMemento USER true)
 
-    Q_INVOKABLE explicit MementoNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit MementoNode(AbstractSession* sess);
     virtual ~MementoNode();
 
     virtual QString title() const override;

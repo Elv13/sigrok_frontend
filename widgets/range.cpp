@@ -198,7 +198,6 @@ void Range::slotAllColumns(bool val)
 
 void Range::applyWidget(const QModelIndex& root, QVector< std::function<QWidget*(const QPersistentModelIndex& idx)> >& f)
 {
-    qDebug() << "RELOAD";
     // Create all missing widgets
     for (int i=0; i < m_pFiltered->rowCount(root); i++) {
         for (int j = 0; j < m_pFiltered->columnCount(root); j++) {

@@ -7,6 +7,7 @@
 #include "widgets/charttype.h"
 
 #include "common/pagemanager.h"
+#include "common/abstractsession.h"
 
 #include "remotemanager.h"
 
@@ -25,14 +26,14 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-CurveChartNode::CurveChartNode(QObject* parent) : ProxyNode(parent), d_ptr(new CurveChartNodePrivate())
+CurveChartNode::CurveChartNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new CurveChartNodePrivate())
 {
 //     auto chart = new KChart::Chart(nullptr);
 
     d_ptr->m_pPlotter = new CurveChart();
 
     QTimer::singleShot(0, [this](){
-        PageManager::instance()->addPage(this, d_ptr->m_pPlotter, title(), uid());
+        session()->pages()->addPage(this, d_ptr->m_pPlotter, title(), uid());
     });
 //     auto coordinatePlane = dynamic_cast<KChart::CartesianCoordinatePlane*>(
 //         chart->coordinatePlane()

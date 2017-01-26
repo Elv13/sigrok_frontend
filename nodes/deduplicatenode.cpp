@@ -30,7 +30,7 @@ public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
-DeduplicateNode::DeduplicateNode(QObject* parent) : ProxyNode(parent), d_ptr(new DeduplicateNodePrivate())
+DeduplicateNode::DeduplicateNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new DeduplicateNodePrivate())
 {
     d_ptr->q_ptr = this;
 

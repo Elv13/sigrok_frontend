@@ -8,12 +8,13 @@
 #include "ui_mainwindow.h"
 
 class StatusBar2;
-class ProxyNodeFactoryAdapter;
+class Session;
 
 class KTextEdit;
 class QDockWidget;
 class KJob;
 class DesktopSerializer;
+class QTreeView;
 
 class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
 {
@@ -27,11 +28,15 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     static MainWindow* instance();
 
   private:
+    Session* addSession(const QString& name);
+    Session* currentSession() const;
+
     StatusBar2* m_pStatusBar;
-    ProxyNodeFactoryAdapter* m_pSession;
+    QVector<Session*> m_lSessions;
     void setupActions();
     QHash<QString, QDockWidget*> m_lDocks;
     DesktopSerializer* m_pInterfaceSerializer;
+    QTreeView* m_pToolBox;
 
     QUrl fileName;
 
@@ -44,6 +49,10 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     void saveFile();
     void saveFileAs();
     void saveFileAs(const QUrl &outputFileName);
+
+  public Q_SLOTS:
+    void slotTabCloseRequested(int index);
+    void slotTabSelected(int index);
 
     void downloadFinished(KJob* job);
 };

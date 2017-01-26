@@ -24,8 +24,8 @@ public Q_SLOTS:
     void slotCurrentChanged(const QModelIndex& idx);
 };
 
-SequenceNode::SequenceNode(QObject* parent)
-    : AbstractNode(parent), d_ptr(new SequenceNodePrivate)
+SequenceNode::SequenceNode(AbstractSession* sess)
+    : AbstractNode(sess), d_ptr(new SequenceNodePrivate)
 {
     d_ptr->q_ptr = this;
 }

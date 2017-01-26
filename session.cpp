@@ -1,4 +1,4 @@
-#include "proxynodefactory.h"
+#include "session.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QMimeData>
@@ -11,6 +11,7 @@
 #include "qt5-node-editor/src/qreactiveproxymodel.h"
 
 #include "common/interfaceserializer.h"
+#include "common/pagemanager.h"
 
 #if QT_VERSION < 0x050700
 //Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
@@ -24,7 +25,7 @@ const T& qAsConst(const T& v)
 class NodeMimeData : public QMimeData
 {
 public:
-    explicit NodeMimeData(ProxyNodeFactoryAdapter* f, const QModelIndex& idx) :
+    explicit NodeMimeData(Session* f, const QModelIndex& idx) :
     QMimeData(), m_pParent(f), m_Index(idx) {}
 
     virtual bool hasFormat(const QString &mimeType) const override {
@@ -53,17 +54,18 @@ protected:
     }
 
     const QPersistentModelIndex m_Index;
-    ProxyNodeFactoryAdapter* m_pParent;
+    Session* m_pParent;
 };
 
-class ProxyNodeFactoryAdapterPrivate
+class SessionPrivate
 {
 public:
     QList<InterfaceSerializer*> m_lIS;
+    PageManager m_PageManager;
 };
 
-ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
-    m_pNodeW(w), d_ptr(new ProxyNodeFactoryAdapterPrivate)
+Session::Session(QNodeWidget* w) : AbstractSession(w),
+    m_pNodeW(w), d_ptr(new SessionPrivate)
 {
     m_pNodeW->reactiveModel()->setExtraRole(
         QReactiveProxyModel::ExtraRoles::SourceConnectionNotificationRole, 999
@@ -74,7 +76,12 @@ ProxyNodeFactoryAdapter::ProxyNodeFactoryAdapter(QNodeWidget* w) :
     connect(w, SIGNAL(nodeRenamed(QString, QString, QString)), this, SLOT(renameN(QString, QString)));
 }
 
-void ProxyNodeFactoryAdapter::registerInterfaceSerializer(InterfaceSerializer* ser)
+PageManager* Session::pages() const
+{
+    return &d_ptr->m_PageManager;
+}
+
+void Session::registerInterfaceSerializer(InterfaceSerializer* ser)
 {
     d_ptr->m_lIS << ser;
 }
@@ -99,9 +106,9 @@ QByteArray generateRandomHash()
     return ret;
 }
 
-QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaObject(const QMetaObject& meta, const QString& uid)
+QPair<GraphicsNode*, AbstractNode*> Session::addToSceneFromMetaObject(const QMetaObject& meta, const QString& uid)
 {
-    QObject* o = meta.newInstance();
+    QObject* o = meta.newInstance(Q_ARG(AbstractSession*, this));
     Q_ASSERT(o);
 
     AbstractNode* anode = qobject_cast<AbstractNode*>(o);
@@ -150,7 +157,7 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToSceneFromMetaO
     return pair;
 }
 
-QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QModelIndex& idx)
+QPair<GraphicsNode*, AbstractNode*> Session::addToScene(const QModelIndex& idx)
 {
     if ((!idx.isValid()) || !idx.parent().isValid())
         return {};
@@ -167,7 +174,7 @@ QPair<GraphicsNode*, AbstractNode*> ProxyNodeFactoryAdapter::addToScene(const QM
     return ret;
 }
 
-void ProxyNodeFactoryAdapter::remove(const QObject* n, const QString& id)
+void Session::remove(const QObject* n, const QString& id)
 {
     Q_ASSERT(n);
 
@@ -193,13 +200,13 @@ void ProxyNodeFactoryAdapter::remove(const QObject* n, const QString& id)
     Q_EMIT dataChanged(midx, midx);
 }
 
-void ProxyNodeFactoryAdapter::renameN(const QString& uid, const QString& name)
+void Session::renameN(const QString& uid, const QString& name)
 {
     for (const auto is : qAsConst(d_ptr->m_lIS))
         is->rename(uid, name);
 }
 
-QVariant ProxyNodeFactoryAdapter::data(const QModelIndex& idx, int role) const
+QVariant Session::data(const QModelIndex& idx, int role) const
 {
     if (!idx.isValid()) return {};
 
@@ -225,7 +232,7 @@ QVariant ProxyNodeFactoryAdapter::data(const QModelIndex& idx, int role) const
     return {};
 }
 
-int ProxyNodeFactoryAdapter::rowCount(const QModelIndex& parent) const
+int Session::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid() && !parent.parent().isValid())
         return m_slCategory[parent.row()]->m_lTypes.size();
@@ -235,19 +242,19 @@ int ProxyNodeFactoryAdapter::rowCount(const QModelIndex& parent) const
     return 0;
 }
 
-int ProxyNodeFactoryAdapter::columnCount(const QModelIndex& parent) const
+int Session::columnCount(const QModelIndex& parent) const
 {
     return parent.parent().isValid() ? 0 : 1;
 }
 
-QModelIndex ProxyNodeFactoryAdapter::parent(const QModelIndex& idx) const
+QModelIndex Session::parent(const QModelIndex& idx) const
 {
     if (!idx.isValid()) return {};
     const int id = (int)idx.internalId();
     return id==-1 ? QModelIndex() : index(id, 0);
 }
 
-Qt::ItemFlags ProxyNodeFactoryAdapter::flags(const QModelIndex& idx) const
+Qt::ItemFlags Session::flags(const QModelIndex& idx) const
 {
     if (idx.parent().isValid())
         return QAbstractItemModel::flags(idx) | Qt::ItemIsDragEnabled;
@@ -255,12 +262,12 @@ Qt::ItemFlags ProxyNodeFactoryAdapter::flags(const QModelIndex& idx) const
     return QAbstractItemModel::flags(idx);
 }
 
-QStringList ProxyNodeFactoryAdapter::mimeTypes() const
+QStringList Session::mimeTypes() const
 {
     return {QStringLiteral("x-qnodeview/node-index")};
 }
 
-QMimeData* ProxyNodeFactoryAdapter::mimeData(const QModelIndexList& indexes) const
+QMimeData* Session::mimeData(const QModelIndexList& indexes) const
 {
     if (indexes.size() != 1)
         return nullptr;
@@ -271,17 +278,17 @@ QMimeData* ProxyNodeFactoryAdapter::mimeData(const QModelIndexList& indexes) con
     if (!idx.parent().isValid())
         return nullptr;
 
-    auto dt = new NodeMimeData(const_cast<ProxyNodeFactoryAdapter*>(this), idx);
+    auto dt = new NodeMimeData(const_cast<Session*>(this), idx);
 
     return dt;
 }
 
-QModelIndex ProxyNodeFactoryAdapter::index(int row, int column, const QModelIndex& parent) const
+QModelIndex Session::index(int row, int column, const QModelIndex& parent) const
 {
     return createIndex(row, column, parent.isValid() ? parent.row() : -1);
 }
 
-void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
+void Session::serialize(QIODevice *dev) const
 {
     QJsonObject session;
 
@@ -368,7 +375,7 @@ void ProxyNodeFactoryAdapter::serialize(QIODevice *dev) const
     dev->write(QJsonDocument(session).toJson());
 }
 
-void ProxyNodeFactoryAdapter::load(const QByteArray& data)
+void Session::load(const QByteArray& data)
 {
     QJsonDocument loadDoc(QJsonDocument::fromJson(data));
 
@@ -547,7 +554,7 @@ void ProxyNodeFactoryAdapter::load(const QByteArray& data)
 
 }
 
-void ProxyNodeFactoryAdapter::load(QIODevice *dev)
+void Session::load(QIODevice *dev)
 {
     const QByteArray data = dev->readAll();
     load(data);

@@ -10,7 +10,7 @@ public:
     DeviceListNode* q_ptr;
 };
 
-DeviceListNode::DeviceListNode(QObject* parent) : AbstractNode(parent), d_ptr(new DeviceListNodePrivate())
+DeviceListNode::DeviceListNode(AbstractSession* sess) : AbstractNode(sess), d_ptr(new DeviceListNodePrivate())
 {
 }
 

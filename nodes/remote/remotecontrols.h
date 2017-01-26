@@ -12,7 +12,7 @@ class RemoteControls : public AbstractNode
 
 public:
 
-    Q_INVOKABLE explicit RemoteControls(QObject* parent = nullptr);
+    Q_INVOKABLE explicit RemoteControls(AbstractSession* sess);
     virtual ~RemoteControls();
 
     virtual QString title() const override;

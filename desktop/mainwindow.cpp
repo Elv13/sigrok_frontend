@@ -16,7 +16,7 @@
 
 #include "sigrokd/aquisitionmodel.h"
 
-#include "proxynodefactory.h"
+#include "session.h"
 #include "models/remotewidgets.h"
 
 #include "nodes/aquisitionnode.h"
@@ -63,6 +63,7 @@
 #include "tutorial4Settings.h"
 
 #include "qt5-node-editor/src/graphicsnode.hpp"
+#include "qt5-node-editor/src/qnodewidget.h"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
 
 #include "common/pagemanager.h"
@@ -207,6 +208,97 @@ QDockWidget* MainWindow::addDock(QWidget* w, const QString& title, const QString
     return dock;
 }
 
+Session* MainWindow::addSession(const QString& name)
+{
+    auto nodeWidget = new QNodeWidget(this->m_pTabs);
+    auto sess = new Session(nodeWidget);
+    m_lSessions << sess;
+    m_pTabs->addTab(nodeWidget, name);
+
+
+    connect(sess->pages(), &PageManager::pageAdded, this, &MainWindow::addDock);
+
+    connect(sess->pages(), &QAbstractItemModel::rowsAboutToBeRemoved, [this, sess](const QModelIndex& tl, int first, int last) {
+        for (int i = first; i <= last; i++) {
+            const auto uid = sess->pages()->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
+
+            if (m_lDocks.contains(uid)) {
+                removeDockWidget(m_lDocks[uid]);
+                m_lDocks.remove(uid);
+            }
+        }
+    });
+
+    nodeWidget->setViewport(new QGLWidget(
+            QGLFormat(QGL::SampleBuffers)));
+    nodeWidget->setViewportUpdateMode(
+        QGraphicsView::FullViewportUpdate);
+
+
+    m_pInterfaceSerializer = new DesktopSerializer(this);
+    sess->registerInterfaceSerializer(m_pInterfaceSerializer);
+
+    sess->registerType<CurveChartNode>  ("Chart"          , "Widgets"   , "curvedchart_node", QIcon::fromTheme( "document-edit"        ));
+    sess->registerType<TableNode>  ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
+    sess->registerType<MeterNode>  ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
+    sess->registerType<RemoteActionNode>  ("Controls"          , "Widgets"   , "remoteaction_node", QIcon::fromTheme( "bookmark-new"         ));
+    sess->registerType<LCDMeterNode>  ("LCD Meter"      , "Widgets"   , "lcdmeter_node", QIcon::fromTheme( "bookmark-new"         ));
+    sess->registerType<ColumnNode> ("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
+    sess->registerType<ColorNode>  ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
+    sess->registerType<ColumnNode> ("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
+    sess->registerType<DeduplicateNode> ("Deduplicate"  , "Filters"   , "deduplicate_node", QIcon::fromTheme( "view-filter"          ));
+    sess->registerType<AquisitionNode> ("Live aquisition" , "Sources"  , "aquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    sess->registerType<ManualAquisitionNode> ("Manual aquisition" , "Sources"  , "manualaquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    sess->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    sess->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
+    sess->registerType<TailNode>   ("Tail filter"     , "Filters"  , "tail_node"  , QIcon::fromTheme( "kt-add-filters"   ));
+    sess->registerType<HeadNode>   ("Head filter"     , "Filters"  , "head_node" , QIcon::fromTheme( "kt-remove-filters"));
+    sess->registerType<CurrentValues>("Current Values", "Sinks"    , "currentvalues_node" , QIcon::fromTheme( "kt-remove-filters"));
+    sess->registerType<TimerNode>  ("Timer"           , "Tools"    , "timer_node", QIcon::fromTheme( "chronometer"          ));
+    sess->registerType<SequenceNode>  ("Sequence"           , "Tools"    , "sequence_node", QIcon::fromTheme( "chronometer"          ));
+    sess->registerType<ChronoNode> ("Chronometer"     , "Metadata" , "chrono_node", QIcon::fromTheme( "chronometer"        ));
+    sess->registerType<DeviceListNode> ("Device List"      , "Sources"  , "devicelist_node", QIcon::fromTheme( "document-open"          ));
+
+    sess->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    sess->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    sess->registerType<RemoteControls>("Controls"      , "Remote widgets"  , "remotecontrols_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+
+    //DUMMY
+    sess->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
+    sess->registerType<ColorNode> ("External device" , "Sources"  , " ", QIcon::fromTheme( "document-share"          )); //allow async memento transfer from other instances
+    sess->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
+    sess->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
+    sess->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
+    sess->registerType<ColorNode> ("ODS"             , "Exporter" , " ", QIcon::fromTheme( "document-save-all"  ));
+    sess->registerType<ColorNode> ("PCAP (WireShark)", "Exporter" , " ", QIcon::fromTheme( "document-save-as"   ));
+
+    sess->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
+    sess->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
+
+
+    return sess;
+}
+
+Session* MainWindow::currentSession() const
+{
+    return m_lSessions[m_pTabs->currentIndex()];
+}
+
+void MainWindow::slotTabCloseRequested(int index)
+{
+    qDebug() << "CLOSE REQUESTED!!!";
+}
+
+void MainWindow::slotTabSelected(int index)
+{
+    auto sess = m_lSessions[index];
+    qDebug() << "CURRET CHANGED" << index;
+    m_pToolBox->setModel(sess);
+    m_pToolBox->expandAll();
+
+
+}
+
 MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QString())
 {
     setObjectName("Master Window");
@@ -218,91 +310,40 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
     auto w = new QWidget(this);
     setupUi(w);
 
-    m_pNode->setViewport(new QGLWidget(
-            QGLFormat(QGL::SampleBuffers)));
-    m_pNode->setViewportUpdateMode(
-        QGraphicsView::FullViewportUpdate);
-
-    connect(PageManager::instance(), &PageManager::pageAdded, this, &MainWindow::addDock);
-
-    connect(PageManager::instance(), &QAbstractItemModel::rowsAboutToBeRemoved, [this](const QModelIndex& tl, int first, int last) {
-        for (int i = first; i <= last; i++) {
-            const auto uid = PageManager::instance()->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
-
-            if (m_lDocks.contains(uid)) {
-                removeDockWidget(m_lDocks[uid]);
-                m_lDocks.remove(uid);
-            }
-        }
-    });
-
-    m_pSession = new ProxyNodeFactoryAdapter(m_pNode);
-
-    m_pInterfaceSerializer = new DesktopSerializer(this);
-    m_pSession->registerInterfaceSerializer(m_pInterfaceSerializer);
+    connect(m_pTabs, &QTabWidget::tabCloseRequested, this, &MainWindow::slotTabCloseRequested);
+    connect(m_pTabs, &QTabWidget::currentChanged, this, &MainWindow::slotTabSelected);
 
     setCentralWidget(w);
 
-    m_pSession->registerType<CurveChartNode>  ("Chart"          , "Widgets"   , "curvedchart_node", QIcon::fromTheme( "document-edit"        ));
-    m_pSession->registerType<TableNode>  ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
-    m_pSession->registerType<MeterNode>  ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
-    m_pSession->registerType<RemoteActionNode>  ("Controls"          , "Widgets"   , "remoteaction_node", QIcon::fromTheme( "bookmark-new"         ));
-    m_pSession->registerType<LCDMeterNode>  ("LCD Meter"      , "Widgets"   , "lcdmeter_node", QIcon::fromTheme( "bookmark-new"         ));
-    m_pSession->registerType<ColumnNode> ("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
-    m_pSession->registerType<ColorNode>  ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
-    m_pSession->registerType<ColumnNode> ("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
-    m_pSession->registerType<DeduplicateNode> ("Deduplicate"  , "Filters"   , "deduplicate_node", QIcon::fromTheme( "view-filter"          ));
-    m_pSession->registerType<AquisitionNode> ("Live aquisition" , "Sources"  , "aquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    m_pSession->registerType<ManualAquisitionNode> ("Manual aquisition" , "Sources"  , "manualaquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    m_pSession->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    m_pSession->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
-    m_pSession->registerType<TailNode>   ("Tail filter"     , "Filters"  , "tail_node"  , QIcon::fromTheme( "kt-add-filters"   ));
-    m_pSession->registerType<HeadNode>   ("Head filter"     , "Filters"  , "head_node" , QIcon::fromTheme( "kt-remove-filters"));
-    m_pSession->registerType<CurrentValues>("Current Values", "Sinks"    , "currentvalues_node" , QIcon::fromTheme( "kt-remove-filters"));
-    m_pSession->registerType<TimerNode>  ("Timer"           , "Tools"    , "timer_node", QIcon::fromTheme( "chronometer"          ));
-    m_pSession->registerType<SequenceNode>  ("Sequence"           , "Tools"    , "sequence_node", QIcon::fromTheme( "chronometer"          ));
-    m_pSession->registerType<ChronoNode> ("Chronometer"     , "Metadata" , "chrono_node", QIcon::fromTheme( "chronometer"        ));
-    m_pSession->registerType<DeviceListNode> ("Device List"      , "Sources"  , "devicelist_node", QIcon::fromTheme( "document-open"          ));
-
-    m_pSession->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    m_pSession->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    m_pSession->registerType<RemoteControls>("Controls"      , "Remote widgets"  , "remotecontrols_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-
-    //DUMMY
-    m_pSession->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
-    m_pSession->registerType<ColorNode> ("External device" , "Sources"  , " ", QIcon::fromTheme( "document-share"          )); //allow async memento transfer from other instances
-    m_pSession->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
-    m_pSession->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
-    m_pSession->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
-    m_pSession->registerType<ColorNode> ("ODS"             , "Exporter" , " ", QIcon::fromTheme( "document-save-all"  ));
-    m_pSession->registerType<ColorNode> ("PCAP (WireShark)", "Exporter" , " ", QIcon::fromTheme( "document-save-as"   ));
-
-    m_pSession->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
-    m_pSession->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
-
     //Create the node creator dock
-    auto dock = new QDockWidget    ( ins );
-    auto tab  = new CategorizedTree( dock     );
+    auto dock = new QDockWidget( "Tool box", ins );
+    m_pToolBox = new CategorizedTree(dock);
+    m_pToolBox->header()->setHidden(true);
     dock->setObjectName("ToolBox");
-    tab->setModel(m_pSession);
-    tab->setDragEnabled(true);
-    tab->setDragDropMode(QAbstractItemView::DragOnly);
-    auto del = new CategorizedDelegate(tab);
+    m_pToolBox->setDragEnabled(true);
+    m_pToolBox->setDragDropMode(QAbstractItemView::DragOnly);
+    auto del = new CategorizedDelegate(m_pToolBox);
     del->setChildDelegate(new AutoCompletionDelegate());
-    tab->setItemDelegate(del);
-    tab->setIndentation(5);
-    tab->expandAll();
-    QObject::connect(tab, &QTreeView::doubleClicked, [this](const QModelIndex& idx) {
-        m_pSession->addToScene(idx);
+    m_pToolBox->setItemDelegate(del);
+    m_pToolBox->setIndentation(5);
+    QObject::connect(m_pToolBox, &QTreeView::doubleClicked, [this](const QModelIndex& idx) {
+        const int cur = m_pTabs->currentIndex();
+        Q_ASSERT(cur >= 0 && cur < m_lSessions.size());
+
+        m_lSessions[cur]->addToScene(idx);
     });
 
-    dock->setWidget(tab);
+    dock->setWidget(m_pToolBox);
     ins->addDockWidget(Qt::LeftDockWidgetArea, dock);
 
     setupActions();
 
+
     if (Settings::openLastFile() && !Settings::lastFilePath().isEmpty())
         openFile(Settings::lastFilePath());
+    else
+        addSession("dsfsdf");
+
 }
 
 MainWindow::~MainWindow()
@@ -346,10 +387,13 @@ void MainWindow::newFile()
 void MainWindow::saveFileAs(const QUrl &outputFileName)
 {
     if (!outputFileName.isEmpty()) {
+        auto sess = currentSession();
+        Q_ASSERT(sess);
+
         QSaveFile file(outputFileName.path());
         file.open(QIODevice::WriteOnly);
 
-        m_pSession->serialize(&file);
+        sess->serialize(&file);
         file.commit();
 
         fileName = outputFileName;
@@ -411,5 +455,9 @@ void MainWindow::downloadFinished(KJob* job)
 
     KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
 
-    m_pSession->load(storedJob->data());
+    auto sess = addSession("fo");
+
+    sess->load(storedJob->data());
 }
+
+#include <mainwindow.moc>

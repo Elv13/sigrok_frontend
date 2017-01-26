@@ -32,7 +32,7 @@ public:
     Q_PROPERTY(bool stop WRITE stop USER true)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY runningChanged USER true)
 
-    Q_INVOKABLE explicit AquisitionNode(QObject* parent = nullptr);
+    Q_INVOKABLE explicit AquisitionNode(AbstractSession* sess);
 
     virtual ~AquisitionNode();
 

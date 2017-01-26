@@ -12,8 +12,8 @@ public:
 
 };
 
-ManualAquisitionNode::ManualAquisitionNode(QObject* parent) :
-    AquisitionNode(parent), d_ptr(new ManualAquisitionNodePrivate())
+ManualAquisitionNode::ManualAquisitionNode(AbstractSession* sess) :
+    AquisitionNode(sess), d_ptr(new ManualAquisitionNodePrivate())
 {
     
 }
