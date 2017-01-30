@@ -25,6 +25,7 @@ SET(libcommon_SRCS
     remotemanager.cpp
     interfaceserializer.cpp
     abstractsession.cpp
+    widgetgroupmodel.cpp
 )
 
 qt5_generate_repc(libcommon_SRCS

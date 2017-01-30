@@ -5,10 +5,13 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QUrl>
 
+#include "docktitle.h"
+
 #include "ui_mainwindow.h"
 
 class StatusBar2;
 class Session;
+class WidgetGroupModel;
 
 class KTextEdit;
 class QDockWidget;
@@ -34,9 +37,11 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     StatusBar2* m_pStatusBar;
     QVector<Session*> m_lSessions;
     void setupActions();
-    QHash<QString, QDockWidget*> m_lDocks;
+    QHash<QString, DockTitle*> m_lDocks;
+    QHash<QString, QMainWindow*> m_lWindows;
     DesktopSerializer* m_pInterfaceSerializer;
     QTreeView* m_pToolBox;
+    WidgetGroupModel* m_pGroups;
 
     QUrl fileName;
 
@@ -49,6 +54,8 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     void saveFile();
     void saveFileAs();
     void saveFileAs(const QUrl &outputFileName);
+    QMainWindow* addMainWindow(const QString& title = QString(), const QString& id = QString());
+    QMainWindow* slotAddMainWindow(bool);
 
   public Q_SLOTS:
     void slotTabCloseRequested(int index);

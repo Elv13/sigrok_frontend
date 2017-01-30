@@ -16,6 +16,8 @@
 
 #include "sigrokd/aquisitionmodel.h"
 
+#include "docktitle.h"
+
 #include "session.h"
 #include "models/remotewidgets.h"
 
@@ -68,6 +70,7 @@
 
 #include "common/pagemanager.h"
 #include "common/interfaceserializer.h"
+#include "common/widgetgroupmodel.h"
 
 static MainWindow* ins; //FIXME
 
@@ -80,6 +83,8 @@ public:
 
     virtual void reflow() const override;
     virtual void rename(const QString& id, const QString& newName) override;
+
+    QMainWindow* getWindowWinId(const QString& uid) const;
 
 protected:
     virtual void writeWidget(QJsonObject &parent, const QString& id) const override;
@@ -97,23 +102,54 @@ void DesktopSerializer::writeWidget(QJsonObject &parent, const QString& id) cons
         return;
     }
 
-    const auto area = m_pMain->dockWidgetArea(dock);
+    auto mw = getWindowWinId(id);
+    Q_ASSERT(mw);
+
+    const auto area = mw->dockWidgetArea(dock);
     const float ratio = (float) ( (float)
             (area & (Qt::DockWidgetArea::TopDockWidgetArea | Qt::DockWidgetArea::BottomDockWidgetArea)) ?
                 dock->width() : dock->height()
         ) / (float) ( (float)
             (area & (Qt::DockWidgetArea::TopDockWidgetArea | Qt::DockWidgetArea::BottomDockWidgetArea)) ?
-                m_pMain->centralWidget()->width() : m_pMain->centralWidget()->height()
+                mw->centralWidget()->width() : mw->centralWidget()->height()
         );
 
     const int pos = (area & (Qt::DockWidgetArea::TopDockWidgetArea | Qt::DockWidgetArea::BottomDockWidgetArea)) ?
         dock->x() : dock->y();
 
-    parent[ "name"  ] = dock->objectName(); //TODO REMOVE
-    parent[ "pos"   ] = pos;
-    parent[ "area"  ] = area;
-    parent[ "ratio" ] = ratio;
-    parent[ "uid"   ] = id;
+    const auto winId = dock->parentWidget() ?
+        dock->parentWidget()->objectName() : "floating";
+
+    Q_ASSERT(!winId.isEmpty());
+
+    parent[ "name"   ] = dock->objectName(); //TODO REMOVE
+    parent[ "pos"    ] = pos;
+    parent[ "area"   ] = area;
+    parent[ "ratio"  ] = ratio;
+    parent[ "uid"    ] = id;
+    parent[ "window" ] = winId;
+}
+
+QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
+{
+    QString windowId;
+
+    for (const auto e : elements()) {
+        if (e["uid"].toString() == uid) {
+            windowId = e["window"].toString();
+            break;
+        }
+    }
+
+    if (m_pMain->m_lWindows.contains(windowId))
+        return m_pMain->m_lWindows[windowId];
+
+    if (!windowId.isEmpty())
+        return m_pMain->addMainWindow(QObject::tr("Window"), windowId);
+
+    Q_ASSERT(m_pMain->m_lWindows.contains("mainWindow"));
+
+    return m_pMain->m_lWindows["mainWindow"];
 }
 
 void DesktopSerializer::reflow() const
@@ -122,13 +158,11 @@ void DesktopSerializer::reflow() const
         int          pos;
         float        ratio;
         QDockWidget* dock;
+        QMainWindow* mw;
     };
 
     // QMap are ordered, this allows resizeDocks to work
     QMap<int, QMap<int, info_t>> docksByArea;
-    //resizeDocks(const QList<QDockWidget *> &docks, const QList<int> &sizes, Qt::Orientation orientation)
-
-    QJsonArray arr;
 
     // Sort each docks (per area)
     for (const auto e : elements()) {
@@ -140,10 +174,16 @@ void DesktopSerializer::reflow() const
 
         const int area = e["area"].toInt();
 
+        const auto winId = e["area"].toString();
+
+        auto mw = ((!winId.isEmpty()) && m_pMain->m_lWindows.contains(winId)) ?
+            m_pMain->m_lWindows[winId] : getWindowWinId(uid);
+
         info_t i {
-            e["pos"].toInt(),
-            e["ratio"].toDouble(),
-            m_pMain->m_lDocks[uid]
+            e[ "pos"   ].toInt(),
+            e[ "ratio" ].toDouble(),
+            m_pMain->m_lDocks[uid],
+            mw
         };
 
         Q_ASSERT(dynamic_cast<QDockWidget*>(i.dock));
@@ -166,7 +206,7 @@ void DesktopSerializer::reflow() const
         QList<int> sizes;
 
         for (const auto& i : docksByArea[area]) {
-            m_pMain->addDockWidget(area, i.dock);
+            i.mw->addDockWidget(area, i.dock);
             docks << i.dock;
             sizes << (i.ratio*total);
         }
@@ -180,18 +220,24 @@ void DesktopSerializer::rename(const QString& id, const QString& newName)
     if (!m_pMain->m_lDocks.contains(id))
         return;
 
-    m_pMain->m_lDocks[id]->setWindowTitle(newName);
+    m_pMain->m_lDocks[id]->setText(newName);
 }
 
 QDockWidget* MainWindow::addDock(QWidget* w, const QString& title, const QString& uid)
 {
     static QHash<QString, int> uniqueNames;
 
-    auto dock = new QDockWidget(title, this);
+    auto mw = m_pInterfaceSerializer->getWindowWinId(uid);
+    Q_ASSERT(mw);
+
+    auto dock = new DockTitle(mw);
+    dock->setModel(m_pGroups);
+    dock->setText(title);
 
     dock->setWidget(w);
     dock->setObjectName(title+QString::number(uniqueNames[title]++));
-    addDockWidget(Qt::TopDockWidgetArea, dock);
+    qDebug() << mw->objectName();
+    mw->addDockWidget(Qt::TopDockWidgetArea, dock);
 
     if (Q_UNLIKELY(m_lDocks.contains(uid)))
         qWarning() << "A Widget with the same ID already exist" << uid;
@@ -228,6 +274,9 @@ Session* MainWindow::addSession(const QString& name)
             }
         }
     });
+
+    m_pGroups = new WidgetGroupModel(this);
+    m_pGroups->addGroup(this, tr("Main"), "mainWindow");
 
     nodeWidget->setViewport(new QGLWidget(
             QGLFormat(QGL::SampleBuffers)));
@@ -275,7 +324,6 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
     sess->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
 
-
     return sess;
 }
 
@@ -296,12 +344,14 @@ void MainWindow::slotTabSelected(int index)
     m_pToolBox->setModel(sess);
     m_pToolBox->expandAll();
 
-
+    if (!sess->rowCount())
+        QTimer::singleShot(0, m_pToolBox, &QTreeView::expandAll);
 }
 
 MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QString())
 {
-    setObjectName("Master Window");
+    setObjectName("mainWindow");
+    m_lWindows["mainWindow"] = this;
     ins = this;
 
     m_pStatusBar = new StatusBar2(this);
@@ -363,6 +413,13 @@ void MainWindow::setupActions()
     clearAction->setIcon(QIcon::fromTheme("document-new"));
     actionCollection()->setDefaultShortcut(clearAction, Qt::CTRL + Qt::Key_W);
     actionCollection()->addAction("clear", clearAction);
+
+    QAction* addWindowAction = new QAction(this);
+    addWindowAction->setText(i18n("&Add window"));
+    addWindowAction->setIcon(QIcon::fromTheme("document-new"));
+    actionCollection()->setDefaultShortcut(addWindowAction, Qt::CTRL + Qt::Key_A);
+    actionCollection()->addAction("add_window", addWindowAction);
+    connect(addWindowAction, &QAction::triggered, this, &MainWindow::slotAddMainWindow);
 
     KStandardAction::quit(qApp, SLOT(quit()), actionCollection());
 
@@ -458,6 +515,30 @@ void MainWindow::downloadFinished(KJob* job)
     auto sess = addSession("fo");
 
     sess->load(storedJob->data());
+}
+
+QMainWindow* MainWindow::slotAddMainWindow(bool)
+{
+    return addMainWindow(tr("Window"));
+}
+
+QMainWindow* MainWindow::addMainWindow(const QString& title, const QString& id)
+{
+    QMainWindow* w = new QMainWindow(this);
+    auto wdg = new QWidget();
+    wdg->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+    w->setCentralWidget(new QWidget());
+    QDockWidget* d = new QDockWidget();
+    const auto id2 = m_pGroups->addGroup(w, title, id.isEmpty() ? title : id);
+    w->setObjectName(id2);
+    w->show();
+
+    Q_ASSERT(id.isEmpty() || id == id2);
+
+    m_lWindows[id2] = w;
+
+    return w;
 }
 
 #include <mainwindow.moc>

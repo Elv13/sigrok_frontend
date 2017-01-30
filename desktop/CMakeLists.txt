@@ -34,11 +34,13 @@ find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
 SET(desktop_SRCS
     mainwindow.cpp
     configdialog.cpp
+    docktitle.cpp
 )
 
 QT5_WRAP_UI(desktop_SRCS
     mainwindow.ui
     generalconfig.ui
+    docktitle.ui
 )
 
 kconfig_add_kcfg_files(desktop_SRCS ../data/tutorial4Settings.kcfgc)
