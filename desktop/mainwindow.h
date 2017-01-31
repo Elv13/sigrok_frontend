@@ -12,6 +12,7 @@
 class StatusBar2;
 class Session;
 class WidgetGroupModel;
+class ToolBox;
 
 class KTextEdit;
 class QDockWidget;
@@ -28,7 +29,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     explicit MainWindow(QWidget *parent=0);
     virtual ~MainWindow();
 
-    static MainWindow* instance();
+//     static MainWindow* /*insta*/nce();
 
   private:
     Session* addSession(const QString& name);
@@ -40,8 +41,8 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     QHash<QString, DockTitle*> m_lDocks;
     QHash<QString, QMainWindow*> m_lWindows;
     DesktopSerializer* m_pInterfaceSerializer;
-    QTreeView* m_pToolBox;
     WidgetGroupModel* m_pGroups;
+    ToolBox* m_pToolBox;
 
     QUrl fileName;
 

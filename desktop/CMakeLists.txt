@@ -35,12 +35,14 @@ SET(desktop_SRCS
     mainwindow.cpp
     configdialog.cpp
     docktitle.cpp
+    toolbox.cpp
 )
 
 QT5_WRAP_UI(desktop_SRCS
     mainwindow.ui
     generalconfig.ui
     docktitle.ui
+    toolbox.ui
 )
 
 kconfig_add_kcfg_files(desktop_SRCS ../data/tutorial4Settings.kcfgc)

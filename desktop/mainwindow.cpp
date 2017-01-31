@@ -17,6 +17,8 @@
 #include "sigrokd/aquisitionmodel.h"
 
 #include "docktitle.h"
+#include "toolbox.h"
+
 
 #include "session.h"
 #include "models/remotewidgets.h"
@@ -51,9 +53,6 @@
 #include "widgets/categorizedtree.h"
 #include "widgets/statusbar.h"
 #include "configdialog.h"
-
-#include "delegates/categorizeddelegate.h"
-#include "delegates/autocompletiondelegate.h"
 
 #include <QtCore/QDebug>
 
@@ -345,14 +344,13 @@ void MainWindow::slotTabSelected(int index)
     m_pToolBox->expandAll();
 
     if (!sess->rowCount())
-        QTimer::singleShot(0, m_pToolBox, &QTreeView::expandAll);
+        QTimer::singleShot(0, m_pToolBox, &ToolBox::expandAll);
 }
 
 MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QString())
 {
     setObjectName("mainWindow");
     m_lWindows["mainWindow"] = this;
-    ins = this;
 
     m_pStatusBar = new StatusBar2(this);
     setStatusBar(m_pStatusBar);
@@ -365,26 +363,17 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
     setCentralWidget(w);
 
-    //Create the node creator dock
-    auto dock = new QDockWidget( "Tool box", ins );
-    m_pToolBox = new CategorizedTree(dock);
-    m_pToolBox->header()->setHidden(true);
-    dock->setObjectName("ToolBox");
-    m_pToolBox->setDragEnabled(true);
-    m_pToolBox->setDragDropMode(QAbstractItemView::DragOnly);
-    auto del = new CategorizedDelegate(m_pToolBox);
-    del->setChildDelegate(new AutoCompletionDelegate());
-    m_pToolBox->setItemDelegate(del);
-    m_pToolBox->setIndentation(5);
-    QObject::connect(m_pToolBox, &QTreeView::doubleClicked, [this](const QModelIndex& idx) {
+    //Create the node toolbox dock
+    m_pToolBox = new ToolBox(this);
+
+    QObject::connect(m_pToolBox, &ToolBox::doubleClicked, [this](const QModelIndex& idx) {
         const int cur = m_pTabs->currentIndex();
         Q_ASSERT(cur >= 0 && cur < m_lSessions.size());
 
         m_lSessions[cur]->addToScene(idx);
     });
 
-    dock->setWidget(m_pToolBox);
-    ins->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    addDockWidget(Qt::LeftDockWidgetArea, m_pToolBox);
 
     setupActions();
 
@@ -398,13 +387,8 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QStrin
 
 MainWindow::~MainWindow()
 {
-//     auto dock, m_lDocks
 }
 
-MainWindow* MainWindow::instance()
-{
-    return ins;
-}
 
 void MainWindow::setupActions()
 {

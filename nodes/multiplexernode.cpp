@@ -14,9 +14,6 @@ class MultiplexerModel final : public QAbstractListModel
     friend class MultiplexerNode;
 public:
 
-    explicit MultiplexerModel();
-    virtual ~MultiplexerModel() {};
-
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
     virtual bool setData(const QModelIndex& idx, const QVariant& value, int role) override;
