@@ -63,7 +63,7 @@ public:
 
 
 Q_SIGNALS:
-    void modelChanged(); //Dummy
+    void modelChanged(QAbstractItemModel*);
     void aboutToClear();
     void cleared();
     void runningChanged(bool);

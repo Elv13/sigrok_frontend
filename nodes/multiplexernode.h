@@ -6,15 +6,11 @@
 
 class MultiplexerNodePrivate;
 
-class Q_DECL_EXPORT MultiplexerNode : public ProxyNode
+class Q_DECL_EXPORT MultiplexerNode : public AbstractNode
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QAbstractItemModel* model2 READ model NOTIFY modelChangedCopy USER true)
-    Q_PROPERTY(QAbstractItemModel* model3 READ model NOTIFY modelChangedCopy USER true)
-    Q_PROPERTY(QAbstractItemModel* model4 READ model NOTIFY modelChangedCopy USER true)
-
     Q_INVOKABLE explicit MultiplexerNode(AbstractSession* sess);
     virtual ~MultiplexerNode();
 
@@ -23,10 +19,15 @@ public:
 
     virtual QString id() const override;
 
+    virtual Mode mode() const override {return AbstractNode::Mode::MODEL;}
+
     virtual void write(QJsonObject &parent) const override;
 
-Q_SIGNALS:
-    void modelChangedCopy(QAbstractItemModel* newModel, QAbstractItemModel* old);
+    virtual QAbstractItemModel* sourceModel() const override;
+
+    virtual bool createSocket(const QString& name) override;
+// Q_SIGNALS:
+//     void modelChangedCopy(QAbstractItemModel* newModel, QAbstractItemModel* old);
 
 private:
     MultiplexerNodePrivate* d_ptr;

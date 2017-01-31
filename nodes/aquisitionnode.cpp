@@ -84,6 +84,8 @@ void AquisitionNode::setModel(AquisitionModel* m)
         return;
 
     d_ptr->m_pModel = m;
+
+    Q_EMIT modelChanged(m);
 }
 
 AquisitionModel* AquisitionNode::aqModel() const
