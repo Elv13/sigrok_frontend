@@ -70,6 +70,10 @@
 #include "common/pagemanager.h"
 #include "common/interfaceserializer.h"
 #include "common/widgetgroupmodel.h"
+#include "common/actioncollection.h"
+#include "common/selectedactioncollection.h"
+
+#include "qrc_desktop.cpp"
 
 static MainWindow* ins; //FIXME
 
@@ -262,6 +266,8 @@ Session* MainWindow::addSession(const QString& name)
 
 
     connect(sess->pages(), &PageManager::pageAdded, this, &MainWindow::addDock);
+    connect(nodeWidget, &QNodeWidget::currentNodeChanged, this, &MainWindow::slotSelectionChanged);
+    connect(nodeWidget, &QNodeWidget::zoomLevelChanged, this, &MainWindow::zoomLevelChanged);
 
     connect(sess->pages(), &QAbstractItemModel::rowsAboutToBeRemoved, [this, sess](const QModelIndex& tl, int first, int last) {
         for (int i = first; i <= last; i++) {
@@ -347,19 +353,31 @@ void MainWindow::slotTabSelected(int index)
         QTimer::singleShot(0, m_pToolBox, &ToolBox::expandAll);
 }
 
-MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(QString())
+MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
+    m_pActionCollection(new ActionCollection(this)),
+    m_pSelActionCol(new SelectedActionCollection(this))
 {
     setObjectName("mainWindow");
     m_lWindows["mainWindow"] = this;
 
+    static QResource ss(":/pref/tutorial4ui.rc");
+    Q_ASSERT(ss.isValid());
+
+
     m_pStatusBar = new StatusBar2(this);
     setStatusBar(m_pStatusBar);
+    connect(m_pStatusBar, &StatusBar2::zoomLevel, this, &MainWindow::setZoom);
 
     auto w = new QWidget(this);
     setupUi(w);
 
     connect(m_pTabs, &QTabWidget::tabCloseRequested, this, &MainWindow::slotTabCloseRequested);
     connect(m_pTabs, &QTabWidget::currentChanged, this, &MainWindow::slotTabSelected);
+
+    connect(m_pActionCollection, &ActionCollection::zoomIn, this, &MainWindow::zoomIn);
+    connect(m_pActionCollection, &ActionCollection::zoomOut, this, &MainWindow::zoomOut);
+    connect(m_pActionCollection, &ActionCollection::zoomFit, this, &MainWindow::zoomFit);
+    connect(m_pActionCollection, &ActionCollection::zoomReset, this, &MainWindow::zoomReset);
 
     setCentralWidget(w);
 
@@ -417,7 +435,7 @@ void MainWindow::setupActions()
 
     KStandardAction::preferences(this, SLOT(settingsConfigure()), actionCollection());
 
-    setupGUI(Default, "tutorial4ui.rc");
+    setupGUI(Default, ":/pref/tutorial4ui.rc");
 }
 
 void MainWindow::newFile()
@@ -506,6 +524,13 @@ QMainWindow* MainWindow::slotAddMainWindow(bool)
     return addMainWindow(tr("Window"));
 }
 
+QNodeWidget* MainWindow::currentNodeWidget() const
+{
+    auto w = m_pTabs->widget(m_pTabs->currentIndex());
+
+    return qobject_cast<QNodeWidget*>(w);
+}
+
 QMainWindow* MainWindow::addMainWindow(const QString& title, const QString& id)
 {
     QMainWindow* w = new QMainWindow(this);
@@ -523,6 +548,52 @@ QMainWindow* MainWindow::addMainWindow(const QString& title, const QString& id)
     m_lWindows[id2] = w;
 
     return w;
+}
+
+QMainWindow* MainWindow::slotSelectionChanged()
+{
+    if (!m_pTabs->count())
+        return nullptr;
+
+    if (auto w = currentNodeWidget())
+        m_pSelActionCol->currentChanged(w->currentNode());
+
+    return nullptr;
+}
+
+void MainWindow::zoomIn()
+{
+    if (auto w = currentNodeWidget())
+        w->setZoomLevel(w->zoomLevel() + 0.5);
+}
+
+void MainWindow::zoomOut()
+{
+    if (auto w = currentNodeWidget())
+        w->setZoomLevel(w->zoomLevel() - 0.5);
+}
+
+void MainWindow::zoomFit()
+{
+
+}
+
+void MainWindow::zoomReset()
+{
+    if (auto w = currentNodeWidget())
+        w->setZoomLevel(1);
+}
+
+void MainWindow::setZoom(qreal level)
+{
+    if (auto w = currentNodeWidget())
+        w->setZoomLevel(level);
+}
+
+void MainWindow::zoomLevelChanged(qreal level)
+{
+    if (sender() == currentNodeWidget())
+        m_pStatusBar->setZoomLevel(level);
 }
 
 #include <mainwindow.moc>

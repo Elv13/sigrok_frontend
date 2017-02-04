@@ -9,6 +9,8 @@ class QNodeViewPrivate;
 
 class GraphicsNode;
 
+class QItemSelectionModel;
+
 //TODO use  a QAbstractItemView as the base class...
 
 class Q_DECL_EXPORT QNodeView : public GraphicsNodeView
@@ -21,6 +23,9 @@ public:
     void setModel(QAbstractItemModel* m);
 
     GraphicsNode* getNode(const QModelIndex& idx) const;
+
+    QItemSelectionModel* selectionModel() const;
+    void setSelectionModel(QItemSelectionModel* m);
 
     Q_INVOKABLE QAbstractItemModel *sinkSocketModel(const QModelIndex& node) const;
     Q_INVOKABLE QAbstractItemModel *sourceSocketModel(const QModelIndex& node) const;

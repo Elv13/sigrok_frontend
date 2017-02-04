@@ -7,7 +7,9 @@
 #include <QPoint>
 
 class QMimeData;
+class QTimeLine;
 class QResizeEvent;
+class QItemSelectionModel;
 class GraphicsNode;
 class GraphicsDirectedEdge;
 class GraphicsNodeSocket;
@@ -46,8 +48,8 @@ public:
 	explicit GraphicsNodeView(QWidget *parent = nullptr);
 	GraphicsNodeView(QGraphicsScene *scene, QWidget *parent = nullptr);
 
-    void forceDrag(GraphicsNode* node);
-
+	void setZoomLevel(qreal);
+	qreal zoomLevel() const;
 protected:
 	virtual void wheelEvent(QWheelEvent *event) override;
 	virtual void mouseMoveEvent(QMouseEvent *event) override;
@@ -59,6 +61,8 @@ protected:
 	virtual void dropEvent(QDropEvent *event) override;
 
     QNodeEditorSocketModel* m_pModel {nullptr}; //HACK evil workaround until the QAbstractItemView is added
+	QItemSelectionModel* m_pSelectionModel {nullptr}; //idem
+	QList<QModelIndex> selectedNodeIndexes() const;
 
 private:
 	void middleMouseButtonPress(QMouseEvent *event);
@@ -71,10 +75,21 @@ private:
 	GraphicsNodeSocket* socket_at(QPoint pos);
 
 private:
+	// No need for a d_ptr here. Eventually this class will become private
 	EdgeDragEvent *_drag_event = nullptr;
 	NodeResizeEvent *_resize_event = nullptr;
+	QTimeLine *_time_line = nullptr;
+	qreal _scheduled_zoom_steps = 1;
+	qreal _zoom_level = 1;
 
+private Q_SLOTS:
+	void slotZoomStep(qreal target);
+	void slotFinishZoom();
+
+Q_SIGNALS:
+	void zoomLevelChanged(qreal level);
 };
 
 #endif /* __GRAPHICSNODEVIEW_HPP__59C6610F_3283_42A1_9102_38A7065DB718 */
+//kate: space-indent off; indent-width tabs; replace-tabs off;
 

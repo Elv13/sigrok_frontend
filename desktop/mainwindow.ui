@@ -35,7 +35,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="desktop.qrc"/>
+ </resources>
  <connections/>
  <slots>
   <slot>slotTabCloseRequested(int)</slot>

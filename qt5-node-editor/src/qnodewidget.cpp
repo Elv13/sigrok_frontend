@@ -6,6 +6,7 @@
 #include "qreactiveproxymodel.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QItemSelectionModel>
 
 class QNodeWidgetPrivate : public QObject
 {
@@ -20,6 +21,7 @@ public:
 public Q_SLOTS:
     void slotRemoveRows(const QModelIndex& parent, int first, int last);
     void slotModelRenamed(const QModelIndex& index, const QString& newName, const QString& oldName);
+    void slotCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
 };
 
 QNodeWidget::QNodeWidget(QWidget* parent) : QNodeView(parent),
@@ -34,6 +36,9 @@ QNodeWidget::QNodeWidget(QWidget* parent) : QNodeView(parent),
 
     connect(&d_ptr->m_Model, SIGNAL(modelRenamed(QModelIndex,QString,QString)),
         d_ptr, SLOT(slotModelRenamed(QModelIndex,QString,QString)));
+
+    connect(selectionModel(), &QItemSelectionModel::currentChanged,
+        d_ptr, &QNodeWidgetPrivate::slotCurrentChanged);
 }
 
 QNodeWidget::~QNodeWidget()
@@ -153,6 +158,22 @@ void QNodeWidgetPrivate::slotModelRenamed(const QModelIndex& index, const QStrin
     }
     else
         Q_EMIT q_ptr->modelRenamed(model, newName, oldName);
+}
+
+void QNodeWidgetPrivate::slotCurrentChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+    // Both can be nullptr, that's ok
+    Q_EMIT q_ptr->currentNodeChanged(
+        q_ptr->getNode(current),
+        q_ptr->getNode(previous)
+    );
+}
+
+GraphicsNode* QNodeWidget::currentNode() const
+{
+    const auto idx = selectionModel()->currentIndex();
+
+    return idx.isValid() ? getNode(idx) : Q_NULLPTR;
 }
 
 #include <qnodewidget.moc>

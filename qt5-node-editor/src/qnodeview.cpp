@@ -1,6 +1,7 @@
 #include "qnodeview.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QItemSelectionModel>
 
 #include "graphicsnode.hpp"
 
@@ -20,14 +21,23 @@ public:
     QVector<GraphicsNode*>  m_lNodes  {         };
     GraphicsNodeScene       m_Scene   {this     };
     QNodeEditorSocketModel* m_pFactory{Q_NULLPTR};
+
+    QNodeView* q_ptr;
+
+public Q_SLOTS:
+    void slotSelectionChanged();
 };
 
 QNodeView::QNodeView(QWidget* parent) : GraphicsNodeView(parent),
     d_ptr(new QNodeViewPrivate(this))
 {
+    d_ptr->q_ptr = this;
     d_ptr->m_pFactory = new QNodeEditorSocketModel(&d_ptr->m_Proxy, &d_ptr->m_Scene);
 
     m_pModel = d_ptr->m_pFactory; //HACK to remove
+    m_pSelectionModel = new QItemSelectionModel(m_pModel);
+
+    connect(&d_ptr->m_Scene, &QGraphicsScene::selectionChanged, d_ptr, &QNodeViewPrivate::slotSelectionChanged);
 
     setScene(&d_ptr->m_Scene);
 }
@@ -80,4 +90,40 @@ QAbstractItemModel *QNodeView::sourceSocketModel(const QModelIndex& node) const
 QAbstractItemModel* QNodeView::edgeModel() const
 {
     return d_ptr->m_pFactory->edgeModel();
+}
+
+QItemSelectionModel* QNodeView::selectionModel() const
+{
+    return m_pSelectionModel;
+}
+
+void QNodeView::setSelectionModel(QItemSelectionModel* m)
+{
+    m_pSelectionModel = m;
+    d_ptr->slotSelectionChanged();
+}
+
+void QNodeViewPrivate::slotSelectionChanged()
+{
+    const auto sel = q_ptr->selectedNodeIndexes();
+
+    switch(sel.size()) {
+        case 0:
+            q_ptr->m_pSelectionModel->clear();
+            return;
+        case 1:
+            q_ptr->m_pSelectionModel->setCurrentIndex(
+                sel.first(),
+                QItemSelectionModel::Clear  |
+                QItemSelectionModel::Select |
+                QItemSelectionModel::Current
+            );
+            return;
+        default:
+            /*for (const auto& idx : sel) {
+                //TODO
+            }*/
+            break;
+    }
+
 }

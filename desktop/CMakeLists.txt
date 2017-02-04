@@ -38,6 +38,10 @@ SET(desktop_SRCS
     toolbox.cpp
 )
 
+QT5_ADD_RESOURCES(desktop_SRCS
+    desktop.qrc
+)
+
 QT5_WRAP_UI(desktop_SRCS
     mainwindow.ui
     generalconfig.ui

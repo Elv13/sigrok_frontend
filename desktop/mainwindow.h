@@ -19,6 +19,10 @@ class QDockWidget;
 class KJob;
 class DesktopSerializer;
 class QTreeView;
+class QNodeWidget;
+
+class ActionCollection;
+class SelectedActionCollection;
 
 class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
 {
@@ -34,6 +38,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
   private:
     Session* addSession(const QString& name);
     Session* currentSession() const;
+    QNodeWidget* currentNodeWidget() const;
 
     StatusBar2* m_pStatusBar;
     QVector<Session*> m_lSessions;
@@ -43,6 +48,8 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     DesktopSerializer* m_pInterfaceSerializer;
     WidgetGroupModel* m_pGroups;
     ToolBox* m_pToolBox;
+    ActionCollection* m_pActionCollection;
+    SelectedActionCollection* m_pSelActionCol;
 
     QUrl fileName;
 
@@ -57,6 +64,14 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     void saveFileAs(const QUrl &outputFileName);
     QMainWindow* addMainWindow(const QString& title = QString(), const QString& id = QString());
     QMainWindow* slotAddMainWindow(bool);
+    QMainWindow* slotSelectionChanged();
+
+    void zoomIn();
+    void zoomOut();
+    void zoomFit();
+    void zoomReset();
+    void setZoom(qreal level);
+    void zoomLevelChanged(qreal level);
 
   public Q_SLOTS:
     void slotTabCloseRequested(int index);

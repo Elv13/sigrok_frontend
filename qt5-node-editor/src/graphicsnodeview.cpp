@@ -6,9 +6,11 @@
 #include <QResizeEvent>
 #include <QMimeData>
 #include <QDebug>
+#include <QtCore/QTimeLine>
 #include <QGraphicsDropShadowEffect>
 #include <QResizeEvent>
 #include <QGraphicsItem>
+#include <QItemSelectionModel>
 
 #include "graphicsnode.hpp"
 #include "graphicsnodesocket.hpp"
@@ -99,16 +101,7 @@ dropEvent(QDropEvent *event)
 void GraphicsNodeView::
 wheelEvent(QWheelEvent *event) {
 	if (event->modifiers() & Qt::ControlModifier) {
-		setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-		double scaleFactor = 1.25;
-		if (event->delta() < 0) {
-			// zoom in
-			scale(scaleFactor, scaleFactor);
-		}
-		else {
-			// zoom out
-			scale(1.0 / scaleFactor, 1.0 / scaleFactor);
-		}
+		setZoomLevel(zoomLevel() + event->delta()/300.0);
 		event->accept();
 	}
 	else {
@@ -392,3 +385,77 @@ socket_at(QPoint pos)
 		return nullptr;
     }
 }
+
+QList<QModelIndex> GraphicsNodeView::
+selectedNodeIndexes() const
+{
+	Q_ASSERT(scene());
+
+	QList<QModelIndex> ret;
+
+	const auto elements = scene()->selectedItems();
+
+	for (const auto i : elements) {
+		if (i->type() == GraphicsNodeItemTypes::TypeNode) {
+			GraphicsNode *node = static_cast<NodeGraphicsItem*>(i)->q_ptr;
+			ret << node->index();
+		}
+	}
+
+	return ret;
+}
+
+void GraphicsNodeView::
+setZoomLevel(qreal zoom)
+{
+	const qreal old = _zoom_level;
+	_zoom_level = zoom;
+
+	// prevent mirror scaling
+	_zoom_level = std::max(0.1, _zoom_level);
+
+	// arbitrary decision
+	_zoom_level = std::min(7.0, _zoom_level);
+
+	if (old != _zoom_level)
+		Q_EMIT zoomLevelChanged(_zoom_level);
+
+	// setCurrentTime(0) makes the animation speed vary and and it doesn't look
+	// good. Better leave it alone
+	if (_time_line)
+		return;
+
+	_time_line = new QTimeLine(350, this);
+	_time_line->setUpdateInterval(20);
+
+	connect(_time_line, &QTimeLine::valueChanged, this, &GraphicsNodeView::slotZoomStep);
+	connect(_time_line, &QTimeLine::finished, this, &GraphicsNodeView::slotFinishZoom);
+
+	_time_line->start();
+}
+
+qreal GraphicsNodeView::
+zoomLevel() const
+{
+	return _zoom_level;
+}
+
+void GraphicsNodeView::
+slotZoomStep(qreal target)
+{
+	const qreal step = _scheduled_zoom_steps
+		+ (_zoom_level - _scheduled_zoom_steps) * target;
+
+	setTransform(QTransform::fromScale(step, step));
+}
+
+void GraphicsNodeView::
+slotFinishZoom()
+{
+	_scheduled_zoom_steps = _zoom_level;
+
+	delete _time_line;
+	_time_line = Q_NULLPTR;
+}
+
+//kate: space-indent off; indent-width tabs; replace-tabs off;

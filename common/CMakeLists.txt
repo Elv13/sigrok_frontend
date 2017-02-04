@@ -19,6 +19,10 @@ find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     RemoteObjects
 )
 
+find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
+    XmlGui
+)
+
 SET(libcommon_SRCS
     pagemanager.cpp
     abstractnode.cpp
@@ -26,6 +30,8 @@ SET(libcommon_SRCS
     interfaceserializer.cpp
     abstractsession.cpp
     widgetgroupmodel.cpp
+    actioncollection.cpp
+    selectedactioncollection.cpp
 )
 
 qt5_generate_repc(libcommon_SRCS
@@ -49,6 +55,7 @@ qt5_generate_repc(libcommon_SRCS
 ADD_LIBRARY( common STATIC ${libcommon_SRCS} )
 
 TARGET_LINK_LIBRARIES( common
+    KF5::XmlGui
     Qt5::Core
     Qt5::Widgets
     Qt5::Gui

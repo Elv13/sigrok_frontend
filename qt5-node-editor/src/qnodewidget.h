@@ -41,6 +41,8 @@ public:
         const QVariant&     uid   = {}
     );
 
+    GraphicsNode* currentNode() const;
+
 Q_SIGNALS:
     // Removing
     void objectRemoved(QObject* o);
@@ -51,6 +53,9 @@ Q_SIGNALS:
     void modelRenamed(QAbstractItemModel* m, const QString& nameName, const QString& oldName);
     void nodeRenamed(GraphicsNode* n, const QString& nameName, const QString& oldName);
     void nodeRenamed(const QString& uid, const QString& nameName, const QString& oldName);
+
+    // Selection
+    void currentNodeChanged(GraphicsNode* current, GraphicsNode* previous);
 
 private:
     QNodeWidgetPrivate* d_ptr;
