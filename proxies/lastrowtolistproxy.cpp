@@ -4,6 +4,7 @@
 
 class LastRowToListProxyPrivate : public QObject
 {
+    Q_OBJECT
 public:
     QAbstractItemModel* m_pSourceModel {nullptr};
     bool m_UseHeaderDR {false};
@@ -196,3 +197,6 @@ void LastRowToListProxyPrivate::slotLayoutChanged()
 {
     Q_EMIT q_ptr->layoutChanged();
 }
+
+#include <lastrowtolistproxy.moc>
+

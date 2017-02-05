@@ -32,6 +32,7 @@ struct SerializedRange
 
 class ColorNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     ColorNodePrivate(ColorNode* p) : QObject(p) {}
 
@@ -45,7 +46,6 @@ public:
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
-    void slotDataChanged();
     void slotRowsInserted(const QModelIndex& parent, int first, int last);
     void slotModelReset();
 };
@@ -136,14 +136,13 @@ QAbstractItemModel* ColorNode::filteredModel() const
 
 void ColorNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(old)
+    Q_UNUSED(newModel)
+
     m_pRangeProxy->setSourceModel(newModel);
 
     slotModelReset();
 }
-/*
-void ColorNodePrivate::slotDataChanged()
-{
-}*/
 
 void ColorNodePrivate::slotRowsInserted(const QModelIndex& parent, int first, int last)
 {
@@ -168,3 +167,5 @@ void ColorNodePrivate::slotModelReset()
 {
     slotRowsInserted({}, 0, m_pRangeProxy->rowCount());
 }
+
+#include <colornode.moc>

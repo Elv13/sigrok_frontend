@@ -16,6 +16,7 @@
 
 class DeduplicateNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     Deduplicate* m_pDeduplicate{Q_NULLPTR};
     QString m_PreferredColumn;
@@ -130,3 +131,5 @@ void DeduplicateNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbs
 
     m_pFilteredModel->setSourceModel(newModel);
 }
+
+#include <deduplicatenode.moc>

@@ -6,8 +6,18 @@
 
 #include "widgets/sequence.h"
 
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
+
 class SequenceNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     bool        m_Looping {false};
     int         m_Current {0};
@@ -177,7 +187,7 @@ void SequenceNode::write(QJsonObject &parent) const
 
     QJsonArray elements;
 
-    for (const auto& v : d_ptr->m_Model.stringList())
+    for (const auto& v : qAsConst(d_ptr->m_Model.stringList()))
         elements.append(v);
 
     parent["elements"] = elements;
@@ -219,3 +229,5 @@ void SequenceNodePrivate::slotCurrentChanged(const QModelIndex& idx)
     if (idx.row() != m_Current)
        q_ptr->setCurrent(idx.row());
 }
+
+#include <sequencenode.moc>

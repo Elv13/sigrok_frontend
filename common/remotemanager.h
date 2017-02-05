@@ -24,6 +24,7 @@ private:
 
 class RemoteManager final : public QAbstractListModel
 {
+    Q_OBJECT
 public:
     static RemoteManager* instance();
 

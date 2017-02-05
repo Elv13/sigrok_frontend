@@ -6,6 +6,7 @@
 
 class RemoteTablePrivate final : public QObject
 {
+    Q_OBJECT
 public:
 
     RemoteTable* q_ptr;
@@ -60,3 +61,5 @@ QString RemoteTable::remoteModelName() const
 {
     return "remotetable";
 }
+
+#include <remotetable.moc>

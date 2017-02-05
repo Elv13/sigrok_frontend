@@ -10,6 +10,7 @@
 
 class ChronoNodePrivate final : public QObject
 {
+    Q_OBJECT
 public:
     ChronometerProxy m_Proxy{this};
     ChronoNode* q_ptr;
@@ -138,3 +139,5 @@ bool ChronoNode::hasDateTimeColumn() const
 {
     return d_ptr->m_Proxy.extraColumns() & ChronometerProxy::ExtraColumns::DATE_TIME;
 }
+
+#include <chrononode.moc>

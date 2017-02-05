@@ -88,6 +88,8 @@ QWidget* LCDMeterNode::widget() const
 
 void LCDMeterNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(old)
+
     m_pSource = newModel;
     m_pColumnProxy->setSourceModel(newModel);
 

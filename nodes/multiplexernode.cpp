@@ -2,6 +2,15 @@
 
 #include <QtCore/QDebug>
 
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
+
 struct CloneHolder
 {
     bool                  init     { false                    };
@@ -11,6 +20,7 @@ struct CloneHolder
 
 class MultiplexerModel final : public QAbstractListModel
 {
+    Q_OBJECT
     friend class MultiplexerNode;
 public:
 
@@ -70,7 +80,7 @@ bool MultiplexerModel::setData(const QModelIndex& idx, const QVariant& value, in
                 Q_EMIT dataChanged(index(1,0), index(rowCount()-1, 0));
 
                 //FIXME why is this required?
-                for (auto dh : m_lRows) {
+                for (auto dh : qAsConst(m_lRows)) {
                     if (auto m = const_cast<QAbstractItemModel*>(dh->m_rIndex.model())) {
                         m->setData(dh->m_rIndex, m_Var, Qt::EditRole);
                     }
@@ -184,3 +194,5 @@ bool MultiplexerNode::createSocket(const QString& name)
 
     return true;
 }
+
+#include <multiplexernode.moc>

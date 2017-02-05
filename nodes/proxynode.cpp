@@ -7,6 +7,7 @@
 
 class ProxyNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     QAbstractItemModel* m_pModel {nullptr};
 
@@ -53,3 +54,5 @@ void ProxyNode::setModel(QAbstractItemModel* m)
     d_ptr->m_pModel = m;
     Q_EMIT modelChanged(m, old);
 }
+
+#include <proxynode.moc>

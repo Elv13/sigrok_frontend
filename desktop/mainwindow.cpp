@@ -75,7 +75,14 @@
 
 #include "qrc_desktop.cpp"
 
-static MainWindow* ins; //FIXME
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
 
 class DesktopSerializer : public InterfaceSerializer
 {
@@ -137,7 +144,7 @@ QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
 {
     QString windowId;
 
-    for (const auto e : elements()) {
+    for (const auto& e : qAsConst(elements())) {
         if (e["uid"].toString() == uid) {
             windowId = e["window"].toString();
             break;
@@ -159,7 +166,7 @@ void DesktopSerializer::reflow() const
 {
     struct info_t {
         int          pos;
-        float        ratio;
+        double       ratio;
         QDockWidget* dock;
         QMainWindow* mw;
     };
@@ -168,7 +175,7 @@ void DesktopSerializer::reflow() const
     QMap<int, QMap<int, info_t>> docksByArea;
 
     // Sort each docks (per area)
-    for (const auto e : elements()) {
+    for (const auto& e : qAsConst(elements())) {
         const auto  uid = e["uid"].toString();
         Q_ASSERT(!uid.isEmpty());
 
@@ -208,7 +215,7 @@ void DesktopSerializer::reflow() const
         QList<QDockWidget*> docks;
         QList<int> sizes;
 
-        for (const auto& i : docksByArea[area]) {
+        for (const auto& i : qAsConst(docksByArea[area])) {
             i.mw->addDockWidget(area, i.dock);
             docks << i.dock;
             sizes << (i.ratio*total);
@@ -269,7 +276,7 @@ Session* MainWindow::addSession(const QString& name)
     connect(nodeWidget, &QNodeWidget::currentNodeChanged, this, &MainWindow::slotSelectionChanged);
     connect(nodeWidget, &QNodeWidget::zoomLevelChanged, this, &MainWindow::zoomLevelChanged);
 
-    connect(sess->pages(), &QAbstractItemModel::rowsAboutToBeRemoved, [this, sess](const QModelIndex& tl, int first, int last) {
+    connect(sess->pages(), &QAbstractItemModel::rowsAboutToBeRemoved, [this, sess](const QModelIndex& , int first, int last) {
         for (int i = first; i <= last; i++) {
             const auto uid = sess->pages()->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
 
@@ -538,7 +545,7 @@ QMainWindow* MainWindow::addMainWindow(const QString& title, const QString& id)
     wdg->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     w->setCentralWidget(new QWidget());
-    QDockWidget* d = new QDockWidget();
+
     const auto id2 = m_pGroups->addGroup(w, title, id.isEmpty() ? title : id);
     w->setObjectName(id2);
     w->show();

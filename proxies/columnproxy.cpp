@@ -4,6 +4,7 @@
 
 class ColumnProxyPrivate : public QObject
 {
+    Q_OBJECT
 public:
     explicit ColumnProxyPrivate(ColumnProxy* q) : QObject(q), q_ptr(q) {}
 
@@ -208,3 +209,6 @@ void ColumnProxyPrivate::slotColumnsAboutRemoved(const QModelIndex& p, int first
 //     q_ptr->beginMoveRows(p, first, last);
 //     q_ptr->endMoveRows();
 // }
+
+#include <columnproxy.moc>
+

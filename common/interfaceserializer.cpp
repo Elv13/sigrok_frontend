@@ -42,12 +42,15 @@ void InterfaceSerializer::add(const QString& uid)
 
 void InterfaceSerializer::rename(const QString& id, const QString& newName)
 {
+    Q_UNUSED(id)
+    Q_UNUSED(newName)
     // nothing
 }
 
 void InterfaceSerializer::writeWidget(QJsonObject &parent, const QString& id) const
 {
-
+    Q_UNUSED(parent)
+    Q_UNUSED(id)
 }
 
 void InterfaceSerializer::write(QJsonObject &parent) const

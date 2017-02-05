@@ -35,6 +35,7 @@ public:
 protected:
     virtual QVariant retrieveData(const QString &mt, QVariant::Type t) const override
     {
+        Q_UNUSED(t)
 
         if (mt != QLatin1String("x-qnodeview/node-index"))
             return {};
@@ -184,9 +185,9 @@ void Session::remove(const QObject* n, const QString& id)
 
     const auto& l = i->m_lInstances;
 
-    for (int i =0; i < l.size(); i++) {
-        if (l[i].second == n) {
-            idx = i;
+    for (int j =0; j < l.size(); j++) {
+        if (l[j].second == n) {
+            idx = j;
             break;
         }
     }

@@ -4,6 +4,7 @@
 
 class TailProxyPrivate : public QObject
 {
+    Q_OBJECT
 public:
     int m_Maximum {-1};
 
@@ -227,3 +228,5 @@ void TailProxyPrivate::slotRowsInserted(const QModelIndex &parent, int s, int e)
         q_ptr->endInsertRows();
     }
 }
+
+#include <tailproxy.moc>

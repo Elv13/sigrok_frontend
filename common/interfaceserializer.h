@@ -8,6 +8,7 @@ class InterfaceSerializer
 {
 public:
     explicit InterfaceSerializer(const QString& name);
+    virtual ~InterfaceSerializer() {}
 
     virtual void reflow() const = 0;
     QJsonObject byId(const QString& id) const;

@@ -71,7 +71,7 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
                     m_lRows << new Row {
                         m_lRows.size(),
                         0,
-                        {
+                        QVector<Chan*> {
                             new Chan { true, test }
                         },
                         std::chrono::time_point_cast<std::chrono::milliseconds>(

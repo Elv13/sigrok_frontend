@@ -6,6 +6,7 @@
 
 class HeadNodePrivate final : public QObject
 {
+    Q_OBJECT
 public:
     HeadNodePrivate(QObject* parent) : QObject(parent), m_Proxy(this) {}
 
@@ -90,3 +91,5 @@ void HeadNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractIt
 
     m_Proxy.setSourceModel(newModel);
 }
+
+#include <headnode.moc>

@@ -16,6 +16,7 @@
 
 class ColumnNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     Column* m_pColumnW {new Column()};
 
@@ -111,3 +112,4 @@ void ColumnNodePrivate::slotDataChanged()
     m_pFilteredModel->setSourceColumns(ret);
 }
 
+#include <columnnode.moc>

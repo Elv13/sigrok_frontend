@@ -7,6 +7,7 @@
 
 class TimerNodePrivate final : public QObject
 {
+    Q_OBJECT
 public:
     int m_Ms {1000};
     QTimer m_Timer {this};
@@ -137,3 +138,6 @@ void TimerNode::setActive(bool value)
 }
 
 bool TimerNode::dummy() const {return false;}
+
+#include <timernode.moc>
+

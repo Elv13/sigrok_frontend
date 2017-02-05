@@ -24,6 +24,7 @@ public:
 
 class ColoredProxy : public QIdentityProxyModel
 {
+    Q_OBJECT
 public:
     using QIdentityProxyModel::QIdentityProxyModel;
 
@@ -132,3 +133,6 @@ QAbstractItemModel* ColoredRangeProxy::filteredModel() const
 {
     return d_ptr->m_pProxy;
 }
+
+#include <coloredrangeproxy.moc>
+

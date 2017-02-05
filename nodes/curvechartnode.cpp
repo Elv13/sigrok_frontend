@@ -16,6 +16,7 @@
 
 class CurveChartNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     CurveChart* m_pPlotter;
 //     ChartType* m_pChartW {new ChartType};
@@ -103,3 +104,5 @@ QString CurveChartNode::remoteWidgetType() const
 {
     return id();
 }
+
+#include <curvechartnode.moc>

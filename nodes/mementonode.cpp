@@ -235,6 +235,7 @@ void MementoNode::takeMemento(bool)
 
 void MementoNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
+    Q_UNUSED(newModel)
     Q_UNUSED(old)
 }
 

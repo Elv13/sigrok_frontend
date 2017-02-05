@@ -32,6 +32,7 @@ struct InternalItem
 
 class QMultiModelTreePrivate : public QObject
 {
+    Q_OBJECT
 public:
     explicit QMultiModelTreePrivate(QObject* p) : QObject(p) {}
 
@@ -430,3 +431,5 @@ void QMultiModelTree::setTopLevelIdentifierRole(int role)
     d_ptr->m_HasIdRole = true;
     d_ptr->m_IdRole = role;
 }
+
+#include <qmultimodeltree.moc>

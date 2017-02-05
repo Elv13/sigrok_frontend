@@ -16,6 +16,7 @@ Q_DECLARE_STREAM_METATYPE(SigrokDevice*)
 
 class AquisitionNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     AquisitionModel* m_pModel {nullptr};
     Aquisition* m_pWidget {nullptr};
@@ -188,3 +189,5 @@ void AquisitionNode::stop(bool value)
 
     d_ptr->slotStop();
 }
+
+#include <aquisitionnode.moc>

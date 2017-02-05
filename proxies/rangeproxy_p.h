@@ -29,6 +29,7 @@ struct Node
 
 class RangeProxyPrivate : public QObject
 {
+    Q_OBJECT
 public:
     int m_ExtraColumnCount {0};
     QVector<Node*> m_lRows;

@@ -13,6 +13,7 @@
 
 class QNodeViewPrivate final : public QObject
 {
+    Q_OBJECT
 public:
     explicit QNodeViewPrivate(QObject* p) : QObject(p) {}
 
@@ -127,3 +128,6 @@ void QNodeViewPrivate::slotSelectionChanged()
     }
 
 }
+
+#include <qnodeview.moc>
+

@@ -18,6 +18,7 @@ const T& qAsConst(const T& v)
 
 class ConnectedIndicesModel : public QAbstractTableModel
 {
+    Q_OBJECT
     friend class QReactiveProxyModel;
     friend class QReactiveProxyModelPrivate;
 public:
@@ -52,6 +53,7 @@ struct ConnectionHolder
 
 class QReactiveProxyModelPrivate : public QObject
 {
+    Q_OBJECT
 public:
     const QString MIME_TYPE = QStringLiteral("qt-model/reactive-connection");
     QVector<int> m_lConnectedRoles;
@@ -608,3 +610,5 @@ void QReactiveProxyModelPrivate::slotRemoveItem(const QModelIndex &parent, int f
         }
     }
 }
+
+#include <qreactiveproxymodel.moc>

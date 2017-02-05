@@ -44,7 +44,8 @@ protected:
 
 class GraphicsBezierEdge : public GraphicsDirectedEdge
 {
-    friend class EdgeWrapper; // to create
+    Q_OBJECT
+    friend struct EdgeWrapper; // to create
 public:
 
 protected:

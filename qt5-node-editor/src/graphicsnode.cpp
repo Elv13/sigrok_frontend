@@ -36,6 +36,7 @@ const T& qAsConst(const T& v)
 
 class CloseButton : public QGraphicsTextItem
 {
+    Q_OBJECT
 public:
     explicit CloseButton(NodeGraphicsItem* parent);
 
@@ -117,6 +118,7 @@ constexpr const qreal GraphicsNodePrivate::_socket_size;
 
 class NodeTitle : public QGraphicsTextItem
 {
+    Q_OBJECT
 public:
     explicit NodeTitle(GraphicsNodePrivate* parent) : QGraphicsTextItem(parent->m_pGraphicsItem),
     d_ptr(parent) {}
@@ -753,3 +755,6 @@ void CloseButton::mousePressEvent(QGraphicsSceneMouseEvent *event)
     d_ptr->m_pModel->removeRow(d_ptr->m_Index.row(), d_ptr->m_Index.parent());
     event->accept();
 }
+
+#include <graphicsnode.moc>
+

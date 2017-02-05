@@ -167,7 +167,8 @@ void Range::slotAjustColumns()
 void Range::setColumnWidgetFactory(int col, std::function<QWidget*(const QPersistentModelIndex& idx)> w)
 {
     const int cc = m_pProxy->columnCount();
-    if (col > cc) return;
+    if (col > cc)
+        return;
 
     //FIXME hack
     auto list = &(true ? m_lWidgetFactoriesChild : m_lWidgetFactories);

@@ -6,6 +6,7 @@
 
 class TailNodePrivate final : public QObject
 {
+    Q_OBJECT
 public:
     TailNodePrivate(QObject* parent) : QObject(parent), m_Proxy(this) {}
 
@@ -90,3 +91,6 @@ void TailNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractIt
 
     m_Proxy.setSourceModel(newModel);
 }
+
+#include <tailnode.moc>
+

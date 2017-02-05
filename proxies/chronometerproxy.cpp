@@ -6,6 +6,7 @@
 
 class ChronometerProxyPrivate : public QObject
 {
+    Q_OBJECT
 public:
     enum class Mode {
         STD_CHRONO,
@@ -272,3 +273,5 @@ int ChronometerProxy::extraColumns() const
 {
     return d_ptr->m_ExtraCols;
 }
+
+#include <chronometerproxy.moc>

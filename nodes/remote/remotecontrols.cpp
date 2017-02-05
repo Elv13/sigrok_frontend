@@ -5,6 +5,7 @@
 
 class RemoteControlsPrivate final : public QObject
 {
+    Q_OBJECT
 public:
     explicit RemoteControlsPrivate(RemoteControls* p) : QObject(p), q_ptr(p) {}
 
@@ -41,6 +42,7 @@ void RemoteControls::write(QJsonObject &parent) const
 
 void RemoteControls::read(const QJsonObject &parent)
 {
+    Q_UNUSED(parent)
 }
 
 bool RemoteControls::createSocket(const QString& name)
@@ -57,3 +59,5 @@ QAbstractItemModel* RemoteControls::sourceModel() const
 {
     return &d_ptr->m_Model;
 }
+
+#include <remotecontrols.moc>
