@@ -361,13 +361,15 @@ void RangeProxyPrivate::slotLayoutChanged()
         }
     }
 
-    slotRowsAboutToBeInserted({}, m_lRows.size(), delta - 1);
+    slotRowsAboutToBeInserted({}, m_lRows.size(), m_lRows.size() + delta - 1);
     Q_ASSERT(m_lRows.size() == rc);
 }
 
 void RangeProxyPrivate::slotRowsAboutToBeInserted(const QModelIndex &parent, int first, int last)
 {
     Q_UNUSED(parent)
+
+    Q_ASSERT(last >= first);
 
     //FIXME support moved
 
