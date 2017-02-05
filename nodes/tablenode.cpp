@@ -45,7 +45,7 @@ TableNode::~TableNode()
 
 QString TableNode::title() const
 {
-    return "Table";
+    return QStringLiteral("Table");
 }
 
 QString TableNode::id() const

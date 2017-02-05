@@ -27,7 +27,7 @@ RemoteTable::~RemoteTable()
 
 QString RemoteTable::title() const
 {
-    return "Remote table";
+    return QStringLiteral("Remote table");
 }
 
 QString RemoteTable::id() const
@@ -54,12 +54,12 @@ void RemoteTablePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstrac
         Qt::BackgroundRole
     };
 
-    RemoteManager::instance()->addModel(newModel, roles, "RemoteModel");
+    RemoteManager::instance()->addModel(newModel, roles, QStringLiteral("RemoteModel"));
 }
 
 QString RemoteTable::remoteModelName() const
 {
-    return "remotetable";
+    return QStringLiteral("remotetable");
 }
 
 #include <remotetable.moc>

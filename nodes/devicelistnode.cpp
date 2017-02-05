@@ -21,7 +21,7 @@ DeviceListNode::~DeviceListNode()
 
 QString DeviceListNode::title() const
 {
-    return "Local device list";
+    return QStringLiteral("Local device list");
 }
 
 QString DeviceListNode::id() const

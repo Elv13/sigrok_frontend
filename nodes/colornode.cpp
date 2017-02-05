@@ -65,7 +65,7 @@ ColorNode::~ColorNode()
 
 QString ColorNode::title() const
 {
-    return "Color";
+    return QStringLiteral("Color");
 }
 
 QString ColorNode::id() const
@@ -86,12 +86,12 @@ void ColorNode::write(QJsonObject &parent) const
         for (int j=0; j < d_ptr->m_pRangeProxy->rowCount(idx); j++) {
             QJsonObject col;
 
-            col[ "name"      ] = column;
-            col[ "bg"        ] = d_ptr->m_pRangeProxy->index(j, 1, idx)
+            col[ QStringLiteral("name")      ] = column;
+            col[ QStringLiteral("bg")        ] = d_ptr->m_pRangeProxy->index(j, 1, idx)
                 .data(Qt::BackgroundRole).toString();
-            col[ "fg"        ] = d_ptr->m_pRangeProxy->index(j, 2, idx)
+            col[ QStringLiteral("fg")        ] = d_ptr->m_pRangeProxy->index(j, 2, idx)
                 .data(Qt::ForegroundRole).toString();
-            col[ "delimiter" ] = d_ptr->m_pRangeProxy->index(j, 0, idx)
+            col[ QStringLiteral("delimiter") ] = d_ptr->m_pRangeProxy->index(j, 0, idx)
                 .data((int)RangeProxy::Role::RANGE_DELIMITER_NAME).toString();
 
             Q_ASSERT(d_ptr->m_pRangeProxy->index(j, 0, idx).parent() == idx);
@@ -102,15 +102,15 @@ void ColorNode::write(QJsonObject &parent) const
         }
     }
 
-    parent["columns"] = columns;
+    parent[QStringLiteral("columns")] = columns;
 }
 
 void ColorNode::read(const QJsonObject &parent)
 {
-    const auto arr = parent["columns"].toArray();
+    const auto arr = parent[QStringLiteral("columns")].toArray();
     for (int i=0; i < arr.size();i++) {
         const auto elem = arr[i].toObject();
-        const auto name = elem["name"].toString();
+        const auto name = elem[QStringLiteral("name")].toString();
         d_ptr->m_hlSerializedRanges[name] << new SerializedRange {
             name,
             elem[ "delimiter" ].toString(),

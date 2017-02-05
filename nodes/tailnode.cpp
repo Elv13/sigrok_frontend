@@ -33,7 +33,7 @@ TailNode::~TailNode()
 
 QString TailNode::title() const
 {
-    return "Tail filter";
+    return QStringLiteral("Tail filter");
 }
 
 QString TailNode::id() const
@@ -45,14 +45,14 @@ void TailNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    parent[ "count"   ] = maximumRows();
-    parent[ "limited" ] = isLimited();
+    parent[ QStringLiteral("count")   ] = maximumRows();
+    parent[ QStringLiteral("limited") ] = isLimited();
 }
 
 void TailNode::read(const QJsonObject &parent)
 {
-    setLimited    (parent["limited"].toBool());
-    setMaximumRows(parent["count"  ].toInt ());
+    setLimited    (parent[QStringLiteral("limited")].toBool());
+    setMaximumRows(parent[QStringLiteral("count")  ].toInt ());
 }
 
 bool TailNode::isLimited() const

@@ -36,7 +36,7 @@ void InterfaceSerializer::add(const QString& uid)
 
     QJsonObject o;
     writeWidget(o, uid);
-    Q_ASSERT(!o["uid"].toString().isEmpty());
+    Q_ASSERT(!o[QStringLiteral("uid")].toString().isEmpty());
     d_ptr->m_hById[uid] = o;
 }
 
@@ -62,21 +62,21 @@ void InterfaceSerializer::write(QJsonObject &parent) const
     for (i = d_ptr->m_hById.constBegin(); i != d_ptr->m_hById.constEnd(); ++i) {
         QJsonObject o = i.value();
 
-        o["uid"] = i.key();
+        o[QStringLiteral("uid")] = i.key();
         writeWidget(o, i.key());
 
         arr.append(o);
     }
-    parent["widgets"] = arr;
+    parent[QStringLiteral("widgets")] = arr;
 }
 
 void InterfaceSerializer::read(const QJsonObject &parent)
 {
-    QJsonArray arr = parent["widgets"].toArray();
+    QJsonArray arr = parent[QStringLiteral("widgets")].toArray();
 
     for (int i = 0; i < arr.size(); ++i) {
         QJsonObject o = arr[i].toObject();
-        const QString name = o["uid"].toString();
+        const QString name = o[QStringLiteral("uid")].toString();
         Q_ASSERT(!name.isEmpty());
         d_ptr->m_hById[name] = o;
     }

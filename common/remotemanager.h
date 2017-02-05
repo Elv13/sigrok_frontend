@@ -35,7 +35,7 @@ public:
     QRemoteObjectHost* host() const;
 
     void addObject(QObject* o, const QString& title);
-    void addModel(QAbstractItemModel* o, const QVector<int> role, const QString& title);
+    void addModel(QAbstractItemModel* o, const QVector<int>& role, const QString& title);
 
     QAbstractItemModel* getModel(const QModelIndex& idx) const;
 

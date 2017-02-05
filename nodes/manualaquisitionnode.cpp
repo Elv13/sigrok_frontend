@@ -25,12 +25,12 @@ ManualAquisitionNode::~ManualAquisitionNode()
 
 QString ManualAquisitionNode::title() const
 {
-    return "Manual aquisition";
+    return QStringLiteral("Manual aquisition");
 }
 
 QString ManualAquisitionNode::id() const
 {
-    return "manualaquisition_node";
+    return QStringLiteral("manualaquisition_node");
 }
 
 void ManualAquisitionNode::write(QJsonObject &parent) const

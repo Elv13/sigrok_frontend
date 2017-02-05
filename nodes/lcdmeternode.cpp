@@ -61,7 +61,7 @@ LCDMeterNode::~LCDMeterNode()
 
 QString LCDMeterNode::title() const
 {
-    return "LCD Meter";
+    return QStringLiteral("LCD Meter");
 }
 
 QString LCDMeterNode::id() const

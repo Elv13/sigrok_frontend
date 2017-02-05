@@ -56,7 +56,7 @@ ColumnNode::~ColumnNode()
 
 QString ColumnNode::title() const
 {
-    return "Column";
+    return QStringLiteral("Column");
 }
 
 void ColumnNode::write(QJsonObject &parent) const

@@ -19,7 +19,7 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     Q_ASSERT(index.isValid());
 
     if (index.column() < 1)
-        return QStyledItemDelegate::paint(painter, option, index);
+        QStyledItemDelegate::paint(painter, option, index);
 
     const auto bg = index.data(Qt::BackgroundRole);
     if (bg.canConvert<QColor>()) {

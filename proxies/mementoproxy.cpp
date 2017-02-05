@@ -33,7 +33,7 @@ d_ptr(new MementoProxyPrivate())
 MementoProxy::MementoProxy(const QJsonObject& json, QObject* parent) : QAbstractItemModel(parent),
 d_ptr(new MementoProxyPrivate())
 {
-    const auto arr = json["data"].toArray();
+    const auto arr = json[QStringLiteral("data")].toArray();
 
     d_ptr->m_llRoots.resize(arr.size());
 
@@ -273,7 +273,7 @@ QJsonObject MementoProxy::toJson() const
         mainArray.append(row);
     }
 
-    ret["data"] = mainArray;
+    ret[QStringLiteral("data")] = mainArray;
 
     return ret;
 }

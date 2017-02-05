@@ -37,7 +37,7 @@ DeduplicateNode::DeduplicateNode(AbstractSession* sess) : ProxyNode(sess), d_ptr
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &DeduplicateNodePrivate::slotModelChanged);
 
-    d_ptr->m_pFilteredModel->setExtraColumnName("Samples");
+    d_ptr->m_pFilteredModel->setExtraColumnName(QStringLiteral("Samples"));
 
 }
 
@@ -48,27 +48,27 @@ DeduplicateNode::~DeduplicateNode()
 
 QString DeduplicateNode::title() const
 {
-    return "Deduplicate";
+    return QStringLiteral("Deduplicate");
 }
 
 void DeduplicateNode::read(const QJsonObject &parent)
 {
     AbstractNode::read(parent);
 
-    d_ptr->m_pFilteredModel->setExtraColumn(parent["add_column"].toBool());
-    d_ptr->m_pFilteredModel->setThreshold(parent["threshold" ].toDouble());
-    d_ptr->m_PreferredColumn = parent["column"].toString();
+    d_ptr->m_pFilteredModel->setExtraColumn(parent[QStringLiteral("add_column")].toBool());
+    d_ptr->m_pFilteredModel->setThreshold(parent[QStringLiteral("threshold") ].toDouble());
+    d_ptr->m_PreferredColumn = parent[QStringLiteral("column")].toString();
 }
 
 void DeduplicateNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    parent["add_column"] = hasExtraColumn();
-    parent["threshold" ] = threshold();
+    parent[QStringLiteral("add_column")] = hasExtraColumn();
+    parent[QStringLiteral("threshold") ] = threshold();
 
     if (d_ptr->m_pDeduplicate)
-        parent["column"] = d_ptr->m_pDeduplicate->selectedColumnName();
+        parent[QStringLiteral("column")] = d_ptr->m_pDeduplicate->selectedColumnName();
 }
 
 bool DeduplicateNode::hasExtraColumn() const

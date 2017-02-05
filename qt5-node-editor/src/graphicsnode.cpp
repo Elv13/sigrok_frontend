@@ -502,7 +502,7 @@ setRect(const qreal x, const qreal y, const qreal width, const qreal height)
 }
 
 void GraphicsNode::
-setRect(const QRectF size)
+setRect(const QRectF& size)
 {
     graphicsItem()->setPos(size.topLeft());
     setSize(size.size());

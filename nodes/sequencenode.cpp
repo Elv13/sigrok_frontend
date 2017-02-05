@@ -47,7 +47,7 @@ SequenceNode::~SequenceNode()
 
 QString SequenceNode::title() const
 {
-    return "Sequence";
+    return QStringLiteral("Sequence");
 }
 
 QWidget* SequenceNode::widget() const
@@ -190,15 +190,15 @@ void SequenceNode::write(QJsonObject &parent) const
     for (const auto& v : qAsConst(d_ptr->m_Model.stringList()))
         elements.append(v);
 
-    parent["elements"] = elements;
-    parent["looping" ] = d_ptr->m_Looping;
+    parent[QStringLiteral("elements")] = elements;
+    parent[QStringLiteral("looping") ] = d_ptr->m_Looping;
 }
 
 void SequenceNode::read(const QJsonObject &parent)
 {
     AbstractNode::read(parent);
 
-    const auto elems = parent["elements"].toArray();
+    const auto elems = parent[QStringLiteral("elements")].toArray();
 
     QStringList elements;
 

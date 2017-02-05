@@ -15,7 +15,7 @@ public:
 
 RemoteControls::RemoteControls(AbstractSession* sess) : AbstractNode(sess), d_ptr(new RemoteControlsPrivate(this))
 {
-    d_ptr->m_Model.setObjectName("RemoteControl");
+    d_ptr->m_Model.setObjectName(QStringLiteral("RemoteControl"));
 }
 
 RemoteControls::~RemoteControls()
@@ -25,7 +25,7 @@ RemoteControls::~RemoteControls()
 
 QString RemoteControls::title() const
 {
-    return "Control widgets";
+    return QStringLiteral("Control widgets");
 }
 
 QString RemoteControls::id() const

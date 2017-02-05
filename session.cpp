@@ -312,11 +312,11 @@ void Session::serialize(QIODevice *dev) const
 
             QJsonObject o;
 
-            o[ "direction"    ] = name;
-            o[ "own_socket"   ] = sockI.data ().toString();
-            o[ "other_socket" ] = rsockI.data().toString();
-            o[ "id"           ] = edgeI.data ().toInt   ();
-            o[ "other_node"   ] = nodeid;
+            o[ QStringLiteral("direction")    ] = name;
+            o[ QStringLiteral("own_socket")   ] = sockI.data ().toString();
+            o[ QStringLiteral("other_socket") ] = rsockI.data().toString();
+            o[ QStringLiteral("id")           ] = edgeI.data ().toInt   ();
+            o[ QStringLiteral("other_node")   ] = nodeid;
 
             ret.append(o);
         }
@@ -333,7 +333,7 @@ void Session::serialize(QIODevice *dev) const
                 nodeJ.second->write(data);
 
                 QJsonObject node;
-                node["data"] = data;
+                node[QStringLiteral("data")] = data;
 
                 const auto nodeW       = nodeJ.first;
                 const auto sinkModel   = m_pNodeW->sinkSocketModel(nodeW->index());
@@ -342,26 +342,26 @@ void Session::serialize(QIODevice *dev) const
                 const QRectF r = nodeW->rect();
 
                 QJsonObject widget;
-                widget["x"     ] = r.x();
-                widget["y"     ] = r.y();
-                widget["width" ] = r.width();
-                widget["height"] = r.height();
-                widget["title" ] = nodeW->title();
-                widget["UID"   ] = nodeW->index().data(Qt::UserRole).toString();
+                widget[QStringLiteral("x")     ] = r.x();
+                widget[QStringLiteral("y")     ] = r.y();
+                widget[QStringLiteral("width") ] = r.width();
+                widget[QStringLiteral("height")] = r.height();
+                widget[QStringLiteral("title") ] = nodeW->title();
+                widget[QStringLiteral("UID")   ] = nodeW->index().data(Qt::UserRole).toString();
 
                 QJsonArray conns;
                 sConn(conns, sourceModel, QStringLiteral("source"));
                 sConn(conns, sinkModel  , QStringLiteral("sink"  ));
-                widget["connections"] = conns;
+                widget[QStringLiteral("connections")] = conns;
 
-                node["widget"] = widget;
+                node[QStringLiteral("widget")] = widget;
 
                 levelArray.append(node);
             }
         }
     }
 
-    session["nodes"] = levelArray;
+    session[QStringLiteral("nodes")] = levelArray;
 
     QJsonArray views;
 
@@ -371,7 +371,7 @@ void Session::serialize(QIODevice *dev) const
         views.append(view);
     }
 
-    session["views"] = views;
+    session[QStringLiteral("views")] = views;
 
     dev->write(QJsonDocument(session).toJson());
 }
@@ -382,7 +382,7 @@ void Session::load(const QByteArray& data)
 
     const auto obj = loadDoc.object();
 
-    const auto nodes = obj["nodes"].toArray();
+    const auto nodes = obj[QStringLiteral("nodes")].toArray();
 
     QHash<GraphicsNode*, QString> toHash;
     QHash<GraphicsNode*, AbstractNode*> toNode;
@@ -403,10 +403,10 @@ void Session::load(const QByteArray& data)
     auto loadConnections = [&connections](const QJsonArray& a, GraphicsNode* s) {
         for (int cId = 0; cId < a.size(); ++cId) {
             const auto c  = a[   cId       ].toObject();
-            bool isSource = c[ "direction" ] == QLatin1String("source");
-            int  connId   = c[ "id"        ].toInt() * (isSource ? 1 : -1);
+            bool isSource = c[ QStringLiteral("direction") ] == QLatin1String("source");
+            int  connId   = c[ QStringLiteral("id")        ].toInt() * (isSource ? 1 : -1);
 
-            const auto nodeId = c["other_node"].toString();
+            const auto nodeId = c[QStringLiteral("other_node")].toString();
 
             connections.insert(connId, new Conn {
                 connId,                       /* id;      */
@@ -424,10 +424,10 @@ void Session::load(const QByteArray& data)
     for (int nodeId = 0; nodeId < nodes.size(); ++nodeId) {
         const QJsonObject nodeJ = nodes[nodeId].toObject();
 
-        const auto widget = nodeJ [ "widget" ].toObject();
-        const auto data2  = nodeJ [ "data"   ].toObject();
-        const auto type   = data2 [ "id"     ].toString();
-        const auto uid    = widget[ "UID"    ].toString();
+        const auto widget = nodeJ [ QStringLiteral("widget") ].toObject();
+        const auto data2  = nodeJ [ QStringLiteral("data")   ].toObject();
+        const auto type   = data2 [ QStringLiteral("id")     ].toString();
+        const auto uid    = widget[ QStringLiteral("UID")    ].toString();
         g_Used[uid] = true;
 
         if (uid.isEmpty()) {
@@ -451,10 +451,10 @@ void Session::load(const QByteArray& data)
             auto nodeW = pair.first;
 
             nodeW->setRect(
-                widget[ "x"      ].toDouble(),
-                widget[ "y"      ].toDouble(),
-                widget[ "width"  ].toDouble(),
-                widget[ "height" ].toDouble()
+                widget[ QStringLiteral("x")      ].toDouble(),
+                widget[ QStringLiteral("y")      ].toDouble(),
+                widget[ QStringLiteral("width")  ].toDouble(),
+                widget[ QStringLiteral("height") ].toDouble()
             );
 
             nodeW->setDecoration(metaInfo->m_Icon);
@@ -474,7 +474,7 @@ void Session::load(const QByteArray& data)
                 if (!prop.first.isEmpty())
                     (nodeW->*prop.second)(prop.first);
 
-            loadConnections(widget["connections"].toArray(), nodeW);
+            loadConnections(widget[QStringLiteral("connections")].toArray(), nodeW);
 
             toHash [nodeW] = uid;
             toNode [nodeW] = pair.second;
@@ -544,7 +544,7 @@ void Session::load(const QByteArray& data)
         }
     }
 
-    const QJsonArray views = obj["views"].toArray();
+    const QJsonArray views = obj[QStringLiteral("views")].toArray();
 
     for (int i = 0; i < views.size(); ++i) {
         if (!d_ptr->m_lIS.isEmpty()) { //FIXME

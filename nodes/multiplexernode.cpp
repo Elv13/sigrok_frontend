@@ -156,7 +156,7 @@ MultiplexerNode::~MultiplexerNode()
 
 QString MultiplexerNode::title() const
 {
-    return "Multiplexer";
+    return QStringLiteral("Multiplexer");
 }
 
 QString MultiplexerNode::id() const

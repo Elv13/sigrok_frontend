@@ -130,7 +130,7 @@ MementoNode::MementoNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new Mem
 
     d_ptr->m_RemoveRowProxy.setSourceModel(d_ptr->m_pMementoList);
     d_ptr->m_RemoveRowProxy.setSelectionModel(d_ptr->m_pSelection);
-    d_ptr->m_RemoveRowProxy.setIcon(QIcon::fromTheme("list-remove"));
+    d_ptr->m_RemoveRowProxy.setIcon(QIcon::fromTheme(QStringLiteral("list-remove")));
 
     d_ptr->m_pWidgets->setModel(&d_ptr->m_RemoveRowProxy, d_ptr->m_pSelection);
 
@@ -147,7 +147,7 @@ MementoNode::~MementoNode()
 
 QString MementoNode::title() const
 {
-    return "Memento";
+    return QStringLiteral("Memento");
 }
 
 QString MementoNode::id() const
@@ -157,20 +157,20 @@ QString MementoNode::id() const
 
 void MementoNode::read(const QJsonObject &parent)
 {
-    const auto mementos = parent["mementos"].toArray();
+    const auto mementos = parent[QStringLiteral("mementos")].toArray();
 
     d_ptr->m_pMementoList->beginInsertRows({}, 0, mementos.size()-1);
     for (int i = 0; i < mementos.size(); ++i) {
         const QJsonObject obj = mementos[i].toObject();
 
-        const QJsonObject memento = obj["content"].toObject();
+        const QJsonObject memento = obj[QStringLiteral("content")].toObject();
 
         auto proxy = new MementoProxy(memento, this);
 
         d_ptr->m_pMementoList->m_lMementos << proxy;
-        d_ptr->m_pMementoList->m_lTitle << obj["title"].toString();
+        d_ptr->m_pMementoList->m_lTitle << obj[QStringLiteral("title")].toString();
 
-        if (obj["selected"].toBool()) {
+        if (obj[QStringLiteral("selected")].toBool()) {
             d_ptr->m_pSelection->setCurrentIndex(
                 d_ptr->m_pMementoList->index(i,0),
                 QItemSelectionModel::ClearAndSelect
@@ -191,13 +191,13 @@ void MementoNode::write(QJsonObject &parent) const
 
     for (auto m : qAsConst(d_ptr->m_pMementoList->m_lMementos)) {
         QJsonObject obj;
-        obj[ "title"    ] = d_ptr->m_pMementoList->m_lTitle[i++].toString();
-        obj[ "content"  ] = m->toJson();
-        obj[ "selected" ] = selectedMemento() == m;
+        obj[ QStringLiteral("title")    ] = d_ptr->m_pMementoList->m_lTitle[i++].toString();
+        obj[ QStringLiteral("content")  ] = m->toJson();
+        obj[ QStringLiteral("selected") ] = selectedMemento() == m;
         mementos.append(obj);
     }
 
-    parent["mementos"] = mementos;
+    parent[QStringLiteral("mementos")] = mementos;
 }
 
 QWidget* MementoNode::widget() const

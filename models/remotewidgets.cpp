@@ -34,7 +34,7 @@ RemoteWidgets::RemoteWidgets(QObject* o) : QAbstractListModel(o),
         Qt::BackgroundRole
     };
 
-    RemoteManager::instance()->addModel(clientModel(), roles, "Remote_controls1");
+    RemoteManager::instance()->addModel(clientModel(), roles, QStringLiteral("Remote_controls1"));
 }
 
 RemoteWidgets::~RemoteWidgets()
@@ -155,13 +155,13 @@ void RemoteWidgets::write(QJsonObject &parent) const
     Q_FOREACH(const auto r, d_ptr->m_lRows) {
         if (r->m_NodeUID.isValid()) {
             QJsonObject ro;
-            ro[ "property" ] = r->name;
-            ro[ "node"     ] = r->m_NodeUID.toString();
+            ro[ QStringLiteral("property") ] = r->name;
+            ro[ QStringLiteral("node")     ] = r->m_NodeUID.toString();
             a.append(ro);
         }
     }
 
-    parent["properties"] = a;
+    parent[QStringLiteral("properties")] = a;
 }
 
 bool RemoteWidgets::addRow(const QString& name)

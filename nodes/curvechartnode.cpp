@@ -55,7 +55,7 @@ CurveChartNode::~CurveChartNode()
 
 QString CurveChartNode::title() const
 {
-    return "Chart";
+    return QStringLiteral("Chart");
 }
 
 QString CurveChartNode::id() const

@@ -60,7 +60,7 @@ CurrentValues::~CurrentValues()
 
 QString CurrentValues::title() const
 {
-    return "Current Values";
+    return QStringLiteral("Current Values");
 }
 
 QString CurrentValues::id() const

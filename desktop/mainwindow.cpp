@@ -88,7 +88,7 @@ class DesktopSerializer : public InterfaceSerializer
 {
 public:
     explicit DesktopSerializer(MainWindow* mw) :
-        InterfaceSerializer("desktop"), m_pMain(mw) {}
+        InterfaceSerializer(QStringLiteral("desktop")), m_pMain(mw) {}
     virtual ~DesktopSerializer() {}
 
     virtual void reflow() const override;
@@ -128,16 +128,16 @@ void DesktopSerializer::writeWidget(QJsonObject &parent, const QString& id) cons
         dock->x() : dock->y();
 
     const auto winId = dock->parentWidget() ?
-        dock->parentWidget()->objectName() : "floating";
+        dock->parentWidget()->objectName() : QStringLiteral("floating");
 
     Q_ASSERT(!winId.isEmpty());
 
-    parent[ "name"   ] = dock->objectName(); //TODO REMOVE
-    parent[ "pos"    ] = pos;
-    parent[ "area"   ] = area;
-    parent[ "ratio"  ] = ratio;
-    parent[ "uid"    ] = id;
-    parent[ "window" ] = winId;
+    parent[ QStringLiteral("name")   ] = dock->objectName(); //TODO REMOVE
+    parent[ QStringLiteral("pos")    ] = pos;
+    parent[ QStringLiteral("area")   ] = area;
+    parent[ QStringLiteral("ratio")  ] = ratio;
+    parent[ QStringLiteral("uid")    ] = id;
+    parent[ QStringLiteral("window") ] = winId;
 }
 
 QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
@@ -145,8 +145,8 @@ QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
     QString windowId;
 
     for (const auto& e : qAsConst(elements())) {
-        if (e["uid"].toString() == uid) {
-            windowId = e["window"].toString();
+        if (e[QStringLiteral("uid")].toString() == uid) {
+            windowId = e[QStringLiteral("window")].toString();
             break;
         }
     }
@@ -159,7 +159,7 @@ QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
 
     Q_ASSERT(m_pMain->m_lWindows.contains("mainWindow"));
 
-    return m_pMain->m_lWindows["mainWindow"];
+    return m_pMain->m_lWindows[QStringLiteral("mainWindow")];
 }
 
 void DesktopSerializer::reflow() const
@@ -176,15 +176,15 @@ void DesktopSerializer::reflow() const
 
     // Sort each docks (per area)
     for (const auto& e : qAsConst(elements())) {
-        const auto  uid = e["uid"].toString();
+        const auto  uid = e[QStringLiteral("uid")].toString();
         Q_ASSERT(!uid.isEmpty());
 
         if (!m_pMain->m_lDocks.contains(uid))
             continue;
 
-        const int area = e["area"].toInt();
+        const int area = e[QStringLiteral("area")].toInt();
 
-        const auto winId = e["area"].toString();
+        const auto winId = e[QStringLiteral("area")].toString();
 
         auto mw = ((!winId.isEmpty()) && m_pMain->m_lWindows.contains(winId)) ?
             m_pMain->m_lWindows[winId] : getWindowWinId(uid);
@@ -288,7 +288,7 @@ Session* MainWindow::addSession(const QString& name)
     });
 
     m_pGroups = new WidgetGroupModel(this);
-    m_pGroups->addGroup(this, tr("Main"), "mainWindow");
+    m_pGroups->addGroup(this, tr("Main"), QStringLiteral("mainWindow"));
 
     nodeWidget->setViewport(new QGLWidget(
             QGLFormat(QGL::SampleBuffers)));
@@ -299,42 +299,42 @@ Session* MainWindow::addSession(const QString& name)
     m_pInterfaceSerializer = new DesktopSerializer(this);
     sess->registerInterfaceSerializer(m_pInterfaceSerializer);
 
-    sess->registerType<CurveChartNode>  ("Chart"          , "Widgets"   , "curvedchart_node", QIcon::fromTheme( "document-edit"        ));
-    sess->registerType<TableNode>  ("Table"          , "Widgets"   , "table_node", QIcon::fromTheme( "configure-shortcuts"  ));
-    sess->registerType<MeterNode>  ("Meter"          , "Widgets"   , "meter_node", QIcon::fromTheme( "bookmark-new"         ));
-    sess->registerType<RemoteActionNode>  ("Controls"          , "Widgets"   , "remoteaction_node", QIcon::fromTheme( "bookmark-new"         ));
-    sess->registerType<LCDMeterNode>  ("LCD Meter"      , "Widgets"   , "lcdmeter_node", QIcon::fromTheme( "bookmark-new"         ));
-    sess->registerType<ColumnNode> ("Range filter"   , "Filters"   , "range_node", QIcon::fromTheme( "view-filter"          ));
-    sess->registerType<ColorNode>  ("Range Colorizer", "Metadata"  , "color_node", QIcon::fromTheme( "colors-chromablue"   ));
-    sess->registerType<ColumnNode> ("Column filter"  , "Filters"   , "column_node", QIcon::fromTheme( "view-filter"          ));
-    sess->registerType<DeduplicateNode> ("Deduplicate"  , "Filters"   , "deduplicate_node", QIcon::fromTheme( "view-filter"          ));
-    sess->registerType<AquisitionNode> ("Live aquisition" , "Sources"  , "aquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    sess->registerType<ManualAquisitionNode> ("Manual aquisition" , "Sources"  , "manualaquisition_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    sess->registerType<MementoNode>("Memento"         , "Sources"  , "memento_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    sess->registerType<MultiplexerNode>("Multiplexer" , "Tools"    , "multiplexer_node", QIcon::fromTheme( "edit-copy"          ));
-    sess->registerType<TailNode>   ("Tail filter"     , "Filters"  , "tail_node"  , QIcon::fromTheme( "kt-add-filters"   ));
-    sess->registerType<HeadNode>   ("Head filter"     , "Filters"  , "head_node" , QIcon::fromTheme( "kt-remove-filters"));
-    sess->registerType<CurrentValues>("Current Values", "Sinks"    , "currentvalues_node" , QIcon::fromTheme( "kt-remove-filters"));
-    sess->registerType<TimerNode>  ("Timer"           , "Tools"    , "timer_node", QIcon::fromTheme( "chronometer"          ));
-    sess->registerType<SequenceNode>  ("Sequence"           , "Tools"    , "sequence_node", QIcon::fromTheme( "chronometer"          ));
-    sess->registerType<ChronoNode> ("Chronometer"     , "Metadata" , "chrono_node", QIcon::fromTheme( "chronometer"        ));
-    sess->registerType<DeviceListNode> ("Device List"      , "Sources"  , "devicelist_node", QIcon::fromTheme( "document-open"          ));
+    sess->registerType<CurveChartNode>  (QStringLiteral("Chart")          , QStringLiteral("Widgets")   , QStringLiteral("curvedchart_node"), QIcon::fromTheme( QStringLiteral("document-edit")        ));
+    sess->registerType<TableNode>  (QStringLiteral("Table")          , QStringLiteral("Widgets")   , QStringLiteral("table_node"), QIcon::fromTheme( QStringLiteral("configure-shortcuts")  ));
+    sess->registerType<MeterNode>  (QStringLiteral("Meter")          , QStringLiteral("Widgets")   , QStringLiteral("meter_node"), QIcon::fromTheme( QStringLiteral("bookmark-new")         ));
+    sess->registerType<RemoteActionNode>  (QStringLiteral("Controls")          , QStringLiteral("Widgets")   , QStringLiteral("remoteaction_node"), QIcon::fromTheme( QStringLiteral("bookmark-new")         ));
+    sess->registerType<LCDMeterNode>  (QStringLiteral("LCD Meter")      , QStringLiteral("Widgets")   , QStringLiteral("lcdmeter_node"), QIcon::fromTheme( QStringLiteral("bookmark-new")         ));
+    sess->registerType<ColumnNode> (QStringLiteral("Range filter")   , QStringLiteral("Filters")   , QStringLiteral("range_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
+    sess->registerType<ColorNode>  (QStringLiteral("Range Colorizer"), QStringLiteral("Metadata")  , QStringLiteral("color_node"), QIcon::fromTheme( QStringLiteral("colors-chromablue")   ));
+    sess->registerType<ColumnNode> (QStringLiteral("Column filter")  , QStringLiteral("Filters")   , QStringLiteral("column_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
+    sess->registerType<DeduplicateNode> (QStringLiteral("Deduplicate")  , QStringLiteral("Filters")   , QStringLiteral("deduplicate_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
+    sess->registerType<AquisitionNode> (QStringLiteral("Live aquisition") , QStringLiteral("Sources")  , QStringLiteral("aquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<ManualAquisitionNode> (QStringLiteral("Manual aquisition") , QStringLiteral("Sources")  , QStringLiteral("manualaquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<MementoNode>(QStringLiteral("Memento")         , QStringLiteral("Sources")  , QStringLiteral("memento_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<MultiplexerNode>(QStringLiteral("Multiplexer") , QStringLiteral("Tools")    , QStringLiteral("multiplexer_node"), QIcon::fromTheme( QStringLiteral("edit-copy")          ));
+    sess->registerType<TailNode>   (QStringLiteral("Tail filter")     , QStringLiteral("Filters")  , QStringLiteral("tail_node")  , QIcon::fromTheme( QStringLiteral("kt-add-filters")   ));
+    sess->registerType<HeadNode>   (QStringLiteral("Head filter")     , QStringLiteral("Filters")  , QStringLiteral("head_node") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
+    sess->registerType<CurrentValues>(QStringLiteral("Current Values"), QStringLiteral("Sinks")    , QStringLiteral("currentvalues_node") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
+    sess->registerType<TimerNode>  (QStringLiteral("Timer")           , QStringLiteral("Tools")    , QStringLiteral("timer_node"), QIcon::fromTheme( QStringLiteral("chronometer")          ));
+    sess->registerType<SequenceNode>  (QStringLiteral("Sequence")           , QStringLiteral("Tools")    , QStringLiteral("sequence_node"), QIcon::fromTheme( QStringLiteral("chronometer")          ));
+    sess->registerType<ChronoNode> (QStringLiteral("Chronometer")     , QStringLiteral("Metadata") , QStringLiteral("chrono_node"), QIcon::fromTheme( QStringLiteral("chronometer")        ));
+    sess->registerType<DeviceListNode> (QStringLiteral("Device List")      , QStringLiteral("Sources")  , QStringLiteral("devicelist_node"), QIcon::fromTheme( QStringLiteral("document-open")          ));
 
-    sess->registerType<RemoteTable>("Table"         , "Remote widgets"  , "remotetable_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    sess->registerType<RemoteMeter>("Meter"         , "Remote widgets"  , "remotemeter_node", QIcon::fromTheme( "view-calendar-timeline"          ));
-    sess->registerType<RemoteControls>("Controls"      , "Remote widgets"  , "remotecontrols_node", QIcon::fromTheme( "view-calendar-timeline"          ));
+    sess->registerType<RemoteTable>(QStringLiteral("Table")         , QStringLiteral("Remote widgets")  , QStringLiteral("remotetable_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<RemoteMeter>(QStringLiteral("Meter")         , QStringLiteral("Remote widgets")  , QStringLiteral("remotemeter_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<RemoteControls>(QStringLiteral("Controls")      , QStringLiteral("Remote widgets")  , QStringLiteral("remotecontrols_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
 
     //DUMMY
-    sess->registerType<ColorNode> ("File"            , "Sources"  , " ", QIcon::fromTheme( "document-open"          ));
-    sess->registerType<ColorNode> ("External device" , "Sources"  , " ", QIcon::fromTheme( "document-share"          )); //allow async memento transfer from other instances
-    sess->registerType<ColorNode> ("Statistics"      , "Metadata" , " ", QIcon::fromTheme( "format-number-percent"        ));
-    sess->registerType<ColorNode> ("CSV"             , "Exporter" , " ", QIcon::fromTheme( "document-save"      ));
-    sess->registerType<ColorNode> ("XLSX"            , "Exporter" , " ", QIcon::fromTheme( "document-share"     ));
-    sess->registerType<ColorNode> ("ODS"             , "Exporter" , " ", QIcon::fromTheme( "document-save-all"  ));
-    sess->registerType<ColorNode> ("PCAP (WireShark)", "Exporter" , " ", QIcon::fromTheme( "document-save-as"   ));
+    sess->registerType<ColorNode> (QStringLiteral("File")            , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-open")          ));
+    sess->registerType<ColorNode> (QStringLiteral("External device") , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")          )); //allow async memento transfer from other instances
+    sess->registerType<ColorNode> (QStringLiteral("Statistics")      , QStringLiteral("Metadata") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("format-number-percent")        ));
+    sess->registerType<ColorNode> (QStringLiteral("CSV")             , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save")      ));
+    sess->registerType<ColorNode> (QStringLiteral("XLSX")            , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")     ));
+    sess->registerType<ColorNode> (QStringLiteral("ODS")             , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save-all")  ));
+    sess->registerType<ColorNode> (QStringLiteral("PCAP (WireShark)"), QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save-as")   ));
 
-    sess->registerType<ColorNode> ("Rate watchdog"   , "Sinks"    , "" , QIcon::fromTheme( "mail-forward"     ));
-    sess->registerType<ColorNode> ("Unit filter"     , "Filters"  , "" , QIcon::fromTheme( "kt-remove-filters"));
+    sess->registerType<ColorNode> (QStringLiteral("Rate watchdog")   , QStringLiteral("Sinks")    , QLatin1String("") , QIcon::fromTheme( QStringLiteral("mail-forward")     ));
+    sess->registerType<ColorNode> (QStringLiteral("Unit filter")     , QStringLiteral("Filters")  , QLatin1String("") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
 
     return sess;
 }
@@ -364,10 +364,10 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
     m_pActionCollection(new ActionCollection(this)),
     m_pSelActionCol(new SelectedActionCollection(this))
 {
-    setObjectName("mainWindow");
-    m_lWindows["mainWindow"] = this;
+    setObjectName(QStringLiteral("mainWindow"));
+    m_lWindows[QStringLiteral("mainWindow")] = this;
 
-    static QResource ss(":/pref/tutorial4ui.rc");
+    static QResource ss(QStringLiteral(":/pref/tutorial4ui.rc"));
     Q_ASSERT(ss.isValid());
 
 
@@ -406,7 +406,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
     if (Settings::openLastFile() && !Settings::lastFilePath().isEmpty())
         openFile(Settings::lastFilePath());
     else
-        addSession("dsfsdf");
+        addSession(QStringLiteral("dsfsdf"));
 
 }
 
@@ -419,15 +419,15 @@ void MainWindow::setupActions()
 {
     QAction* clearAction = new QAction(this);
     clearAction->setText(i18n("&Clear"));
-    clearAction->setIcon(QIcon::fromTheme("document-new"));
+    clearAction->setIcon(QIcon::fromTheme(QStringLiteral("document-new")));
     actionCollection()->setDefaultShortcut(clearAction, Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("clear", clearAction);
+    actionCollection()->addAction(QStringLiteral("clear"), clearAction);
 
     QAction* addWindowAction = new QAction(this);
     addWindowAction->setText(i18n("&Add window"));
-    addWindowAction->setIcon(QIcon::fromTheme("document-new"));
+    addWindowAction->setIcon(QIcon::fromTheme(QStringLiteral("document-new")));
     actionCollection()->setDefaultShortcut(addWindowAction, Qt::CTRL + Qt::Key_A);
-    actionCollection()->addAction("add_window", addWindowAction);
+    actionCollection()->addAction(QStringLiteral("add_window"), addWindowAction);
     connect(addWindowAction, &QAction::triggered, this, &MainWindow::slotAddMainWindow);
 
     KStandardAction::quit(qApp, SLOT(quit()), actionCollection());
@@ -442,7 +442,7 @@ void MainWindow::setupActions()
 
     KStandardAction::preferences(this, SLOT(settingsConfigure()), actionCollection());
 
-    setupGUI(Default, ":/pref/tutorial4ui.rc");
+    setupGUI(Default, QStringLiteral(":/pref/tutorial4ui.rc"));
 }
 
 void MainWindow::newFile()
@@ -521,7 +521,7 @@ void MainWindow::downloadFinished(KJob* job)
 
     KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
 
-    auto sess = addSession("fo");
+    auto sess = addSession(QStringLiteral("fo"));
 
     sess->load(storedJob->data());
 }

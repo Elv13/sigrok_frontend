@@ -92,7 +92,7 @@ QModelDataListDecoder::QModelDataListDecoder(const QMimeData* data)
         return;
 
     // Check all payloads if one can be converted to the right QMetaType
-    auto buf = data->data("application/x-qabstractitemmodeldatalist");
+    auto buf = data->data(QStringLiteral("application/x-qabstractitemmodeldatalist"));
 
     if (buf.isEmpty())
         return;

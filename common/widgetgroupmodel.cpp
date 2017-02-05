@@ -50,7 +50,7 @@ QString WidgetGroupModel::addGroup(QMainWindow* w, const QString& name, const QS
 
     for(const auto& ii : qAsConst(d_ptr->m_lIds)) {
         if (ii == i)
-            i += "1";
+            i += QLatin1String("1");
     }
 
     beginInsertRows({}, d_ptr->m_lGroups.size(), d_ptr->m_lGroups.size());

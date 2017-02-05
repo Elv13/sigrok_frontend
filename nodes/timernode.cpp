@@ -32,7 +32,7 @@ TimerNode::~TimerNode()
 
 QString TimerNode::title() const
 {
-    return "Timer";
+    return QStringLiteral("Timer");
 }
 
 QString TimerNode::id() const
@@ -44,15 +44,15 @@ void TimerNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    parent[ "milliseconds" ] = seconds()*1000+milliseconds();
+    parent[ QStringLiteral("milliseconds") ] = seconds()*1000+milliseconds();
 }
 
 void TimerNode::read(const QJsonObject &parent)
 {
     AbstractNode::read(parent);
 
-    setMilliseconds(parent[ "milliseconds" ].toInt()%1000);
-    setSeconds     (parent[ "milliseconds" ].toInt()/1000);
+    setMilliseconds(parent[ QStringLiteral("milliseconds") ].toInt()%1000);
+    setSeconds     (parent[ QStringLiteral("milliseconds") ].toInt()/1000);
 }
 
 QWidget* TimerNode::widget() const

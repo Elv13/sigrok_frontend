@@ -46,24 +46,24 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
 
     d_ptr->m_pBg = new QAction(parent);
     d_ptr->m_pBg->setText(tr("&Background"));
-    d_ptr->m_pBg->setIcon(QIcon::fromTheme("color-fill"));
-    parent->actionCollection()->addAction("background", d_ptr->m_pBg);
+    d_ptr->m_pBg->setIcon(QIcon::fromTheme(QStringLiteral("color-fill")));
+    parent->actionCollection()->addAction(QStringLiteral("background"), d_ptr->m_pBg);
     d_ptr->m_pBg->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pBg;
     connect(d_ptr->m_pBg, SELF::slotBg);
 
     d_ptr->m_pFg = new QAction(parent);
     d_ptr->m_pFg->setText(tr("&Foreground"));
-    d_ptr->m_pFg->setIcon(QIcon::fromTheme("color-picker"));
-    parent->actionCollection()->addAction("foreground", d_ptr->m_pFg);
+    d_ptr->m_pFg->setIcon(QIcon::fromTheme(QStringLiteral("color-picker")));
+    parent->actionCollection()->addAction(QStringLiteral("foreground"), d_ptr->m_pFg);
     d_ptr->m_pFg->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pFg;
     connect(d_ptr->m_pBg, SELF::slotFg);
 
     d_ptr->m_pCopy = new QAction(parent);
     d_ptr->m_pCopy->setText(tr("Copy"));
-    d_ptr->m_pCopy->setIcon(QIcon::fromTheme("edit-copy"));
-    parent->actionCollection()->addAction("copy", d_ptr->m_pCopy);
+    d_ptr->m_pCopy->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
+    parent->actionCollection()->addAction(QStringLiteral("copy"), d_ptr->m_pCopy);
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_pCopy, Qt::CTRL + Qt::Key_C);
     d_ptr->m_pCopy->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pCopy;
@@ -71,8 +71,8 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
 
     d_ptr->m_pCut = new QAction(parent);
     d_ptr->m_pCut->setText(tr("Cut"));
-    d_ptr->m_pCut->setIcon(QIcon::fromTheme("edit-cut"));
-    parent->actionCollection()->addAction("cut", d_ptr->m_pCut);
+    d_ptr->m_pCut->setIcon(QIcon::fromTheme(QStringLiteral("edit-cut")));
+    parent->actionCollection()->addAction(QStringLiteral("cut"), d_ptr->m_pCut);
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_pCut, Qt::CTRL + Qt::Key_X);
     d_ptr->m_pCut->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pCut;
@@ -80,8 +80,8 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
 
     d_ptr->m_pPaste = new QAction(parent);
     d_ptr->m_pPaste->setText(tr("Paste"));
-    d_ptr->m_pPaste->setIcon(QIcon::fromTheme("edit-paste"));
-    parent->actionCollection()->addAction("paste", d_ptr->m_pPaste);
+    d_ptr->m_pPaste->setIcon(QIcon::fromTheme(QStringLiteral("edit-paste")));
+    parent->actionCollection()->addAction(QStringLiteral("paste"), d_ptr->m_pPaste);
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_pPaste, Qt::CTRL + Qt::Key_V);
     d_ptr->m_pPaste->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pPaste;

@@ -16,24 +16,24 @@ int main (int argc, char *argv[])
                          // The program name used internally. (componentName)
                          QStringLiteral("Captivate"),
                          // A displayable program name string. (displayName)
-                         "Tutorial 4",
+                         QStringLiteral("Tutorial 4"),
                          // The program version string. (version)
                          QStringLiteral("1.0"),
                          // Short description of what the app does. (shortDescription)
-                         "A simple text area which can load and save.",
+                         QStringLiteral("A simple text area which can load and save."),
                          // The license this code is released under
                          KAboutLicense::Custom,
                          // Copyright Statement (copyrightStatement = QString())
-                         "(c) 2016",
+                         QStringLiteral("(c) 2016"),
                          // Optional text shown in the About box.
                          // Can contain any information desired. (otherText)
-                         "Some text...",
+                         QStringLiteral("Some text..."),
                          // The program homepage string. (homePageAddress = QString())
                          QStringLiteral("http://example.com/"),
                          // The bug report email address
                          // (bugsEmailAddress = QLatin1String("submit@bugs.kde.org")
                          QStringLiteral("submit@bugs.kde.org"));
-    aboutData.addAuthor("Name", "Task", QStringLiteral("your@email.com"),
+    aboutData.addAuthor(QStringLiteral("Name"), QStringLiteral("Task"), QStringLiteral("your@email.com"),
                         QStringLiteral("http://your.website.com"), QStringLiteral("OSC Username"));
     KAboutData::setApplicationData(aboutData);
 

@@ -26,7 +26,7 @@ ProxyNode::~ProxyNode()
 
 QString ProxyNode::title() const
 {
-    return "Aquisition";
+    return QStringLiteral("Aquisition");
 }
 
 QString ProxyNode::id() const

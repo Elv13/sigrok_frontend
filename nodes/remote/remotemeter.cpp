@@ -35,7 +35,7 @@ RemoteMeter::RemoteMeter(AbstractSession* sess) : ProxyNode(sess), d_ptr(new Rem
 {
     d_ptr->q_ptr = this;
 
-    RemoteManager::instance()->addObject(&d_ptr->m_MeterData, "Remote_meter");
+    RemoteManager::instance()->addObject(&d_ptr->m_MeterData, QStringLiteral("Remote_meter"));
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteMeterPrivate::slotModelChanged);
 }
@@ -47,7 +47,7 @@ RemoteMeter::~RemoteMeter()
 
 QString RemoteMeter::title() const
 {
-    return "Remote meter";
+    return QStringLiteral("Remote meter");
 }
 
 QString RemoteMeter::id() const

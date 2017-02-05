@@ -42,7 +42,7 @@ RemoteActionNode::~RemoteActionNode()
 
 QString RemoteActionNode::title() const
 {
-    return "Controls";
+    return QStringLiteral("Controls");
 }
 
 QString RemoteActionNode::id() const

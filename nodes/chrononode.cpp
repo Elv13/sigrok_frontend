@@ -40,7 +40,7 @@ QAbstractItemModel* ChronoNode::filteredModel() const
 
 QString ChronoNode::title() const
 {
-    return "Chronometer";
+    return QStringLiteral("Chronometer");
 }
 
 QString ChronoNode::id() const
@@ -52,7 +52,7 @@ void ChronoNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    parent["columns"] = d_ptr->m_Proxy.extraColumns();
+    parent[QStringLiteral("columns")] = d_ptr->m_Proxy.extraColumns();
 }
 
 void ChronoNode::read(const QJsonObject &parent)
@@ -60,7 +60,7 @@ void ChronoNode::read(const QJsonObject &parent)
     Q_UNUSED(parent)
 
     d_ptr->m_Proxy.setExtraColumns( (ChronometerProxy::ExtraColumns) (
-        parent["columns"].toInt() | ChronometerProxy::ExtraColumns::MS_DELTA
+        parent[QStringLiteral("columns")].toInt() | ChronometerProxy::ExtraColumns::MS_DELTA
     ));
 }
 

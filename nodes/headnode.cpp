@@ -33,7 +33,7 @@ HeadNode::~HeadNode()
 
 QString HeadNode::title() const
 {
-    return "Head filter";
+    return QStringLiteral("Head filter");
 }
 
 QString HeadNode::id() const
@@ -45,14 +45,14 @@ void HeadNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    parent[ "count"   ] = maximumRows();
-    parent[ "limited" ] = isLimited();
+    parent[ QStringLiteral("count")   ] = maximumRows();
+    parent[ QStringLiteral("limited") ] = isLimited();
 }
 
 void HeadNode::read(const QJsonObject &parent)
 {
-    setLimited    (parent["limited"].toBool());
-    setMaximumRows(parent["count"  ].toInt ());
+    setLimited    (parent[QStringLiteral("limited")].toBool());
+    setMaximumRows(parent[QStringLiteral("count")  ].toInt ());
 }
 
 bool HeadNode::isLimited() const

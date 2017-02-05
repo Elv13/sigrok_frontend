@@ -56,7 +56,7 @@ MeterNode::~MeterNode()
 
 QString MeterNode::title() const
 {
-    return "Meter";
+    return QStringLiteral("Meter");
 }
 
 QString MeterNode::id() const

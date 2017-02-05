@@ -71,7 +71,7 @@ void RemoteManager::addObject(QObject* o, const QString& title)
     endInsertRows();
 }
 
-void RemoteManager::addModel(QAbstractItemModel* m, const QVector<int> roles, const QString& title)
+void RemoteManager::addModel(QAbstractItemModel* m, const QVector<int>& roles, const QString& title)
 {
     host()->enableRemoting(m, title, roles);
 

@@ -95,7 +95,7 @@ dropEvent(QDropEvent *event)
 
 	// The QMimeData retrieveData will be called and should create and place
 	// the node.
-	const auto dt = md->data("x-qnodeview/node-index");
+	const auto dt = md->data(QStringLiteral("x-qnodeview/node-index"));
 }
 
 void GraphicsNodeView::
