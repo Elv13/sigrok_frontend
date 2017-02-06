@@ -103,7 +103,7 @@ d_ptr(new QObjectModelPrivate)
 {
 }
 
-QObjectModel::QObjectModel(const QList<QObject*> objs, Qt::Orientation o, int dr, QObject* p) :
+QObjectModel::QObjectModel(const QList<QObject*>& objs, Qt::Orientation o, int dr, QObject* p) :
     QObjectModel(p)
 {
     d_ptr->m_IsVertical = o == Qt::Vertical;

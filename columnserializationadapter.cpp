@@ -4,7 +4,7 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>
 
-ColumnSerializationAdapter::ColumnSerializationAdapter(QAbstractItemModel* m, QList<int> cols, QObject* p)
+ColumnSerializationAdapter::ColumnSerializationAdapter(QAbstractItemModel* m, const QList<int>& cols, QObject* p)
      : QObject(p), m_pModel(m), m_lColumns(cols)
 {
     connect(m, &QAbstractItemModel::rowsInserted,
@@ -17,6 +17,8 @@ ColumnSerializationAdapter::ColumnSerializationAdapter(QAbstractItemModel* m, QL
 
 void ColumnSerializationAdapter::slotRowsInserted(const QModelIndex& parent, int first, int last)
 {
+    Q_UNUSED(parent)
+
     Q_FOREACH(int col, m_lColumns) {
         for (int i = first; i <= last; i++) {
             if (m_hhActivated[col].contains(m_pModel->index(i, 0).data().toString())) {

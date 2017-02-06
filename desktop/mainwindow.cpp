@@ -157,7 +157,7 @@ QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
     if (!windowId.isEmpty())
         return m_pMain->addMainWindow(QObject::tr("Window"), windowId);
 
-    Q_ASSERT(m_pMain->m_lWindows.contains("mainWindow"));
+    Q_ASSERT(m_pMain->m_lWindows.contains(QStringLiteral("mainWindow")));
 
     return m_pMain->m_lWindows[QStringLiteral("mainWindow")];
 }
@@ -203,6 +203,9 @@ void DesktopSerializer::reflow() const
 
     typedef Qt::DockWidgetArea DWA;
 
+    QList<QDockWidget*> docks;
+    QList<int> sizes;
+
     // Place the docks
     for (auto area : {
         DWA::TopDockWidgetArea , DWA::BottomDockWidgetArea,
@@ -212,15 +215,16 @@ void DesktopSerializer::reflow() const
         const int total = area > 1 ?
             m_pMain->centralWidget()->height() :m_pMain->centralWidget()->width();
 
-        QList<QDockWidget*> docks;
-        QList<int> sizes;
-
         for (const auto& i : qAsConst(docksByArea[area])) {
             i.mw->addDockWidget(area, i.dock);
             docks << i.dock;
             sizes << (i.ratio*total);
         }
+
         m_pMain->resizeDocks(docks, sizes, Qt::Horizontal);
+
+        docks.clear();
+        sizes.clear();
     }
 
 }
@@ -489,7 +493,7 @@ void MainWindow::openFile(const QUrl &name)
         KIO::Job* job = KIO::storedGet(name);
         fileName = name;
 
-        connect(job, SIGNAL(result(KJob*)), this, SLOT(downloadFinished(KJob*)));
+        connect(job, &KJob::result, this, &MainWindow::downloadFinished);
 
         job->exec();
     }

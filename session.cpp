@@ -24,6 +24,7 @@ const T& qAsConst(const T& v)
 
 class NodeMimeData : public QMimeData
 {
+    Q_OBJECT
 public:
     explicit NodeMimeData(Session* f, const QModelIndex& idx) :
     QMimeData(), m_pParent(f), m_Index(idx) {}
@@ -560,3 +561,5 @@ void Session::load(QIODevice *dev)
     const QByteArray data = dev->readAll();
     load(data);
 }
+
+#include <session.moc>

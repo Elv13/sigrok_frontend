@@ -9,7 +9,7 @@ class ColumnSerializationAdapter : public QObject
 {
     Q_OBJECT
 public:
-    explicit ColumnSerializationAdapter(QAbstractItemModel* m, QList<int> cols, QObject* p);
+    explicit ColumnSerializationAdapter(QAbstractItemModel* m, const QList<int>& cols, QObject* p);
 
     void write(QJsonObject &parent) const;
     void read(const QJsonObject &parent);

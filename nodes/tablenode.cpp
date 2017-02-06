@@ -16,6 +16,7 @@
 
 class TableNodePrivate : public QObject
 {
+    Q_OBJECT
 public:
     QTableView* m_pTableView;
 
@@ -105,3 +106,4 @@ QString TableNode::remoteModelName() const
     return d_ptr->m_Id;
 }
 
+#include <tablenode.moc>

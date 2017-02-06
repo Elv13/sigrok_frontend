@@ -28,7 +28,7 @@ public:
 
     void setColumnWidgetFactory(
         int col,
-        std::function<QWidget*(const QPersistentModelIndex& idx)> w
+        const std::function<QWidget*(const QPersistentModelIndex& idx)>& w
     );
 
 private:

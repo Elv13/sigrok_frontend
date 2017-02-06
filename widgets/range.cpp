@@ -164,7 +164,7 @@ void Range::slotAjustColumns()
     QTimer::singleShot(0, [this](){m_pTree->expandAll();});
 }
 
-void Range::setColumnWidgetFactory(int col, std::function<QWidget*(const QPersistentModelIndex& idx)> w)
+void Range::setColumnWidgetFactory(int col, const std::function<QWidget*(const QPersistentModelIndex& idx)>& w)
 {
     const int cc = m_pProxy->columnCount();
     if (col > cc)

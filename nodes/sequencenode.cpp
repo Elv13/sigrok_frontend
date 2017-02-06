@@ -72,8 +72,10 @@ void SequenceNode::forward(bool)
     if (!d_ptr->m_Model.rowCount())
         return;
 
-    if (d_ptr->m_Looping && d_ptr->m_Current == d_ptr->m_Model.rowCount()-1)
-        return setCurrent(0);
+    if (d_ptr->m_Looping && d_ptr->m_Current == d_ptr->m_Model.rowCount()-1) {
+        setCurrent(0);
+        return;
+    }
 
     if (d_ptr->m_Current == d_ptr->m_Model.rowCount()-1)
         return;

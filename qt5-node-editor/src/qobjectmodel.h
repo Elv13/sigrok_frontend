@@ -66,7 +66,7 @@ public:
     Q_PROPERTY(bool readOnly READ isReadOnly WRITE setReadOnly)
 
     explicit QObjectModel(QObject* parent = Q_NULLPTR);
-    QObjectModel(const QList<QObject*> objs, Qt::Orientation = Qt::Horizontal, int displayRole = Qt::DisplayRole, QObject* parent = Q_NULLPTR);
+    QObjectModel(const QList<QObject*>& objs, Qt::Orientation = Qt::Horizontal, int displayRole = Qt::DisplayRole, QObject* parent = Q_NULLPTR);
     virtual ~QObjectModel();
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
