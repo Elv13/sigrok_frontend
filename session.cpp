@@ -300,6 +300,7 @@ void Session::serialize(QIODevice *dev) const
         for(int i =0; i < m->rowCount(); i++) {
             const auto edgeI  = m->index(i,1);
 
+
             // Only serialize when there is a connection
             if ((!edgeI.data().canConvert<int>()) )
                 continue;
@@ -307,6 +308,11 @@ void Session::serialize(QIODevice *dev) const
             const auto sockI  = m->index(i,0);
             const auto rsockI = m->index(i,2);
             const auto rnode  = m->index(i,3);
+
+            Q_ASSERT(sockI.isValid());
+            Q_ASSERT(rsockI.isValid());
+            Q_ASSERT(rnode.isValid());
+
             const auto nodeid = rnode.data(Qt::UserRole).toString();
 
             Q_ASSERT(!nodeid.isEmpty());
@@ -506,21 +512,17 @@ void Session::load(const QByteArray& data)
             Q_ASSERT(toHash[conn->node] == otherconn->otherN);
 
             const int row = edgeM->rowCount() -1;
-            auto srcSock  = conn->node->socketIndex(conn->ownS);
-            auto sinkSock = otherconn->node->socketIndex(otherconn->ownS);
+            auto srcSock  = conn->node->sourceIndex(conn->ownS);
+            auto sinkSock = otherconn->node->sinkIndex(otherconn->ownS);
 
             // Try to see if the node has a method to add
             if (auto an = toNode[conn->node])
-                if ((!srcSock.isValid()) && an->createSocket(conn->ownS)) {
-                    conn->node->socketIndex(conn->ownS);
-                    srcSock  = conn->node->socketIndex(conn->ownS);
-                }
+                if ((!srcSock.isValid()) && an->createSourceSocket(conn->ownS))
+                    srcSock  = conn->node->sourceIndex(conn->ownS);
 
             if (auto an = toNode[otherconn->node])
-                if ((!sinkSock.isValid()) && an->createSocket(otherconn->ownS)) {
-                    otherconn->node->socketIndex(otherconn->ownS);
-                    sinkSock = otherconn->node->socketIndex(otherconn->ownS);
-                }
+                if ((!sinkSock.isValid()) && an->createSinkSocket(otherconn->ownS))
+                    sinkSock = otherconn->node->sinkIndex(otherconn->ownS);
 
             if ((!srcSock.isValid()) || (!sinkSock.isValid())) {
                 qWarning() << "Failed to restore the connection between"
@@ -529,16 +531,34 @@ void Session::load(const QByteArray& data)
                 continue;
             }
 
-            edgeM->setData(
+            const bool ret1 = edgeM->setData(
                 edgeM->index(row, 0),
                 srcSock,
                 QReactiveProxyModel::ConnectionsRoles::SOURCE_INDEX
             );
-            edgeM->setData(
+            const bool ret2 = edgeM->setData(
                 edgeM->index(row, 2),
                 sinkSock,
                 QReactiveProxyModel::ConnectionsRoles::DESTINATION_INDEX
             );
+
+            // Validate if the connection is broken
+            const auto rnode  = edgeM->index(row,3);
+            const auto lnode  = edgeM->index(row,0);
+
+            const bool isValid = lnode.data(
+                QReactiveProxyModel::ConnectionsRoles::IS_VALID
+            ).toBool();
+
+            // If both setData are a success, then the combination also is
+            Q_ASSERT((ret1 && ret2) == isValid);
+
+            if (!isValid) {
+                qWarning() << "Failed to link the connection between"
+                    << conn->node->title() << ':' << conn->ownS << "and"
+                    << otherconn->node->title() << ':' << otherconn->ownS;
+                continue;
+            }
 
             delete conn;
             delete otherconn;

@@ -1,6 +1,7 @@
 #include "multiplexernode.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 
 #if QT_VERSION < 0x050700
 //Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
@@ -33,6 +34,7 @@ private:
     int                   m_MaxId {0};
     QVector<CloneHolder*> m_lRows {new CloneHolder};
     QVariant              m_Var;
+    QString               m_SinkName {QStringLiteral("Input")};
 
 };
 
@@ -49,7 +51,7 @@ QVariant MultiplexerModel::data(const QModelIndex& idx, int role) const
     if (!idx.row()) {
         switch(role) {
             case Qt::DisplayRole:
-                return QStringLiteral("Input");
+                return m_SinkName;
             case Qt::EditRole:
                 return m_Var;
         }
@@ -102,7 +104,6 @@ bool MultiplexerModel::setData(const QModelIndex& idx, const QVariant& value, in
             if (m_Var.isValid()) {
                 if (auto m = const_cast<QAbstractItemModel*>(dh->m_rIndex.model())) {
                     m->setData(dh->m_rIndex, m_Var, Qt::EditRole);
-                    return true;
                 }
             }
         }
@@ -112,15 +113,21 @@ bool MultiplexerModel::setData(const QModelIndex& idx, const QVariant& value, in
         Q_EMIT dataChanged(idx, idx);
 
         // Always add more rows when the last once is used
-        if ((!wasInit) && row == m_lRows.size() -1) {
-            beginInsertRows({}, m_lRows.size(), m_lRows.size());
-            m_lRows << new CloneHolder();
-            endInsertRows();
+        if (!wasInit) {
+            QTimer::singleShot(0, [this]() {
+                beginInsertRows({}, m_lRows.size(), m_lRows.size());
+                m_lRows << new CloneHolder();
+                m_lRows.last()->name += QString(" (%1)").arg(m_lRows.size());
+                endInsertRows();
+            });
         }
 
         Q_EMIT dataChanged(idx, idx);
 
         return true;
+    }
+    else if (idx.isValid() && role == 999) {
+        qDebug() << "\n\n\nDISCONNECT";
     }
 
     return false;
@@ -179,14 +186,23 @@ QAbstractItemModel* MultiplexerNode::sourceModel() const
     return &d_ptr->m_Model;
 }
 
-bool MultiplexerNode::createSocket(const QString& name)
+bool MultiplexerNode::createSinkSocket(const QString& name)
+{
+    // The name isn't relevant
+
+    d_ptr->m_Model.m_SinkName = name;
+
+    return true;
+}
+
+bool MultiplexerNode::createSourceSocket(const QString& name)
 {
     // The name isn't relevant
 
     auto cl  = new CloneHolder();
     cl->name = name;
-    cl->init = true;
-
+    cl->init = false;
+qDebug() << "\n\n\nAAA" << name << d_ptr->m_Model.m_lRows.size();
     const int pos = d_ptr->m_Model.m_lRows.size();
     d_ptr->m_Model.beginInsertRows({}, pos, pos);
     d_ptr->m_Model.m_lRows << cl;

@@ -45,7 +45,7 @@ void RemoteControls::read(const QJsonObject &parent)
     Q_UNUSED(parent)
 }
 
-bool RemoteControls::createSocket(const QString& name)
+bool RemoteControls::createSourceSocket(const QString& name)
 {
     return d_ptr->m_Model.addRow(name);
 }

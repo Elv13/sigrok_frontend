@@ -554,12 +554,24 @@ QAbstractItemModel* GraphicsNode::model() const
     return d_ptr->m_pModel;
 }
 
-const QModelIndex GraphicsNode::socketIndex(const QString& name) const
+const QModelIndex GraphicsNode::sinkIndex(const QString& name) const
 {
     const auto c = model()->rowCount(index());
     for (int i = 0; i < c; i++) {
         auto idx = model()->index(i, 0, index());
-        if (idx.data() == name)
+        if (idx.data() == name && idx.flags() & Qt::ItemIsDropEnabled)
+            return idx;
+    }
+
+    return {};
+}
+
+const QModelIndex GraphicsNode::sourceIndex(const QString& name) const
+{
+    const auto c = model()->rowCount(index());
+    for (int i = 0; i < c; i++) {
+        auto idx = model()->index(i, 0, index());
+        if (idx.data() == name && idx.flags() & Qt::ItemIsDragEnabled)
             return idx;
     }
 

@@ -27,7 +27,7 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
-    virtual bool createSocket(const QString& name) override;
+    virtual bool createSourceSocket(const QString& name) override;
 
 private:
     RemoteControlsPrivate* d_ptr;

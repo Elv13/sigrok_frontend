@@ -38,7 +38,8 @@ public:
     virtual QAbstractItemModel* sourceModel() const {return nullptr;}
     virtual QAbstractItemModel* sinkModel() const {return nullptr;}
 
-    virtual bool createSocket(const QString& name);
+    virtual bool createSourceSocket(const QString& name);
+    virtual bool createSinkSocket(const QString& name);
 
     virtual QString remoteObjectName() const;
     virtual QString remoteModelName() const;

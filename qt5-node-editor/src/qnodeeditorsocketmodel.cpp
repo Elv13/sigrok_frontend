@@ -334,7 +334,6 @@ template<
 SocketWrapper* QNodeEditorSocketModelPrivate::getSocketCommon(const QModelIndex& idx) const
 {
     // Use some dark template metamagic. This could have been done otherwise
-
     if (!idx.parent().isValid())
         return Q_NULLPTR;
 
@@ -648,18 +647,38 @@ bool QNodeEditorEdgeModel::connectSocket(const QModelIndex& idx1, const QModelIn
     return true;
 }
 
-// bool QNodeEditorEdgeModel::setData(const QModelIndex &index, const QVariant &value, int role)
-// {
-//     if (!index.isValid())
-//         return false;
-// 
-//     switch (role) {
-//         case Qt::SizeHintRole:
-//             break;
-//     }
-// 
-//     return QIdentityProxyModel::setData(index, value, role);
-// }
+bool QNodeEditorEdgeModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid())
+        return false;
+
+    // Prevent sink-to-sink and source-to-source connections. Otherwise the
+    // SocketModel can be invalid while the reactive one is
+    auto i = value.toModelIndex();
+
+    if (i.isValid()) {
+        switch(index.column()) {
+            case 0:
+                if (!((i.flags() & Qt::ItemIsDragEnabled))) {
+                    qWarning() << "Trying to use a source as a sink"
+                        << index.data() << i.data();
+
+                    return false;
+                }
+                break;
+            case 2:
+                if (!((i.flags() & Qt::ItemIsDropEnabled))) {
+                    qWarning() << "Trying to use a sink as a source"
+                        << index.data() << i.data();
+
+                    return false;
+                }
+                break;
+        }
+    }
+
+    return QIdentityProxyModel::setData(index, value, role);
+}
 
 QVariant QNodeEditorEdgeModel::data(const QModelIndex& idx, int role) const
 {
@@ -779,9 +798,11 @@ void QNodeEditorSocketModelPrivate::slotConnectionsChanged(const QModelIndex& tl
                 e->m_pSource->m_EdgeWrapper = e;
             }
         }
-
         if ((e->m_pSink = getSinkSocket(sink)))
             e->m_pSink->m_Socket.setEdge(m_EdgeModel.index(i, 2));
+
+        Q_ASSERT((!sink.isValid()) || (sink.isValid() && e->m_pSink));
+        Q_ASSERT((!src.isValid()) || (src.isValid() && e->m_pSource));
 
         if (oldSink != e->m_pSink) {
             if (oldSink)
@@ -1038,6 +1059,10 @@ QVariant QNodeEdgeFilterProxy::data(const QModelIndex& idx, int role) const
                 }
         }
     }
+
+    // If the connection is valid but the sockets are not, then the current
+    // state is invalid. All hopes are lost.
+    Q_ASSERT(edgeIdx.data(QReactiveProxyModel::ConnectionsRoles::IS_VALID) == false);
 
     return {};
 }

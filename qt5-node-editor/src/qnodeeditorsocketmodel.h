@@ -20,7 +20,7 @@ public:
     explicit QNodeEditorEdgeModel(QNodeEditorSocketModelPrivate* parent = Q_NULLPTR); //TODO make private
     virtual ~QNodeEditorEdgeModel();
 
-//     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     virtual QVariant data(const QModelIndex& idx, int role) const override;
 
     bool canConnect(const QModelIndex& idx1, const QModelIndex& idx2) const;

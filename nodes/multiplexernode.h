@@ -25,7 +25,8 @@ public:
 
     virtual QAbstractItemModel* sourceModel() const override;
 
-    virtual bool createSocket(const QString& name) override;
+    virtual bool createSinkSocket(const QString& name) override;
+    virtual bool createSourceSocket(const QString& name) override;
 // Q_SIGNALS:
 //     void modelChangedCopy(QAbstractItemModel* newModel, QAbstractItemModel* old);
 
