@@ -24,6 +24,8 @@ class MultiplexerModel final : public QAbstractListModel
     Q_OBJECT
     friend class MultiplexerNode;
 public:
+    explicit MultiplexerModel(QObject* parent = nullptr) :
+        QAbstractListModel(parent) {}
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
@@ -41,7 +43,7 @@ private:
 class MultiplexerNodePrivate final
 {
 public:
-    MultiplexerModel m_Model {};
+    MultiplexerModel* m_pModel {nullptr};
 };
 
 QVariant MultiplexerModel::data(const QModelIndex& idx, int role) const
@@ -154,6 +156,7 @@ Qt::ItemFlags MultiplexerModel::flags(const QModelIndex &idx) const
 
 MultiplexerNode::MultiplexerNode(AbstractSession* sess) : AbstractNode(sess), d_ptr(new MultiplexerNodePrivate())
 {
+    d_ptr->m_pModel = new MultiplexerModel(this);
 }
 
 MultiplexerNode::~MultiplexerNode()
@@ -183,14 +186,14 @@ QWidget* MultiplexerNode::widget() const
 
 QAbstractItemModel* MultiplexerNode::sourceModel() const
 {
-    return &d_ptr->m_Model;
+    return d_ptr->m_pModel;
 }
 
 bool MultiplexerNode::createSinkSocket(const QString& name)
 {
     // The name isn't relevant
 
-    d_ptr->m_Model.m_SinkName = name;
+    d_ptr->m_pModel->m_SinkName = name;
 
     return true;
 }
@@ -202,11 +205,11 @@ bool MultiplexerNode::createSourceSocket(const QString& name)
     auto cl  = new CloneHolder();
     cl->name = name;
     cl->init = false;
-qDebug() << "\n\n\nAAA" << name << d_ptr->m_Model.m_lRows.size();
-    const int pos = d_ptr->m_Model.m_lRows.size();
-    d_ptr->m_Model.beginInsertRows({}, pos, pos);
-    d_ptr->m_Model.m_lRows << cl;
-    d_ptr->m_Model.endInsertRows();
+qDebug() << "\n\n\nAAA" << name << d_ptr->m_pModel->m_lRows.size();
+    const int pos = d_ptr->m_pModel->m_lRows.size();
+    d_ptr->m_pModel->beginInsertRows({}, pos, pos);
+    d_ptr->m_pModel->m_lRows << cl;
+    d_ptr->m_pModel->endInsertRows();
 
     return true;
 }

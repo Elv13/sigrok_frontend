@@ -27,6 +27,10 @@ struct InternalItem
     InternalItem*          m_pParent;
     QVector<InternalItem*> m_lChildren;
     QString                m_Title;
+
+    // Make sure rowCount returns 0 until the children are officially added
+    bool                   m_RowCountLock;
+
     QVariant               m_UId, m_Bg, m_Fg, m_Deco;
 };
 
@@ -173,6 +177,9 @@ int QMultiModelTree::rowCount(const QModelIndex& parent) const
     if (i->m_Mode == InternalItem::Mode::PROXY)
         return 0;
 
+    if (i->m_RowCountLock)
+        return 0;
+
     return i->m_pModel->rowCount();
 }
 
@@ -264,7 +271,6 @@ bool QMultiModelTree::removeRows(int row, int count, const QModelIndex &parent)
             endRemoveRows();
             return true;
         }
-        //FIXME update the m_Index
     }
     else if (!parent.isValid() && row + count <= d_ptr->m_lRows.size()) {
 
@@ -300,16 +306,24 @@ void QMultiModelTreePrivate::slotAddRows(const QModelIndex& parent, int first, i
 
     q_ptr->beginInsertRows(localParent, first, last);
     for (int i = first; i <= last; i++) {
-        p->m_lChildren << new InternalItem {
-            p->m_lChildren.size(),
+        p->m_lChildren.insert(i, new InternalItem {
+            i,
             InternalItem::Mode::PROXY,
             src,
             p,
             {},
             QStringLiteral("N/A"),
+            true,
             {}, {}, {}, {}
-        };
+        });
     }
+
+    const int delta = (last - first) + 1;
+
+    for (int i = last+1; i < p->m_lChildren.size(); i++)
+        p->m_lChildren[i]->m_Index += delta;
+
+    p->m_RowCountLock = false; //FIXME still added twice
     q_ptr->endInsertRows();
 }
 
@@ -347,6 +361,7 @@ QModelIndex QMultiModelTree::appendModel(QAbstractItemModel* model, const QVaria
         Q_NULLPTR,
         {},
         id.canConvert<QString>() ? id.toString() : model->objectName(),
+        true,
         id, {}, {}, {}
     };
     d_ptr->m_lRows << d_ptr->m_hModels[model];

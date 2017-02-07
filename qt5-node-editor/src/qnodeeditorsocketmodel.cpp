@@ -347,9 +347,17 @@ SocketWrapper* QNodeEditorSocketModelPrivate::getSocketCommon(const QModelIndex&
     if (!nodew)
         return Q_NULLPTR;
 
+    const int count = ((*nodew).*SM).size();
+
     // The -1 is because int defaults to 0 and invalid is -1
-    const int relIdx = ((*nodew).*SM).size() > idx.row() ?
+    const int relIdx = count > idx.row() ?
         ((*nodew).*SM)[idx.row()] - 1 : -1;
+
+    // This should never happen, but is "recoverable"
+    if (relIdx >= count) {
+        qWarning() << "Trying to access a socket that should exist, but doesn't";
+        return Q_NULLPTR;
+    }
 
     auto ret = relIdx != -1 ? ((*nodew).*S)[relIdx] : Q_NULLPTR;
 
@@ -493,8 +501,25 @@ void QNodeEditorSocketModelPrivate::slotRowsInserted(const QModelIndex& parent, 
             }
         }
     }
-    else if (!parent.parent().isValid())
-        insertSockets(parent, first, last);
+    else if (!parent.parent().isValid()) {
+        if (auto nodew = getNode(parent)) {
+            const int delta = (last - first) + 1;
+
+            // Sync the mapping from the socket row to the source row
+            for (int i = first; i < nodew->m_lSourcesToSrc.size(); i++) {
+                nodew->m_lSourcesToSrc += delta;
+                nodew->m_lSinksToSrc   += delta;
+            }
+
+            // Sync the source row -> socket row table
+            for (int i = first; i <= last; i++) {
+                nodew->m_lSourcesFromSrc.insert(first, 0);
+                nodew->m_lSinksFromSrc.insert(first, 0);
+            }
+
+            insertSockets(parent, first, last);
+        }
+    }
 }
 
 GraphicsNode* QNodeEditorSocketModelPrivate::insertNode(int idx)
@@ -553,8 +578,8 @@ void QNodeEditorSocketModelPrivate::insertSockets(const QModelIndex& parent, int
 
     Q_ASSERT(parent.model() == q_ptr);
 
-    Q_ASSERT(nodew->m_lSourcesFromSrc.size() >= first);
-    Q_ASSERT(nodew->m_lSinksFromSrc.size() >= first);
+    Q_ASSERT(nodew->m_lSinksFromSrc.size() >  last);
+    Q_ASSERT(nodew->m_lSourcesFromSrc.size() >  last);
 
     for (int i = first; i <= last; i++) {
         const auto idx = q_ptr->index(i, 0, parent);
@@ -574,12 +599,12 @@ void QNodeEditorSocketModelPrivate::insertSockets(const QModelIndex& parent, int
                 GraphicsNodeSocket::SocketType::SOURCE,
                 nodew
             );
-            nodew->m_lSourcesFromSrc.insert(i, nodew->m_lSources.size() + 1);
+
+
+            nodew->m_lSourcesFromSrc[i] = nodew->m_lSources.size() + 1;
             nodew->m_lSources << s;
             nodew->m_lSourcesToSrc << i;
         }
-        else
-            nodew->m_lSourcesFromSrc.insert(i, 0);
 
         constexpr static const Qt::ItemFlags sinkFlags(
             Qt::ItemIsDropEnabled |
@@ -594,15 +619,15 @@ void QNodeEditorSocketModelPrivate::insertSockets(const QModelIndex& parent, int
                 GraphicsNodeSocket::SocketType::SINK,
                 nodew
             );
-            nodew->m_lSinksFromSrc.insert(i, nodew->m_lSinks.size() + 1);
+
+            nodew->m_lSinksFromSrc[i] = nodew->m_lSinks.size() + 1;
             nodew->m_lSinks << s;
             nodew->m_lSinksToSrc << i;
         }
-        else
-            nodew->m_lSinksFromSrc.insert(i, 0);
 
-        nodew->m_Node.update();
     }
+
+    nodew->m_Node.update();
 
     Q_ASSERT(nodew->m_lSinksFromSrc.size() == nodew->m_lSourcesFromSrc.size());
 }

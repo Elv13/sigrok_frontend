@@ -297,6 +297,8 @@ void Session::serialize(QIODevice *dev) const
     const auto cats = m_slCategory;
 
     auto sConn = [](QJsonArray& ret, QAbstractItemModel* m, const QString& name) {
+        QHash<QString, bool> singleSink;
+
         for(int i =0; i < m->rowCount(); i++) {
             const auto edgeI  = m->index(i,1);
 
@@ -318,12 +320,24 @@ void Session::serialize(QIODevice *dev) const
             Q_ASSERT(!nodeid.isEmpty());
 
             QJsonObject o;
+            const auto socketName = sockI.data ().toString();
+
+            // Make sure a socket has only 1 edge
+            if (singleSink.contains(socketName)) {
+                qWarning() << "Trying to save 2 edges for the same socket, aborting"
+                    << socketName << rsockI.data().toString();
+
+                Q_ASSERT(!singleSink.contains(socketName));
+                continue;
+            }
 
             o[ QStringLiteral("direction")    ] = name;
-            o[ QStringLiteral("own_socket")   ] = sockI.data ().toString();
+            o[ QStringLiteral("own_socket")   ] = socketName;
             o[ QStringLiteral("other_socket") ] = rsockI.data().toString();
             o[ QStringLiteral("id")           ] = edgeI.data ().toInt   ();
             o[ QStringLiteral("other_node")   ] = nodeid;
+
+            singleSink[socketName] = true;
 
             ret.append(o);
         }
