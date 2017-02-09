@@ -14,7 +14,7 @@ const T& qAsConst(const T& v)
 }
 #endif
 
-struct InternalItem
+struct MMTInternalItem
 {
     enum class Mode {
         ROOT,
@@ -24,8 +24,8 @@ struct InternalItem
     int                    m_Index;
     Mode                   m_Mode;
     QAbstractItemModel*    m_pModel;
-    InternalItem*          m_pParent;
-    QVector<InternalItem*> m_lChildren;
+    MMTInternalItem*          m_pParent;
+    QVector<MMTInternalItem*> m_lChildren;
     QString                m_Title;
 
     // Make sure rowCount returns 0 until the children are officially added
@@ -40,8 +40,8 @@ class QMultiModelTreePrivate : public QObject
 public:
     explicit QMultiModelTreePrivate(QObject* p) : QObject(p) {}
 
-    QVector<InternalItem*> m_lRows;
-    QHash<const QAbstractItemModel*, InternalItem*> m_hModels;
+    QVector<MMTInternalItem*> m_lRows;
+    QHash<const QAbstractItemModel*, MMTInternalItem*> m_hModels;
 
     bool m_HasIdRole {false};
     int m_IdRole {Qt::DisplayRole};
@@ -82,7 +82,7 @@ QAbstractItemModel* QMultiModelTree::getModel(const QModelIndex& _idx) const
     if ((!idx.isValid()) || idx.model() != this || idx.parent().isValid())
         return Q_NULLPTR;
 
-    const auto i = static_cast<InternalItem*>(idx.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(idx.internalPointer());
 
     Q_ASSERT(!i->m_pParent);
     Q_ASSERT(i->m_pModel);
@@ -95,9 +95,9 @@ QVariant QMultiModelTree::data(const QModelIndex& idx, int role) const
     if (!idx.isValid())
         return {};
 
-    const auto i = static_cast<InternalItem*>(idx.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(idx.internalPointer());
 
-    if (i->m_Mode == InternalItem::Mode::PROXY)
+    if (i->m_Mode == MMTInternalItem::Mode::PROXY)
         return i->m_pModel->data(mapToSource(idx), role);
 
     if (d_ptr->m_HasIdRole && d_ptr->m_IdRole == role)
@@ -123,12 +123,12 @@ bool QMultiModelTree::setData(const QModelIndex &index, const QVariant &value, i
     if (!index.isValid())
         return {};
 
-    auto i = static_cast<InternalItem*>(index.internalPointer());
+    auto i = static_cast<MMTInternalItem*>(index.internalPointer());
 
     switch(i->m_Mode) {
-        case InternalItem::Mode::PROXY:
+        case MMTInternalItem::Mode::PROXY:
             return i->m_pModel->setData(mapToSource(index), value, role);
-        case InternalItem::Mode::ROOT:
+        case MMTInternalItem::Mode::ROOT:
             if (d_ptr->m_HasIdRole && d_ptr->m_IdRole == role) {
                 i->m_UId = value;
                 Q_EMIT dataChanged(index, index);
@@ -172,9 +172,9 @@ int QMultiModelTree::rowCount(const QModelIndex& parent) const
     if (!parent.isValid())
         return d_ptr->m_lRows.size();
 
-    const auto i = static_cast<InternalItem*>(parent.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(parent.internalPointer());
 
-    if (i->m_Mode == InternalItem::Mode::PROXY)
+    if (i->m_Mode == MMTInternalItem::Mode::PROXY)
         return 0;
 
     if (i->m_RowCountLock)
@@ -203,7 +203,7 @@ QModelIndex QMultiModelTree::index(int row, int column, const QModelIndex& paren
         return {};
 
 
-    const auto i = static_cast<InternalItem*>(parent.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(parent.internalPointer());
 
     return mapFromSource(i->m_pModel->index(row, column));
 }
@@ -220,9 +220,9 @@ QModelIndex QMultiModelTree::parent(const QModelIndex& idx) const
     if (!idx.isValid())
         return {};
 
-    const auto i = static_cast<InternalItem*>(idx.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(idx.internalPointer());
 
-    if (i->m_Mode == InternalItem::Mode::ROOT)
+    if (i->m_Mode == MMTInternalItem::Mode::ROOT)
         return {};
 
     return createIndex(i->m_pParent->m_Index, 0, i->m_pParent);
@@ -249,7 +249,7 @@ QModelIndex QMultiModelTree::mapToSource(const QModelIndex& proxyIndex) const
     if (!proxyIndex.parent().isValid())
         return {};
 
-    const auto i = static_cast<InternalItem*>(proxyIndex.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(proxyIndex.internalPointer());
 
     return i->m_pModel->index(proxyIndex.row(), proxyIndex.column());
 }
@@ -265,7 +265,7 @@ bool QMultiModelTree::removeRows(int row, int count, const QModelIndex &parent)
         idx = idx.parent();
 
     if (idx.isValid() && !idx.parent().isValid()) {
-        const auto i = static_cast<InternalItem*>(idx.internalPointer());
+        const auto i = static_cast<MMTInternalItem*>(idx.internalPointer());
         if (i->m_pModel->removeRows(row, count, mapToSource(parent))) {
             beginRemoveRows(parent, row, row + count - 1);
             endRemoveRows();
@@ -306,9 +306,9 @@ void QMultiModelTreePrivate::slotAddRows(const QModelIndex& parent, int first, i
 
     q_ptr->beginInsertRows(localParent, first, last);
     for (int i = first; i <= last; i++) {
-        p->m_lChildren.insert(i, new InternalItem {
+        p->m_lChildren.insert(i, new MMTInternalItem {
             i,
-            InternalItem::Mode::PROXY,
+            MMTInternalItem::Mode::PROXY,
             src,
             p,
             {},
@@ -354,9 +354,9 @@ QModelIndex QMultiModelTree::appendModel(QAbstractItemModel* model, const QVaria
     if ((!model) || d_ptr->m_hModels[model]) return {};
 
     beginInsertRows({}, d_ptr->m_lRows.size(), d_ptr->m_lRows.size());
-    d_ptr->m_hModels[model] = new InternalItem {
+    d_ptr->m_hModels[model] = new MMTInternalItem {
         d_ptr->m_lRows.size(),
-        InternalItem::Mode::ROOT,
+        MMTInternalItem::Mode::ROOT,
         model,
         Q_NULLPTR,
         {},
@@ -385,7 +385,7 @@ bool QMultiModelTree::canDropMimeData(const QMimeData *data, Qt::DropAction acti
     if (!idx.isValid())
         return false;
 
-    const auto i = static_cast<InternalItem*>(idx.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(idx.internalPointer());
 
     auto srcIdx = mapToSource(idx);
 
@@ -399,7 +399,7 @@ bool QMultiModelTree::dropMimeData(const QMimeData *data, Qt::DropAction action,
     if (!idx.isValid())
         return false;
 
-    const auto i = static_cast<InternalItem*>(idx.internalPointer());
+    const auto i = static_cast<MMTInternalItem*>(idx.internalPointer());
 
     auto srcIdx = mapToSource(idx);
 

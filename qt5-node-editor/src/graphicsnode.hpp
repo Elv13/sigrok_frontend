@@ -65,6 +65,10 @@ public:
     QModelIndex index() const;
     QAbstractItemModel* model() const;
 
+    void remove();
+
+    void openTitleEditor();
+
     /**
         * set a regular QWidget as central widget
         */

@@ -2,6 +2,7 @@
 
 #include "graphicsnode.hpp"
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 #include <QPen>
 #include <QPainter>
 #include <QTextCursor>
@@ -123,6 +124,8 @@ public:
     explicit NodeTitle(GraphicsNodePrivate* parent) : QGraphicsTextItem(parent->m_pGraphicsItem),
     d_ptr(parent) {}
 
+    void activate();
+
 private:
     GraphicsNodePrivate* d_ptr;
 
@@ -132,10 +135,8 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
 };
 
-
-void NodeTitle::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void NodeTitle::activate()
 {
-    Q_UNUSED(event);
     setTextInteractionFlags(
         Qt::TextEditorInteraction
     );
@@ -144,6 +145,12 @@ void NodeTitle::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
     cur.select(QTextCursor::Document);
     setTextCursor(cur);
     setFocus();
+}
+
+void NodeTitle::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    Q_UNUSED(event);
+    activate();
 }
 
 void NodeTitle::focusOutEvent(QFocusEvent* event)
@@ -764,8 +771,32 @@ int CloseButton::width() const
 
 void CloseButton::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    d_ptr->m_pModel->removeRow(d_ptr->m_Index.row(), d_ptr->m_Index.parent());
+    d_ptr->q_ptr->remove();
+
     event->accept();
+}
+
+
+void GraphicsNode::
+remove()
+{
+    // Avoid keeping the pointer to `this`, the memory will be freed by the time
+    // it returns.
+    auto model = d_ptr->m_pModel;
+    auto idx   = d_ptr->m_Index;
+
+    QTimer::singleShot(0, [model, idx]() {
+        model->removeRow(
+            idx.row(),
+            idx.parent()
+        );
+    });
+}
+
+void GraphicsNode::
+openTitleEditor()
+{
+    d_ptr->_title_item->activate();
 }
 
 #include <graphicsnode.moc>

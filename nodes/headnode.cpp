@@ -11,7 +11,7 @@ public:
     HeadNodePrivate(QObject* parent) : QObject(parent), m_Proxy(this) {}
 
     HeadProxy m_Proxy;
-    RowSubset m_Widget;
+    RowSubset* m_pWidget {nullptr};
 
     HeadNode* q_ptr;
 public Q_SLOTS:
@@ -22,8 +22,6 @@ HeadNode::HeadNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new HeadNodeP
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &HeadNodePrivate::slotModelChanged);
-    QObject::connect(&d_ptr->m_Widget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &HeadProxy::setMaximum);
-    QObject::connect(&d_ptr->m_Widget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &HeadProxy::setLimited);
 }
 
 HeadNode::~HeadNode()
@@ -77,7 +75,12 @@ void HeadNode::setMaximumRows(int v)
 
 QWidget* HeadNode::widget() const
 {
-    return &d_ptr->m_Widget;
+    if (d_ptr->m_pWidget) {
+        d_ptr->m_pWidget = new RowSubset();
+        QObject::connect(d_ptr->m_pWidget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &HeadProxy::setMaximum);
+        QObject::connect(d_ptr->m_pWidget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &HeadProxy::setLimited);
+    }
+    return d_ptr->m_pWidget;
 }
 
 QAbstractItemModel* HeadNode::filteredModel() const

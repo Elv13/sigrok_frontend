@@ -5,6 +5,11 @@
 #include <QTextStream>
 #include <QByteArray>
 
+#include <QtCore/QJsonDocument>
+#include <QtCore/QMimeData>
+#include <QtGui/QClipboard>
+#include <QtGui/QGuiApplication>
+
 #include <KLocalizedString>
 #include <KActionCollection>
 #include <KStandardAction>
@@ -360,6 +365,8 @@ void MainWindow::slotTabSelected(int index)
     m_pToolBox->setModel(sess);
     m_pToolBox->expandAll();
 
+    m_pSelActionCol->sessionChanged(sess);
+
     if (!sess->rowCount())
         QTimer::singleShot(0, m_pToolBox, &ToolBox::expandAll);
 }
@@ -373,7 +380,6 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
 
     static QResource ss(QStringLiteral(":/pref/tutorial4ui.rc"));
     Q_ASSERT(ss.isValid());
-
 
     m_pStatusBar = new StatusBar2(this);
     setStatusBar(m_pStatusBar);
@@ -389,6 +395,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
     connect(m_pActionCollection, &ActionCollection::zoomOut, this, &MainWindow::zoomOut);
     connect(m_pActionCollection, &ActionCollection::zoomFit, this, &MainWindow::zoomFit);
     connect(m_pActionCollection, &ActionCollection::zoomReset, this, &MainWindow::zoomReset);
+    connect(m_pActionCollection, &ActionCollection::paste, this, &MainWindow::slotPaste);
 
     setCentralWidget(w);
 
@@ -605,6 +612,18 @@ void MainWindow::zoomLevelChanged(qreal level)
 {
     if (sender() == currentNodeWidget())
         m_pStatusBar->setZoomLevel(level);
+}
+
+void MainWindow::slotPaste()
+{
+    static QClipboard* c = QGuiApplication::clipboard();
+
+    const QMimeData *mimeData = c->mimeData();
+
+    if (mimeData->hasFormat(QStringLiteral("x-tutorial4/x-node-content"))) {
+        auto a = mimeData->data(QStringLiteral("x-tutorial4/x-node-content"));
+        currentSession()->addNodeFromData(a, QPoint());
+    }
 }
 
 #include <mainwindow.moc>

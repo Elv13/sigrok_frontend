@@ -1,10 +1,16 @@
 #include "selectedactioncollection.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QMimeData>
+#include <QtGui/QClipboard>
+#include <QtGui/QGuiApplication>
 #include <QtWidgets/QAction>
 
 #include <KXmlGuiWindow>
 #include <KActionCollection>
+
+#include "../session.h" //FIXME
 
 #if QT_VERSION < 0x050700
 //Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
@@ -22,18 +28,23 @@ public:
     QList<QAction*> m_lActions;
     KXmlGuiWindow* m_pParent;
 
+    GraphicsNode* m_pCurrentNode {nullptr};
+    Session* m_pSession {nullptr};
+
     QAction* m_pBg;
     QAction* m_pFg;
     QAction* m_pCopy;
     QAction* m_pCut;
-    QAction* m_pPaste;
+    QAction* m_pDelete;
+    QAction* m_pRename;
 
 public Q_SLOTS:
     void slotBg();
     void slotFg();
     void slotCopy();
     void slotCut();
-    void slotPaste();
+    void slotDelete();
+    void slotRename();
 };
 
 SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObject(parent),
@@ -58,7 +69,7 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
     parent->actionCollection()->addAction(QStringLiteral("foreground"), d_ptr->m_pFg);
     d_ptr->m_pFg->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pFg;
-    connect(d_ptr->m_pBg, SELF::slotFg);
+    connect(d_ptr->m_pFg, SELF::slotFg);
 
     d_ptr->m_pCopy = new QAction(parent);
     d_ptr->m_pCopy->setText(tr("Copy"));
@@ -67,7 +78,7 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_pCopy, Qt::CTRL + Qt::Key_C);
     d_ptr->m_pCopy->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pCopy;
-    connect(d_ptr->m_pBg, SELF::slotCopy);
+    connect(d_ptr->m_pCopy, SELF::slotCopy);
 
     d_ptr->m_pCut = new QAction(parent);
     d_ptr->m_pCut->setText(tr("Cut"));
@@ -76,16 +87,25 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_pCut, Qt::CTRL + Qt::Key_X);
     d_ptr->m_pCut->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pCut;
-    connect(d_ptr->m_pBg, SELF::slotCut);
+    connect(d_ptr->m_pCut, SELF::slotCut);
 
-    d_ptr->m_pPaste = new QAction(parent);
-    d_ptr->m_pPaste->setText(tr("Paste"));
-    d_ptr->m_pPaste->setIcon(QIcon::fromTheme(QStringLiteral("edit-paste")));
-    parent->actionCollection()->addAction(QStringLiteral("paste"), d_ptr->m_pPaste);
-    parent->actionCollection()->setDefaultShortcut(d_ptr->m_pPaste, Qt::CTRL + Qt::Key_V);
-    d_ptr->m_pPaste->setDisabled(true);
-    d_ptr->m_lActions << d_ptr->m_pPaste;
-    connect(d_ptr->m_pBg, SELF::slotPaste);
+    d_ptr->m_pDelete = new QAction(parent);
+    d_ptr->m_pDelete->setText(tr("Delete"));
+    d_ptr->m_pDelete->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
+    parent->actionCollection()->addAction(QStringLiteral("delete"), d_ptr->m_pDelete);
+    parent->actionCollection()->setDefaultShortcut(d_ptr->m_pDelete, Qt::SHIFT + Qt::Key_Delete);
+    d_ptr->m_pDelete->setDisabled(true);
+    d_ptr->m_lActions << d_ptr->m_pDelete;
+    connect(d_ptr->m_pDelete, SELF::slotDelete);
+
+    d_ptr->m_pRename = new QAction(parent);
+    d_ptr->m_pRename->setText(tr("Rename"));
+    d_ptr->m_pRename->setIcon(QIcon::fromTheme(QStringLiteral("edit-rename")));
+    parent->actionCollection()->addAction(QStringLiteral("rename"), d_ptr->m_pRename);
+    parent->actionCollection()->setDefaultShortcut(d_ptr->m_pRename, Qt::CTRL + Qt::Key_R);
+    d_ptr->m_pRename->setDisabled(true);
+    d_ptr->m_lActions << d_ptr->m_pRename;
+    connect(d_ptr->m_pRename, SELF::slotRename);
 #undef SELF
 }
 
@@ -99,32 +119,78 @@ void SelectedActionCollection::currentChanged(GraphicsNode* n)
     for (auto a : qAsConst(d_ptr->m_lActions)) {
         a->setEnabled(!!n);
     }
+
+    d_ptr->m_pCurrentNode = n;
 }
 
+void SelectedActionCollection::sessionChanged(Session* s)
+{
+    d_ptr->m_pSession = s;
+}
 
 void SelectedActionCollectionPrivate::slotBg()
 {
+    if ((!m_pCurrentNode) || (!m_pSession)) return;
+
+    qDebug() << "BG";
 
 }
 
 void SelectedActionCollectionPrivate::slotFg()
 {
+    if ((!m_pCurrentNode) || (!m_pSession)) return;
+
+    qDebug() << "FG";
 
 }
 
 void SelectedActionCollectionPrivate::slotCopy()
 {
+    if ((!m_pCurrentNode) || (!m_pSession)) return;
+
+    auto an = m_pSession->fromGraphicsNode(m_pCurrentNode);
+
+    if (!an)
+        return;
+
+    // Serialize
+    const QByteArray a = m_pSession->serializeSelection();
+
+    static QClipboard* c = QGuiApplication::clipboard();
+
+    QMimeData* md = new QMimeData();
+    md->setData(QStringLiteral("x-tutorial4/x-node-content"), a);
+
+    c->setMimeData(md);
 
 }
 
 void SelectedActionCollectionPrivate::slotCut()
 {
+    if ((!m_pCurrentNode) || (!m_pSession)) return;
+
+    auto an = m_pSession->fromGraphicsNode(m_pCurrentNode);
+
+    qDebug() << "CUT REQUESTED" << an;
+    slotCopy();
+
+    slotDelete();
 
 }
 
-void SelectedActionCollectionPrivate::slotPaste()
+void SelectedActionCollectionPrivate::slotDelete()
 {
+    if ((!m_pCurrentNode) || (!m_pSession)) return;
 
+    m_pCurrentNode->remove();
 }
+
+void SelectedActionCollectionPrivate::slotRename()
+{
+    if ((!m_pCurrentNode) || (!m_pSession)) return;
+
+    m_pCurrentNode->openTitleEditor();
+}
+
 
 #include "selectedactioncollection.moc"

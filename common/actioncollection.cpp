@@ -16,12 +16,14 @@ public:
     QAction* m_ZoomOut;
     QAction* m_ZoomFit;
     QAction* m_ZoomReset;
+    QAction* m_pPaste;
 
 public Q_SLOTS:
     void slotZoonIn();
     void slotZoonOut();
     void slotZoonFit();
     void slotZoonReset();
+    void slotPaste();
 };
 
 ActionCollection::ActionCollection(KXmlGuiWindow* parent) : QObject(parent),
@@ -59,6 +61,13 @@ ActionCollection::ActionCollection(KXmlGuiWindow* parent) : QObject(parent),
     d_ptr->m_ZoomReset->setIcon(QIcon::fromTheme(QStringLiteral("zoom-page")));
     parent->actionCollection()->addAction(QStringLiteral("zoom-reset"), d_ptr->m_ZoomReset);
     connect(d_ptr->m_ZoomReset, SELF::slotZoonReset);
+
+    d_ptr->m_pPaste = new QAction(parent);
+    d_ptr->m_pPaste->setText(tr("Paste"));
+    d_ptr->m_pPaste->setIcon(QIcon::fromTheme(QStringLiteral("edit-paste")));
+    parent->actionCollection()->addAction(QStringLiteral("paste"), d_ptr->m_pPaste);
+    parent->actionCollection()->setDefaultShortcut(d_ptr->m_pPaste, Qt::CTRL + Qt::Key_V);
+    connect(d_ptr->m_pPaste, SELF::slotPaste);
 #undef SELF
 }
 
@@ -85,6 +94,11 @@ void ActionCollectionPrivate::slotZoonFit()
 void ActionCollectionPrivate::slotZoonReset()
 {
     Q_EMIT q_ptr->zoomReset();
+}
+
+void ActionCollectionPrivate::slotPaste()
+{
+    Q_EMIT q_ptr->paste();
 }
 
 #include "actioncollection.moc"

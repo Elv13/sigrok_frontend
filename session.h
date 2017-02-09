@@ -8,7 +8,6 @@
 #include "qt5-node-editor/src/graphicsnodesocket.hpp"
 
 #include <QtCore/QDebug>
-#include <QtCore/QJsonArray>
 #include <QtCore/QAbstractItemModel>
 
 #include <QtGui/QIcon>
@@ -25,8 +24,11 @@ class SessionPrivate;
 
 class Session : public AbstractSession
 {
+    friend class NodeMimeData;
     Q_OBJECT
 public:
+    typedef QPair<GraphicsNode*, AbstractNode*> NodePair;
+
     explicit Session(QNodeWidget* w);
 
     template<typename T>
@@ -43,21 +45,28 @@ public:
     virtual QMimeData* mimeData(const QModelIndexList &indexes) const override;
     virtual QStringList mimeTypes() const override;
 
+    QByteArray serializeSelection() const;
+
     void serialize(QIODevice *dev) const;
     void load(QIODevice *dev);
     void load(const QByteArray& data);
 
+    AbstractNode* fromGraphicsNode(GraphicsNode* n) const;
+    GraphicsNode* fromAbstractNode(AbstractNode* n) const;
+
+    bool addNodeFromData(const QByteArray& data, const QPoint& point = {});
+
     virtual PageManager* pages() const override;
 
 public Q_SLOTS:
-    QPair<GraphicsNode*, AbstractNode*> addToScene(const QModelIndex& idx);
+    NodePair addToScene(const QModelIndex& idx);
 
 private Q_SLOTS:
     void remove(const QObject* o, const QString& id);
     void renameN(const QString& n, const QString& name);
 
 private:
-    QPair<GraphicsNode*, AbstractNode*> addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});
+    NodePair addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});
 
     QNodeWidget* m_pNodeW;
     struct MetaInfo {
@@ -65,7 +74,7 @@ private:
         const QMetaObject m_spMetaObj;
         QString m_Name;
         QIcon m_Icon;
-        QVector< QPair<GraphicsNode*, AbstractNode*> > m_lInstances;
+        QVector< NodePair > m_lInstances;
     };
 
     struct Category {
@@ -75,6 +84,7 @@ private:
 
     QVector<Category*> m_slCategory;
     QHash<QString, MetaInfo*> m_hIdToType;
+    QHash<QString, NodePair>  m_hIdToNode;
     SessionPrivate* d_ptr;
 };
 

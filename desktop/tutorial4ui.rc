@@ -15,6 +15,9 @@
             <Action name="cut" />
             <Action name="paste" />
             <Separator />
+            <Action name="rename" />
+            <Action name="delete" />
+            <Separator />
             <Action name="background" />
             <Action name="foreground" />
         </Menu>

@@ -11,7 +11,7 @@ public:
     TailNodePrivate(QObject* parent) : QObject(parent), m_Proxy(this) {}
 
     TailProxy m_Proxy;
-    RowSubset m_Widget;
+    RowSubset* m_pWidget {nullptr};
 
     TailNode* q_ptr;
 public Q_SLOTS:
@@ -22,8 +22,6 @@ TailNode::TailNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new TailNodeP
 {
     d_ptr->q_ptr = this;
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &TailNodePrivate::slotModelChanged);
-    QObject::connect(&d_ptr->m_Widget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &TailProxy::setMaximum);
-    QObject::connect(&d_ptr->m_Widget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &TailProxy::setLimited);
 }
 
 TailNode::~TailNode()
@@ -77,7 +75,12 @@ void TailNode::setMaximumRows(int v)
 
 QWidget* TailNode::widget() const
 {
-    return &d_ptr->m_Widget;
+    if (!d_ptr->m_pWidget) {
+        d_ptr->m_pWidget = new RowSubset();
+        QObject::connect(d_ptr->m_pWidget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &TailProxy::setMaximum);
+        QObject::connect(d_ptr->m_pWidget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &TailProxy::setLimited);
+    }
+    return d_ptr->m_pWidget;
 }
 
 QAbstractItemModel* TailNode::filteredModel() const

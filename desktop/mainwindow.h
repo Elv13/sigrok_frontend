@@ -72,6 +72,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     void zoomReset();
     void setZoom(qreal level);
     void zoomLevelChanged(qreal level);
+    void slotPaste();
 
   public Q_SLOTS:
     void slotTabCloseRequested(int index);

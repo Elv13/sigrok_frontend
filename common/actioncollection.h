@@ -17,6 +17,7 @@ Q_SIGNALS:
     void zoomOut();
     void zoomFit();
     void zoomReset();
+    void paste();
 
 private:
     ActionCollectionPrivate* d_ptr;

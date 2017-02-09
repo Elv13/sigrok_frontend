@@ -5,6 +5,7 @@
 class KXmlGuiWindow;
 
 class GraphicsNode;
+class Session;
 
 class SelectedActionCollectionPrivate;
 
@@ -16,6 +17,7 @@ public:
     virtual ~SelectedActionCollection();
 
 public Q_SLOTS:
+    void sessionChanged(Session* s);
     void currentChanged(GraphicsNode* n);
 
 private:

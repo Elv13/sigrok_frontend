@@ -8,6 +8,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QItemSelectionModel>
 
+#include <QtWidgets/QGraphicsScene>
+
 class QNodeWidgetPrivate : public QObject
 {
     Q_OBJECT
@@ -174,6 +176,20 @@ GraphicsNode* QNodeWidget::currentNode() const
     const auto idx = selectionModel()->currentIndex();
 
     return idx.isValid() ? getNode(idx) : Q_NULLPTR;
+}
+
+void QNodeWidget::setCurrentNode(GraphicsNode* n)
+{
+    scene()->clearSelection();
+    n->graphicsItem()->setSelected(true);
+}
+
+bool QNodeWidget::removeNode(GraphicsNode* n)
+{
+    if (n)
+        n->remove();
+
+    return !!n;
 }
 
 #include <qnodewidget.moc>

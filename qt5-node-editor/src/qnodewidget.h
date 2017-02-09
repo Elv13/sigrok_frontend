@@ -43,6 +43,10 @@ public:
 
     GraphicsNode* currentNode() const;
 
+    void setCurrentNode(GraphicsNode* n);
+
+    bool removeNode(GraphicsNode* n);
+
 Q_SIGNALS:
     // Removing
     void objectRemoved(QObject* o);

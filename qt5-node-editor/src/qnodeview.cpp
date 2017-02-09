@@ -48,7 +48,7 @@ QNodeView::~QNodeView()
     delete d_ptr;
 }
 
-GraphicsNodeScene* QNodeView::scene() const
+QGraphicsScene* QNodeView::scene() const
 {
     return &d_ptr->m_Scene;
 }
