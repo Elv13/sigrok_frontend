@@ -42,6 +42,7 @@ public:
     );
 
     GraphicsNode* currentNode() const;
+    QList<GraphicsNode*> currentNodes() const;
 
     void setCurrentNode(GraphicsNode* n);
 

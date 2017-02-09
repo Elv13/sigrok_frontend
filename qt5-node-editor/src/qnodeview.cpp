@@ -121,9 +121,12 @@ void QNodeViewPrivate::slotSelectionChanged()
             );
             return;
         default:
-            /*for (const auto& idx : sel) {
-                //TODO
-            }*/
+            for (const auto& idx : sel) {
+                q_ptr->m_pSelectionModel->setCurrentIndex(
+                    idx,
+                    QItemSelectionModel::Select
+                );
+            }
             break;
     }
 

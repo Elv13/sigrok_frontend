@@ -111,6 +111,21 @@ QByteArray generateRandomHash()
     return ret;
 }
 
+/// Multi-selection iterator
+void Session::forEachSelected(const std::function<void(GraphicsNode* gn, AbstractNode* an)>& f) const
+{
+    const auto idxes = m_pNodeW->selectionModel()->selectedIndexes();
+    for (const auto idx : idxes) {
+        auto uid = idx.data(Qt::UserRole).toString();
+
+        if ((!uid.isEmpty()) && m_hIdToNode.contains(uid)) {
+            const auto pair = m_hIdToNode[uid];
+            f(pair.first, pair.second);
+        }
+    }
+}
+
+/// Factory
 Session::NodePair Session::addToSceneFromMetaObject(const QMetaObject& meta, const QString& uid)
 {
     QObject* o = meta.newInstance(Q_ARG(AbstractSession*, this));
@@ -164,6 +179,7 @@ Session::NodePair Session::addToSceneFromMetaObject(const QMetaObject& meta, con
     return pair;
 }
 
+/// Convert a toolbox index to a node
 Session::NodePair Session::addToScene(const QModelIndex& idx)
 {
     if ((!idx.isValid()) || !idx.parent().isValid())
@@ -602,71 +618,75 @@ void Session::load(QIODevice *dev)
 }
 
 
-bool Session::addNodeFromData(const QByteArray& data, const QPoint& point)
+bool Session::addNodesFromData(const QByteArray& data, const QPoint& point)
 {
     Q_UNUSED(point);
 
     QJsonDocument loadDoc(QJsonDocument::fromJson(data));
-    const auto obj  = loadDoc.object();
-    const auto type = obj[ QStringLiteral("id") ].toString();
 
-    if (!m_hIdToType.contains(type)) {
-        qWarning() << "Unknown node type" << type;
-        return false;
+    const auto arr = loadDoc.array();
+    bool ret = false;
+
+    for (int nodeId = 0; nodeId < arr.size(); ++nodeId) {
+        const auto obj  = arr[nodeId].toObject();
+        const auto type = obj[ QStringLiteral("id") ].toString();
+
+        if (!m_hIdToType.contains(type)) {
+            qWarning() << "Unknown node type" << type;
+            return false;
+        }
+
+        // Give it a blank UID in case it's accessed
+        obj[QStringLiteral("UID")] = QString();
+
+        if (auto metaInfo = m_hIdToType[type]) {
+            auto pair = addToSceneFromMetaObject(metaInfo->m_spMetaObj);
+
+            pair.first->setRect({
+                obj[QStringLiteral("x")     ].toDouble(),
+                obj[QStringLiteral("y")     ].toDouble(),
+                obj[QStringLiteral("width") ].toDouble(),
+                obj[QStringLiteral("height")].toDouble()
+            });
+
+            pair.first->setTitle(obj[QStringLiteral("title") ].toString());
+            pair.second->read(obj);
+
+            m_pNodeW->setCurrentNode(pair.first);
+
+            ret = true;
+
+        }
     }
 
-    // Give it a new UID
-    obj[QStringLiteral("UID")] = QString();
-
-    if (auto metaInfo = m_hIdToType[type]) {
-        auto pair = addToSceneFromMetaObject(metaInfo->m_spMetaObj);
-
-        pair.first->setRect({
-            obj[QStringLiteral("x")     ].toDouble(),
-            obj[QStringLiteral("y")     ].toDouble(),
-            obj[QStringLiteral("width") ].toDouble(),
-            obj[QStringLiteral("height")].toDouble()
-        });
-
-        pair.first->setTitle(obj[QStringLiteral("title") ].toString());
-        pair.second->read(obj);
-
-        m_pNodeW->setCurrentNode(pair.first);
-
-        return true;
-    }
-
-    return false;
+    return ret;
 }
 
 QByteArray Session::serializeSelection() const
 {
-    auto idx = m_pNodeW->selectionModel()->currentIndex();
-    auto uid = idx.data(Qt::UserRole).toString();
+    QJsonArray arr;
 
-    if ((!uid.isEmpty()) && m_hIdToNode.contains(uid)) {
-        auto pair = m_hIdToNode[uid];
-
+    forEachSelected([&arr](auto gn, auto an) {
         QJsonObject o;
 
-        const QRectF r = pair.first->rect();
+        const QRectF r = gn->rect();
 
         QJsonObject widget;
-        pair.second->write(o);
+        an->write(o);
 
         o[QStringLiteral("x")     ] = r.x();
         o[QStringLiteral("y")     ] = r.y();
         o[QStringLiteral("width") ] = r.width();
         o[QStringLiteral("height")] = r.height();
-        o[QStringLiteral("title") ] = pair.first->title();
-        o[QStringLiteral("UID")   ] = pair.first->index().data(Qt::UserRole).toString();
+        o[QStringLiteral("title") ] = gn->title();
+        o[QStringLiteral("UID")   ] = gn->index().data(Qt::UserRole).toString();
 
-        const QByteArray a = QJsonDocument(o).toJson();
+        arr.append(o);
+    });
 
-        return a;
-    }
+    const QByteArray a = QJsonDocument(arr).toJson();
 
-    return {};
+    return a;
 }
 
 AbstractNode* Session::fromGraphicsNode(GraphicsNode* n) const

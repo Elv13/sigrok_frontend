@@ -73,6 +73,11 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     void setZoom(qreal level);
     void zoomLevelChanged(qreal level);
     void slotPaste();
+    void slotBg();
+    void slotFg();
+
+    void applyBg(const QColor& c);
+    void applyFg(const QColor& c);
 
   public Q_SLOTS:
     void slotTabCloseRequested(int index);

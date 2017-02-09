@@ -25,7 +25,9 @@
 
 GraphicsNodeView::GraphicsNodeView(QWidget *parent)
 : GraphicsNodeView(nullptr, parent)
-{ }
+{
+	setDragMode(QGraphicsView::RubberBandDrag);
+}
 
 
 GraphicsNodeView::GraphicsNodeView(QGraphicsScene *scene, QWidget *parent)
@@ -219,11 +221,13 @@ mouseMoveEvent(QMouseEvent *event)
 				viewport()->setCursor(Qt::DragMoveCursor);
 			}
 		}
+		event->accept();
 	}
 	else if (_resize_event && (event->buttons() & Qt::LeftButton)) {
 		QPointF size = mapToScene(event->pos())
             - _resize_event->node->graphicsItem()->mapToScene(0,0);
 		_resize_event->node->setSize(size);
+		event->accept();
 	}
 	else {
 		// no button is pressed, so indicate what the user can do with
@@ -249,7 +253,6 @@ mouseMoveEvent(QMouseEvent *event)
 void GraphicsNodeView::
 leftMouseButtonPress(QMouseEvent *event)
 {
-	QGraphicsView::mousePressEvent(event);
 	// GUI logic: if we click on a socket, we need to handle
 	// the event appropriately
 	QGraphicsItem *item = itemAt(event->pos());
@@ -302,7 +305,7 @@ leftMouseButtonPress(QMouseEvent *event)
 			_drag_event->e->d_ptr->setStop (scenePos);
 			_drag_event->e->d_ptr->setStart(scenePos);
 
-			event->ignore();
+			event->accept();
 		}
 		else {
 			QGraphicsView::mousePressEvent(event);
@@ -322,7 +325,7 @@ leftMouseButtonPress(QMouseEvent *event)
 			_resize_event->orig_width = node->size().width();
 			_resize_event->orig_height = node->size().height();
 			_resize_event->pos = event->pos();
-			event->ignore();
+			event->accept();
 		}
 		else {
 			QGraphicsView::mousePressEvent(event);

@@ -10,6 +10,8 @@
 #include <QtGui/QClipboard>
 #include <QtGui/QGuiApplication>
 
+#include <QtWidgets/QMenu>
+
 #include <KLocalizedString>
 #include <KActionCollection>
 #include <KStandardAction>
@@ -71,6 +73,8 @@
 #include "qt5-node-editor/src/graphicsnode.hpp"
 #include "qt5-node-editor/src/qnodewidget.h"
 #include "qt5-node-editor/src/graphicsnodescene.hpp"
+
+#include "Qt-Color-Widgets/include/ColorDialog"
 
 #include "common/pagemanager.h"
 #include "common/interfaceserializer.h"
@@ -397,6 +401,9 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
     connect(m_pActionCollection, &ActionCollection::zoomReset, this, &MainWindow::zoomReset);
     connect(m_pActionCollection, &ActionCollection::paste, this, &MainWindow::slotPaste);
 
+    connect(m_pSelActionCol->bg(), &QAction::triggered, this, &MainWindow::slotBg);
+    connect(m_pSelActionCol->fg(), &QAction::triggered, this, &MainWindow::slotFg);
+
     setCentralWidget(w);
 
     //Create the node toolbox dock
@@ -620,10 +627,48 @@ void MainWindow::slotPaste()
 
     const QMimeData *mimeData = c->mimeData();
 
-    if (mimeData->hasFormat(QStringLiteral("x-tutorial4/x-node-content"))) {
-        auto a = mimeData->data(QStringLiteral("x-tutorial4/x-node-content"));
-        currentSession()->addNodeFromData(a, QPoint());
+    if (mimeData->hasFormat(QStringLiteral("x-tutorial4/x-nodes-content"))) {
+        const auto a = mimeData->data(QStringLiteral("x-tutorial4/x-nodes-content"));
+        currentSession()->addNodesFromData(a, QPoint());
     }
+}
+
+void MainWindow::slotBg()
+{
+    auto d = new color_widgets::ColorDialog(this);
+
+    if (auto cur = m_pSelActionCol->currentNode())
+        d->setColor(cur->background().color());
+
+    connect(d, &color_widgets::ColorDialog::colorSelected, this, &MainWindow::applyBg);
+    d->show();
+}
+
+void MainWindow::slotFg()
+{
+    auto d = new color_widgets::ColorDialog(this);
+
+    if (auto cur = m_pSelActionCol->currentNode())
+        d->setColor(cur->foreground().color());
+
+    connect(d, &color_widgets::ColorDialog::colorSelected, this, &MainWindow::applyFg);
+    d->show();
+}
+
+void MainWindow::applyBg(const QColor& c)
+{
+    currentSession()->forEachSelected([c](auto gn, auto) {
+        gn->setBackground(c);
+    });
+    m_pTabs->repaint();
+}
+
+void MainWindow::applyFg(const QColor& c)
+{
+    currentSession()->forEachSelected([c](auto gn, auto) {
+        gn->setForeground(c);
+    });
+    m_pTabs->repaint();
 }
 
 #include <mainwindow.moc>

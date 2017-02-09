@@ -10,6 +10,15 @@
 
 #include <QtWidgets/QGraphicsScene>
 
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
+
 class QNodeWidgetPrivate : public QObject
 {
     Q_OBJECT
@@ -176,6 +185,19 @@ GraphicsNode* QNodeWidget::currentNode() const
     const auto idx = selectionModel()->currentIndex();
 
     return idx.isValid() ? getNode(idx) : Q_NULLPTR;
+}
+
+QList<GraphicsNode*> QNodeWidget::currentNodes() const
+{
+    const auto list = selectionModel()->selectedIndexes();
+    QList<GraphicsNode*> ret;
+
+    for (const auto& idx : qAsConst(list)) {
+        if (auto n = getNode(idx))
+        ret << n;
+    }
+
+    return ret;
 }
 
 void QNodeWidget::setCurrentNode(GraphicsNode* n)

@@ -2,7 +2,7 @@ project (tutorial4)
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
-ADD_DEFINITIONS("-std=c++11")
+ADD_DEFINITIONS("-std=c++14")
 ADD_DEFINITIONS("-DCLAZY_CHECKS='level2,no-qenums'")
 
 IF(POLICY CMP0063)

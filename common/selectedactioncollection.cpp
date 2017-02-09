@@ -39,8 +39,6 @@ public:
     QAction* m_pRename;
 
 public Q_SLOTS:
-    void slotBg();
-    void slotFg();
     void slotCopy();
     void slotCut();
     void slotDelete();
@@ -53,15 +51,12 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
 #define SELF &QAction::triggered, d_ptr, &SelectedActionCollectionPrivate
     d_ptr->m_pParent = parent;
 
-    //actionCollection()->setDefaultShortcut(d_ptr->m_pBg, Qt::CTRL + Qt::Key_W);
-
     d_ptr->m_pBg = new QAction(parent);
     d_ptr->m_pBg->setText(tr("&Background"));
     d_ptr->m_pBg->setIcon(QIcon::fromTheme(QStringLiteral("color-fill")));
     parent->actionCollection()->addAction(QStringLiteral("background"), d_ptr->m_pBg);
     d_ptr->m_pBg->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pBg;
-    connect(d_ptr->m_pBg, SELF::slotBg);
 
     d_ptr->m_pFg = new QAction(parent);
     d_ptr->m_pFg->setText(tr("&Foreground"));
@@ -69,7 +64,6 @@ SelectedActionCollection::SelectedActionCollection(KXmlGuiWindow* parent) : QObj
     parent->actionCollection()->addAction(QStringLiteral("foreground"), d_ptr->m_pFg);
     d_ptr->m_pFg->setDisabled(true);
     d_ptr->m_lActions << d_ptr->m_pFg;
-    connect(d_ptr->m_pFg, SELF::slotFg);
 
     d_ptr->m_pCopy = new QAction(parent);
     d_ptr->m_pCopy->setText(tr("Copy"));
@@ -114,6 +108,11 @@ SelectedActionCollection::~SelectedActionCollection()
     delete d_ptr;
 }
 
+GraphicsNode* SelectedActionCollection::currentNode() const
+{
+    return d_ptr->m_pCurrentNode;
+}
+
 void SelectedActionCollection::currentChanged(GraphicsNode* n)
 {
     for (auto a : qAsConst(d_ptr->m_lActions)) {
@@ -126,22 +125,6 @@ void SelectedActionCollection::currentChanged(GraphicsNode* n)
 void SelectedActionCollection::sessionChanged(Session* s)
 {
     d_ptr->m_pSession = s;
-}
-
-void SelectedActionCollectionPrivate::slotBg()
-{
-    if ((!m_pCurrentNode) || (!m_pSession)) return;
-
-    qDebug() << "BG";
-
-}
-
-void SelectedActionCollectionPrivate::slotFg()
-{
-    if ((!m_pCurrentNode) || (!m_pSession)) return;
-
-    qDebug() << "FG";
-
 }
 
 void SelectedActionCollectionPrivate::slotCopy()
@@ -159,7 +142,7 @@ void SelectedActionCollectionPrivate::slotCopy()
     static QClipboard* c = QGuiApplication::clipboard();
 
     QMimeData* md = new QMimeData();
-    md->setData(QStringLiteral("x-tutorial4/x-node-content"), a);
+    md->setData(QStringLiteral("x-tutorial4/x-nodes-content"), a);
 
     c->setMimeData(md);
 
@@ -169,11 +152,7 @@ void SelectedActionCollectionPrivate::slotCut()
 {
     if ((!m_pCurrentNode) || (!m_pSession)) return;
 
-    auto an = m_pSession->fromGraphicsNode(m_pCurrentNode);
-
-    qDebug() << "CUT REQUESTED" << an;
     slotCopy();
-
     slotDelete();
 
 }
@@ -182,7 +161,9 @@ void SelectedActionCollectionPrivate::slotDelete()
 {
     if ((!m_pCurrentNode) || (!m_pSession)) return;
 
-    m_pCurrentNode->remove();
+    m_pSession->forEachSelected([](auto gn, auto) {
+        gn->remove();
+    });
 }
 
 void SelectedActionCollectionPrivate::slotRename()
@@ -192,5 +173,11 @@ void SelectedActionCollectionPrivate::slotRename()
     m_pCurrentNode->openTitleEditor();
 }
 
+QAction* SelectedActionCollection::bg()         { return d_ptr->m_pBg;     }
+QAction* SelectedActionCollection::fg()         { return d_ptr->m_pFg;     }
+QAction* SelectedActionCollection::copy()       { return d_ptr->m_pCopy;   }
+QAction* SelectedActionCollection::cut()        { return d_ptr->m_pCut;    }
+QAction* SelectedActionCollection::deleteNode() { return d_ptr->m_pDelete; }
+QAction* SelectedActionCollection::rename()     { return d_ptr->m_pRename; }
 
 #include "selectedactioncollection.moc"

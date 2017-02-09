@@ -12,6 +12,8 @@
 
 #include <QtGui/QIcon>
 
+#include <functional>
+
 #include "common/abstractnode.h"
 
 class QNodeWidget;
@@ -54,7 +56,9 @@ public:
     AbstractNode* fromGraphicsNode(GraphicsNode* n) const;
     GraphicsNode* fromAbstractNode(AbstractNode* n) const;
 
-    bool addNodeFromData(const QByteArray& data, const QPoint& point = {});
+    bool addNodesFromData(const QByteArray& data, const QPoint& point = {});
+
+    void forEachSelected(const std::function<void(GraphicsNode* gn, AbstractNode* an)>& f) const;
 
     virtual PageManager* pages() const override;
 
