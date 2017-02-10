@@ -5,12 +5,20 @@
 class ActionCollectionPrivate;
 class KXmlGuiWindow;
 
+class QAction;
+
 class ActionCollection : public  QObject
 {
     Q_OBJECT
 public:
     explicit ActionCollection(KXmlGuiWindow* parent = nullptr);
     virtual ~ActionCollection();
+
+    QAction* zoonInAction() const;
+    QAction* zoonOutAction() const;
+    QAction* zoonFitAction() const;
+    QAction* zoonResetAction() const;
+    QAction* pasteAction() const;
 
 Q_SIGNALS:
     void zoomIn();

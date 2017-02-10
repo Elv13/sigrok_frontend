@@ -64,6 +64,8 @@ protected:
 	QItemSelectionModel* m_pSelectionModel {nullptr}; //idem
 	QList<QModelIndex> selectedNodeIndexes() const;
 
+    GraphicsNode* nodeAtAbs(const QPoint &point) const;
+
 private:
 	void middleMouseButtonPress(QMouseEvent *event);
 	void leftMouseButtonPress(QMouseEvent *event);

@@ -132,5 +132,12 @@ void QNodeViewPrivate::slotSelectionChanged()
 
 }
 
+QModelIndex QNodeView::indexAt(const QPoint &point) const
+{
+    auto n = nodeAtAbs(point);
+
+    return n ? n->index() : QModelIndex();
+}
+
 #include <qnodeview.moc>
 

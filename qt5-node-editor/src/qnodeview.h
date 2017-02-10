@@ -36,6 +36,8 @@ public:
 
     QAbstractItemModel* edgeModel() const;
 
+    QModelIndex indexAt(const QPoint &point) const;
+
 private:
     QNodeViewPrivate* d_ptr;
     Q_DECLARE_PRIVATE(QNodeView)

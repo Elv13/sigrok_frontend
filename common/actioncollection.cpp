@@ -101,4 +101,30 @@ void ActionCollectionPrivate::slotPaste()
     Q_EMIT q_ptr->paste();
 }
 
+QAction* ActionCollection::zoonInAction() const
+{
+    return d_ptr->m_ZoomIn;
+}
+
+QAction* ActionCollection::zoonOutAction() const
+{
+    return d_ptr->m_ZoomOut;
+}
+
+QAction* ActionCollection::zoonFitAction() const
+{
+    return d_ptr->m_ZoomFit;
+}
+
+QAction* ActionCollection::zoonResetAction() const
+{
+    return d_ptr->m_ZoomReset;
+}
+
+QAction* ActionCollection::pasteAction() const
+{
+    return d_ptr->m_pPaste;
+}
+
+
 #include "actioncollection.moc"

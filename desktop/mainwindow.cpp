@@ -9,6 +9,7 @@
 #include <QtCore/QMimeData>
 #include <QtGui/QClipboard>
 #include <QtGui/QGuiApplication>
+#include <QtGui/QMouseEvent>
 
 #include <QtWidgets/QMenu>
 
@@ -288,6 +289,11 @@ Session* MainWindow::addSession(const QString& name)
     connect(sess->pages(), &PageManager::pageAdded, this, &MainWindow::addDock);
     connect(nodeWidget, &QNodeWidget::currentNodeChanged, this, &MainWindow::slotSelectionChanged);
     connect(nodeWidget, &QNodeWidget::zoomLevelChanged, this, &MainWindow::zoomLevelChanged);
+
+    connect(nodeWidget, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(slotNodeContextMenu(QPoint)));
+
+    nodeWidget->installEventFilter(this);
 
     connect(sess->pages(), &QAbstractItemModel::rowsAboutToBeRemoved, [this, sess](const QModelIndex& , int first, int last) {
         for (int i = first; i <= last; i++) {
@@ -669,6 +675,50 @@ void MainWindow::applyFg(const QColor& c)
         gn->setForeground(c);
     });
     m_pTabs->repaint();
+}
+
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::ContextMenu) {
+        slotNodeContextMenu(static_cast<QContextMenuEvent*>(event)->pos());
+    }
+
+    return QObject::eventFilter(watched, event);
+}
+
+void MainWindow::slotNodeContextMenu(const QPoint& p)
+{
+    if (!m_pSelActionCol->currentNode()) {
+        currentNodeWidget()->selectionModel()->setCurrentIndex(
+            currentNodeWidget()->indexAt(p),
+            QItemSelectionModel::Clear  |
+            QItemSelectionModel::Select
+        );
+
+        if (!m_pSelActionCol->currentNode()) {
+            auto m = new QMenu(this);
+
+            m->addAction(m_pActionCollection->zoonInAction());
+            m->addAction(m_pActionCollection->zoonOutAction());
+            m->addAction(m_pActionCollection->zoonFitAction());
+            m->addAction(m_pActionCollection->zoonResetAction());
+            m->addAction(m_pActionCollection->pasteAction());
+
+            m->exec(QCursor::pos());
+            return;
+        }
+    }
+
+    auto m = new QMenu(this);
+    m->addAction(m_pSelActionCol->copy());
+    m->addAction(m_pSelActionCol->cut());
+    m->addAction(m_pSelActionCol->deleteNode());
+    m->addAction(m_pSelActionCol->rename());
+    m->addSeparator();
+    m->addAction(m_pSelActionCol->bg());
+    m->addAction(m_pSelActionCol->fg());
+    m->exec(QCursor::pos());
 }
 
 #include <mainwindow.moc>

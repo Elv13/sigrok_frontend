@@ -225,7 +225,7 @@ mouseMoveEvent(QMouseEvent *event)
 	}
 	else if (_resize_event && (event->buttons() & Qt::LeftButton)) {
 		QPointF size = mapToScene(event->pos())
-            - _resize_event->node->graphicsItem()->mapToScene(0,0);
+			- _resize_event->node->graphicsItem()->mapToScene(0,0);
 		_resize_event->node->setSize(size);
 		event->accept();
 	}
@@ -249,6 +249,21 @@ mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
+GraphicsNode* GraphicsNodeView::
+nodeAtAbs(const QPoint &point) const
+{
+	const auto its = items(point);
+
+	if (its.isEmpty())
+		return Q_NULLPTR;
+
+	for (auto i : its) {
+		if (i->type() == GraphicsNodeItemTypes::TypeNode)
+			return static_cast<NodeGraphicsItem*>(i)->q_ptr;
+	}
+
+	return Q_NULLPTR;
+}
 
 void GraphicsNodeView::
 leftMouseButtonPress(QMouseEvent *event)

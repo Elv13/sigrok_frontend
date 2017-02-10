@@ -33,7 +33,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     explicit MainWindow(QWidget *parent=0);
     virtual ~MainWindow();
 
-//     static MainWindow* /*insta*/nce();
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
   private:
     Session* addSession(const QString& name);
@@ -78,6 +78,8 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
 
     void applyBg(const QColor& c);
     void applyFg(const QColor& c);
+
+    void slotNodeContextMenu(const QPoint& idx);
 
   public Q_SLOTS:
     void slotTabCloseRequested(int index);
