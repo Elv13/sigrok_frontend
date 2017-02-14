@@ -133,7 +133,7 @@ void Session::registerType(const QString& name, const QString& category, const Q
         cat->m_lTypes.size(), T::staticMetaObject, name, icon, {}
     };
 
-    const auto idx = index(m_slCategory.size()-1, 0);
+//     const auto idx = index(m_slCategory.size()-1, 0);
 
 //     beginInsertRows(idx, cat->m_lTypes.size(), cat->m_lTypes.size());
     cat->m_lTypes << mi;

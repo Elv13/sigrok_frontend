@@ -415,6 +415,8 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
 
     //Create the node toolbox dock
     m_pToolBox = new ToolBox(this);
+    actionCollection()->addAction(QStringLiteral("search-tool"), m_pToolBox->searchAction());
+    actionCollection()->setDefaultShortcut(m_pToolBox->searchAction(), Qt::CTRL + Qt::Key_Space);
 
     QObject::connect(m_pToolBox, &ToolBox::doubleClicked, [this](const QModelIndex& idx) {
         const int cur = m_pTabs->currentIndex();

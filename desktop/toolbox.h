@@ -3,6 +3,7 @@
 #include <QtWidgets/QDockWidget>
 
 class KRecursiveFilterProxyModel;
+class QAction;
 
 #include "ui_toolbox.h"
 
@@ -16,10 +17,13 @@ public:
     explicit ToolBox(QWidget* parent);
     virtual ~ToolBox();
 
+    QAction* searchAction() const;
+
     void setModel(QAbstractItemModel* m);
 
 private Q_SLOTS:
     void slotDoubleClicked(const QModelIndex& idx);
+    void actionTrigger();
 
 public Q_SLOTS:
     void expandAll();
@@ -30,4 +34,5 @@ Q_SIGNALS:
 
 private:
     KRecursiveFilterProxyModel* m_pProxy;
+    QAction* m_pAction;
 };
