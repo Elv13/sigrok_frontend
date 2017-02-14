@@ -2,6 +2,8 @@
 
 #include <QtWidgets/QDockWidget>
 
+class KRecursiveFilterProxyModel;
+
 #include "ui_toolbox.h"
 
 class QAbstractItemModel;
@@ -21,7 +23,11 @@ private Q_SLOTS:
 
 public Q_SLOTS:
     void expandAll();
+    void setFilterText(const QString& text);
 
 Q_SIGNALS:
     void doubleClicked(const QModelIndex& idx);
+
+private:
+    KRecursiveFilterProxyModel* m_pProxy;
 };

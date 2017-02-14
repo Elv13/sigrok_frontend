@@ -1,5 +1,7 @@
 #include "qnodeeditorsocketmodel.h"
 
+#include <algorithm>
+
 #include "graphicsnode.hpp"
 #include "graphicsnodescene.hpp"
 #include "graphicsbezieredge.hpp"
@@ -906,6 +908,12 @@ void QNodeEditorSocketModelPrivate::slotAboutRemoveItem(const QModelIndex &paren
                 delete sw;
             }
         }
+
+        // The code below subtract `i` to compensate for the shrinking list.
+        // chances are items will be ordered, but there is case where it might
+        // not be the case
+        std::sort(srcToDel.begin() , srcToDel.end() );
+        std::sort(sinkToDel.begin(), sinkToDel.end());
 
         nw->m_lSinksFromSrc.remove(first, last - first + 1);
         nw->m_lSourcesFromSrc.remove(first, last - first + 1);

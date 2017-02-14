@@ -124,14 +124,20 @@ void Session::registerType(const QString& name, const QString& category, const Q
             category,
             {}
         };
+        beginInsertRows({}, m_slCategory.size(), m_slCategory.size());
         m_slCategory << cat;
+        endInsertRows();
     }
 
     auto mi = new Session::MetaInfo {
         cat->m_lTypes.size(), T::staticMetaObject, name, icon, {}
     };
 
+    const auto idx = index(m_slCategory.size()-1, 0);
+
+//     beginInsertRows(idx, cat->m_lTypes.size(), cat->m_lTypes.size());
     cat->m_lTypes << mi;
+//     endInsertRows();
 
     m_hIdToType[id] = mi;
 }
