@@ -26,6 +26,7 @@ DeviceModel::DeviceModel() : QAbstractListModel(), d_ptr(new DeviceModelPrivate)
 DeviceModel::~DeviceModel()
 {
     delete d_ptr->m_pSelectionModel;
+    delete d_ptr;
 }
 
 DeviceModel* DeviceModel::instance()

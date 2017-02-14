@@ -65,6 +65,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     QMainWindow* addMainWindow(const QString& title = QString(), const QString& id = QString());
     QMainWindow* slotAddMainWindow(bool);
     QMainWindow* slotSelectionChanged();
+    void slotSessionMessage(const QString& msg);
 
     void zoomIn();
     void zoomOut();

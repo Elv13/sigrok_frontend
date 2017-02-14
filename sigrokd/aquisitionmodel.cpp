@@ -36,14 +36,28 @@ public:
         CHANS
     };
 
+    enum class Action {
+        NEW_SAMPLE,
+        MISSED,
+        ERROR,
+        STOPPING,
+        STARTING,
+    };
+    Q_ENUMS(AquisitionModelPrivate::Action)
+
     QVector<Row*> m_lRows;
     Row* m_pLastValue {nullptr};
+    AquisitionModel::State m_State {AquisitionModel::State::STOPPED};
     AquisitionModel::Mode m_Mode {AquisitionModel::Mode::UNTHROTTLED};
     std::shared_ptr<sigrok::HardwareDevice> m_pDev;
     std::shared_ptr<sigrok::Session> m_pSess;
     std::shared_ptr<sigrok::Context> m_pContext;
 
     void initialize(AquisitionModel* self);
+
+    void performAction(Action a);
+
+    AquisitionModel* q_ptr;
 };
 
 void AquisitionModelPrivate::initialize(AquisitionModel* self)
@@ -64,6 +78,8 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
 
             void* data = analog->data_pointer();
             float test = *(float*)data;
+
+            performAction(Action::NEW_SAMPLE);
 
             switch (m_Mode) {
                 case AquisitionModel::Mode::UNTHROTTLED:
@@ -146,13 +162,14 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
 AquisitionModel::AquisitionModel(SigrokDevice* dev) :
     QAbstractTableModel(nullptr), d_ptr(new AquisitionModelPrivate())
 {
+    d_ptr->q_ptr = this;
     d_ptr->m_pDev = dev->native();
     d_ptr->m_pContext = DeviceModel::instance()->context();;
 }
 
 AquisitionModel::~AquisitionModel()
 {
-    
+    delete d_ptr;
 }
 
 void AquisitionModel::setMode(Mode m)
@@ -306,6 +323,7 @@ void AquisitionModel::start()
         d_ptr->m_pSess->add_device(d_ptr->m_pDev);
         d_ptr->m_pDev->open();
         d_ptr->m_pSess->start();
+        d_ptr->performAction(AquisitionModelPrivate::Action::STARTING);
     }
     catch (const sigrok::Error& e) {
         qWarning() << "Starting device failed because:" << e.what();
@@ -315,8 +333,10 @@ void AquisitionModel::start()
 
 void AquisitionModel::stop()
 {
-    if (!(d_ptr->m_pSess && !d_ptr->m_pSess->is_running()))
+    if (!(d_ptr->m_pSess && d_ptr->m_pSess->is_running()))
         return;
+
+    d_ptr->performAction(AquisitionModelPrivate::Action::STOPPING);
 
     d_ptr->m_pSess->stop();
     d_ptr->m_pDev->close();
@@ -336,13 +356,51 @@ bool AquisitionModel::addLastSample()
 
     if (d_ptr->m_pLastValue
       && (!d_ptr->m_lRows.isEmpty())
-      && d_ptr->m_pLastValue == d_ptr->m_lRows.last())
+      && d_ptr->m_pLastValue == d_ptr->m_lRows.last()) {
+        d_ptr->performAction(AquisitionModelPrivate::Action::MISSED);
         return false;
+    }
 
     beginInsertRows({}, d_ptr->m_lRows.size(), d_ptr->m_lRows.size());
     d_ptr->m_lRows << d_ptr->m_pLastValue;
     endInsertRows();
 
     return true;
+}
+
+void AquisitionModelPrivate::performAction(Action a)
+{
+    typedef AquisitionModel::State S;
+
+    // The idea is to have a deterministic state
+    constexpr static const AquisitionModel::State matrix[6][5] = {
+        /*              NEW_SAMPLE   MISSED      ERROR     STOPPING  STARTING */
+        /*STOPPED */ { S::ERROR   , S::ERROR  , S::ERROR , S::STOPPED, S::INIT },
+        /*INIT    */ { S::STARTED , S::ERROR  , S::ERROR , S::STOPPED, S::ERROR},
+        /*IDLE    */ { S::STARTED , S::TIMEOUT, S::ERROR , S::STOPPED, S::ERROR},
+        /*TIMEOUT */ { S::STARTED , S::TIMEOUT, S::ERROR , S::STOPPED, S::ERROR},
+        /*STARTED */ { S::STARTED , S::TIMEOUT, S::ERROR , S::STOPPED, S::ERROR},
+        /*ERROR   */ { S::ERROR   , S::ERROR  , S::ERROR , S::STOPPED, S::ERROR}
+    };
+
+    const auto old = m_State;
+    m_State = matrix[(int)m_State][(int)a];
+
+    if (old != m_State) {
+        Q_EMIT q_ptr->stateChanged(m_State, old);
+    }
+}
+
+AquisitionModel::State AquisitionModel::state() const
+{
+    return d_ptr->m_State;
+}
+
+QDateTime AquisitionModel::lastSampleDateTime() const
+{
+    if (d_ptr->m_lRows.isEmpty())
+        return {};
+
+    return QDateTime::fromMSecsSinceEpoch(d_ptr->m_lRows.last()->m_Epoch);
 }
 

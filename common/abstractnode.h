@@ -22,6 +22,13 @@ public:
         MODEL,
     };
 
+    enum class NotifyPriority {
+        NORMAL,
+        WARNING,
+        ERROR,
+        CRITICAL,
+    };
+
     explicit AbstractNode(AbstractSession* sess);
     virtual ~AbstractNode();
 //     virtual ~AbstractNode() {}
@@ -50,6 +57,11 @@ public:
 
 Q_SIGNALS:
     void titleChanged(const QString& title);
+    void notify(
+        const QString& message,
+        bool system = false,
+        NotifyPriority p = NotifyPriority::NORMAL
+    );
 
 protected:
     AbstractSession* session() const;

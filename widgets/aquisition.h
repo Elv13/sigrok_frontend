@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
+#include <QtCore/QDateTime>
 
 class QPushButton;
+class QLabel;
 class AquisitionModel;
 
 class Aquisition : public QWidget
@@ -14,6 +16,10 @@ public:
     void setShowAcquire(bool v);
 
     virtual ~Aquisition();
+
+    void setStatus(const QString& st);
+    void setCount(int count);
+    void setLast(const QDateTime& ti);
 
 public Q_SLOTS:
     void slotStarted();
@@ -30,4 +36,7 @@ Q_SIGNALS:
 
 private:
     QPushButton* m_pAcqB;
+    QLabel* m_pStatus;
+    QLabel* m_pTime;
+    QLabel* m_pCount;
 };

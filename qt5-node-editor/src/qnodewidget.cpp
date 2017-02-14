@@ -38,6 +38,7 @@ public Q_SLOTS:
 QNodeWidget::QNodeWidget(QWidget* parent) : QNodeView(parent),
     d_ptr(new QNodeWidgetPrivate(this))
 {
+    d_ptr->q_ptr = this;
     d_ptr->m_Model.setTopLevelIdentifierRole(Qt::UserRole);
 
     setModel(&d_ptr->m_Model);
@@ -64,7 +65,6 @@ QNodeWidget::~QNodeWidget()
 GraphicsNode* QNodeWidget::addObject(QObject* o, const QString& title, QNodeWidget::ObjectFlags f, const QVariant& uid)
 {
     Q_UNUSED(f)
-    d_ptr->q_ptr = this;
 
     auto m = new QObjectModel({o}, Qt::Vertical, QObjectModel::Role::PropertyNameRole, this);
 

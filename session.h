@@ -68,11 +68,24 @@ public Q_SLOTS:
 private Q_SLOTS:
     void remove(const QObject* o, const QString& id);
     void renameN(const QString& n, const QString& name);
+    void notifyForward(
+        const QString& message,
+        bool system,
+        AbstractNode::NotifyPriority p
+    );
+
+Q_SIGNALS:
+    void notify(
+        const QString& message,
+        AbstractNode* node,
+        bool system = false,
+        AbstractNode::NotifyPriority p = AbstractNode::NotifyPriority::NORMAL
+    );
 
 private:
     NodePair addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});
 
-    QNodeWidget* m_pNodeW;
+    QNodeWidget* m_pNodeW {nullptr};
     struct MetaInfo {
         int m_Index;
         const QMetaObject m_spMetaObj;

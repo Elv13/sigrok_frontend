@@ -175,6 +175,7 @@ Session::NodePair Session::addToSceneFromMetaObject(const QMetaObject& meta, con
     connect(anode, &QObject::destroyed, [anode, id, this]() {
         remove(anode, id);
     });
+    connect(anode, &AbstractNode::notify, this, &Session::notifyForward);
 
     return pair;
 }
@@ -707,6 +708,14 @@ GraphicsNode* Session::fromAbstractNode(AbstractNode* n) const
     Q_ASSERT(m_hIdToNode.contains(n->property("uid").toString()));
 
     return m_hIdToNode[n->property("uid").toString()].first;
+}
+
+void Session::
+notifyForward(const QString& message, bool sys, AbstractNode::NotifyPriority p)
+{
+    Q_UNUSED(sys);
+    Q_UNUSED(p);
+    Q_EMIT notify( message, (AbstractNode*)QObject::sender(), sys, p );
 }
 
 #include <session.moc>

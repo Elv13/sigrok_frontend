@@ -33,6 +33,16 @@ public:
         MANUAL,
     };
 
+    enum class State {
+        STOPPED, /* Default                  */
+        INIT   , /* Stated, but no data      */
+        IDLE   , /* Many sampled failed      */
+        TIMEOUT, /* Too many missed samples  */
+        STARTED, /* Everything is going well */
+        ERROR  , /* There was an error       */
+    };
+    Q_ENUMS(AquisitionModel::STATE)
+
     explicit AquisitionModel(SigrokDevice* device);
     virtual ~AquisitionModel();
 
@@ -42,6 +52,10 @@ public:
     QList<float> currentValues() const;
 
     bool addLastSample();
+
+    QDateTime lastSampleDateTime() const;
+
+    State state() const;
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
@@ -56,6 +70,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void currentValuesChanged(QList<float> values);
+    void stateChanged(State s, State old);
 
 private:
     AquisitionModelPrivate* d_ptr;

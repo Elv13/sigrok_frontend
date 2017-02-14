@@ -4,6 +4,7 @@
 #include "sigrokd/aquisitionmodel.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 
 #include "sigrokd/devicemodel.h"
 
@@ -22,7 +23,7 @@ public:
     Aquisition* m_pWidget {nullptr};
     QString m_Title {QStringLiteral("Live Aquisition")};
     SigrokDevice* m_pDevice;
-    bool m_IsRunning {false};
+    QTimer* m_pTimer {nullptr};
 
     AquisitionNode* q_ptr;
 
@@ -30,6 +31,9 @@ public Q_SLOTS:
     void slotClear();
     void slotStop();
     void slotStart();
+    void slotState(AquisitionModel::State, AquisitionModel::State);
+    void slotTick();
+    void slotDestroyed();
 };
 
 AquisitionNode::AquisitionNode(AbstractSession* sess) :
@@ -40,7 +44,9 @@ AquisitionNode::AquisitionNode(AbstractSession* sess) :
 
 AquisitionNode::~AquisitionNode()
 {
-    
+    if (isRunning())
+        d_ptr->m_pModel->stop();
+    delete d_ptr;
 }
 
 QString AquisitionNode::title() const
@@ -69,6 +75,8 @@ QWidget* AquisitionNode::widget() const
             &AquisitionNodePrivate::slotStop);
         QObject::connect(d_ptr->m_pWidget, &Aquisition::cleared, d_ptr,
             &AquisitionNodePrivate::slotClear);
+        QObject::connect(d_ptr->m_pWidget, &QObject::destroyed, d_ptr,
+            &AquisitionNodePrivate::slotDestroyed);
     }
 
     return d_ptr->m_pWidget;
@@ -76,7 +84,10 @@ QWidget* AquisitionNode::widget() const
 
 bool AquisitionNode::isRunning() const
 {
-    return d_ptr->m_IsRunning;
+    if (!d_ptr->m_pModel)
+        return false;
+
+    return d_ptr->m_pModel->state() == AquisitionModel::State::STARTED;
 }
 
 void AquisitionNode::setModel(AquisitionModel* m)
@@ -84,7 +95,14 @@ void AquisitionNode::setModel(AquisitionModel* m)
     if (m == d_ptr->m_pModel)
         return;
 
+    if (d_ptr->m_pModel)
+        disconnect(d_ptr->m_pModel, &AquisitionModel::stateChanged,
+            d_ptr, &AquisitionNodePrivate::slotState);
+
     d_ptr->m_pModel = m;
+
+    connect(d_ptr->m_pModel, &AquisitionModel::stateChanged,
+        d_ptr, &AquisitionNodePrivate::slotState);
 
     Q_EMIT modelChanged(m);
 }
@@ -142,32 +160,115 @@ void AquisitionNodePrivate::slotStop()
     if (!m_pModel)
         return;
 
-    if (!m_IsRunning)
+    if (m_pModel->state() == AquisitionModel::State::STOPPED)
         return;
 
     m_pModel->stop();
 
-    m_IsRunning = false;
-
-    Q_EMIT q_ptr->runningChanged(m_IsRunning);
 }
 
 void AquisitionNodePrivate::slotStart()
 {
-    qDebug() << "IN START";
     if (!m_pModel)
         return;
 
-    if (m_IsRunning)
-        return;
+    switch(m_pModel->state()) {
+        case AquisitionModel::State::STOPPED:
+        case AquisitionModel::State::TIMEOUT:
+        case AquisitionModel::State::ERROR:
+            break;
+        case AquisitionModel::State::STARTED:
+        case AquisitionModel::State::INIT:
+        case AquisitionModel::State::IDLE:
+            return;
+    }
 
-    qDebug() << "IN START2";
     m_pModel->start();
 
-    m_IsRunning = true;
+    Q_EMIT q_ptr->runningChanged(true);
+}
 
-    Q_EMIT q_ptr->runningChanged(m_IsRunning);
-    qDebug() << "IN START3";
+void AquisitionNodePrivate::slotState(AquisitionModel::State n, AquisitionModel::State o)
+{
+    Q_UNUSED(o)
+
+    static const QString stopped = tr("Acquisition stopped");
+    static const QString started = tr("Acquisition in progress");
+    static const QString error   = tr("Acquisition failed");
+    static const QString timeout = tr("Sample acquisition timed out");
+    static const QString idle    = tr("Idle");
+    static const QString init    = tr("Initializing");
+    switch(n) {
+        case AquisitionModel::State::ERROR:
+        case AquisitionModel::State::STOPPED:
+            if (m_pTimer) {
+                m_pTimer->stop();
+            }
+            break;
+        case AquisitionModel::State::TIMEOUT:
+        case AquisitionModel::State::STARTED:
+            if (!m_pTimer) {
+                m_pTimer = new QTimer(this);
+                connect(m_pTimer, &QTimer::timeout, this, &AquisitionNodePrivate::slotTick);
+            }
+
+            if (!m_pTimer->isActive()) {
+                m_pTimer->setInterval(1000);
+                m_pTimer->start();
+            }
+            break;
+        case AquisitionModel::State::INIT:
+        case AquisitionModel::State::IDLE:
+            break;
+    }
+
+    switch(n) {
+        case AquisitionModel::State::STOPPED:
+            if (m_pWidget)
+                m_pWidget->setStatus(stopped);
+            Q_EMIT q_ptr->notify(stopped);
+            Q_EMIT q_ptr->runningChanged(false);
+            break;
+        case AquisitionModel::State::TIMEOUT:
+            if (m_pWidget)
+                m_pWidget->setStatus(timeout);
+            Q_EMIT q_ptr->notify(timeout);
+            Q_EMIT q_ptr->runningChanged(false);
+            break;
+        case AquisitionModel::State::STARTED:
+            if (m_pWidget)
+                m_pWidget->setStatus(started);
+            Q_EMIT q_ptr->notify(started);
+            Q_EMIT q_ptr->runningChanged(true);
+            break;
+        case AquisitionModel::State::ERROR:
+            if (m_pWidget)
+                m_pWidget->setStatus(error);
+            Q_EMIT q_ptr->notify(error);
+            Q_EMIT q_ptr->runningChanged(false);
+            break;
+        case AquisitionModel::State::INIT:
+            if (m_pWidget)
+                m_pWidget->setStatus(init);
+            break;
+        case AquisitionModel::State::IDLE:
+            if (m_pWidget)
+                m_pWidget->setStatus(idle);
+            break;
+    }
+}
+
+void AquisitionNodePrivate::slotTick()
+{
+    if (m_pModel && m_pWidget) {
+        m_pWidget->setCount(m_pModel->rowCount());
+        m_pWidget->setLast(m_pModel->lastSampleDateTime());
+    }
+}
+
+void AquisitionNodePrivate::slotDestroyed()
+{
+    m_pWidget = nullptr;
 }
 
 void AquisitionNode::clear(bool value)

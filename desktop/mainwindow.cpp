@@ -285,6 +285,7 @@ Session* MainWindow::addSession(const QString& name)
     m_lSessions << sess;
     m_pTabs->addTab(nodeWidget, name);
 
+    connect(sess, &Session::notify, this, &MainWindow::slotSessionMessage);
 
     connect(sess->pages(), &PageManager::pageAdded, this, &MainWindow::addDock);
     connect(nodeWidget, &QNodeWidget::currentNodeChanged, this, &MainWindow::slotSelectionChanged);
@@ -719,6 +720,11 @@ void MainWindow::slotNodeContextMenu(const QPoint& p)
     m->addAction(m_pSelActionCol->bg());
     m->addAction(m_pSelActionCol->fg());
     m->exec(QCursor::pos());
+}
+
+void MainWindow::slotSessionMessage(const QString& msg)
+{
+    statusBar()->showMessage(msg);
 }
 
 #include <mainwindow.moc>
