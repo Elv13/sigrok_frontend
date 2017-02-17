@@ -69,6 +69,7 @@ Q_SIGNALS:
 
 private:
     explicit GraphicsNodeSocket(const QModelIndex& index, SocketType socket_type, GraphicsNode *parent);
+    virtual ~GraphicsNodeSocket();
 
     GraphicsNodeSocketPrivate* d_ptr;
     Q_DECLARE_PRIVATE(GraphicsNodeSocket)

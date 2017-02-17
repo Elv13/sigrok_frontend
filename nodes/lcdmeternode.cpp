@@ -25,7 +25,7 @@ class LCDMeterNodePrivate : public QObject
 {
     Q_OBJECT
 public:
-    LCDMeter m_Current;
+    LCDMeter* m_pCurrent;
     Meter* m_pMeterW {new Meter()};
     MeterProxy* m_pCheckProxy {new MeterProxy(this)};
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
@@ -44,8 +44,10 @@ LCDMeterNode::LCDMeterNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new L
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
+    d_ptr->m_pCurrent = new LCDMeter;
+
     QTimer::singleShot(0, [this]() {
-        session()->pages()->addPage(this, &d_ptr->m_Current, title(), uid());
+        session()->pages()->addPage(this, d_ptr->m_pCurrent, title(), uid());
     });
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);
@@ -56,7 +58,8 @@ LCDMeterNode::LCDMeterNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new L
 
 LCDMeterNode::~LCDMeterNode()
 {
-    
+    delete d_ptr->m_pColumnProxy;
+    delete d_ptr;
 }
 
 QString LCDMeterNode::title() const
@@ -93,7 +96,7 @@ void LCDMeterNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstra
     m_pSource = newModel;
     m_pColumnProxy->setSourceModel(newModel);
 
-    m_Current.setModel(newModel);
+    m_pCurrent->setModel(newModel);
 
     if (m_pRemoteModel)
         m_pRemoteModel->setSourceModel(newModel);

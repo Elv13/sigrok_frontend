@@ -9,6 +9,7 @@ class QAction;
 
 class QAbstractItemModel;
 class QModelIndex;
+class CategorizedDelegate;
 
 class ToolBox : public QDockWidget, public Ui_ToolBox
 {
@@ -35,4 +36,5 @@ Q_SIGNALS:
 private:
     KRecursiveFilterProxyModel* m_pProxy;
     QAction* m_pAction;
+    CategorizedDelegate* m_pDel;
 };

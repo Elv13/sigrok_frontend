@@ -74,7 +74,7 @@ PageManager::PageManager() : d_ptr(new PageManagerPrivate)
 
 PageManager::~PageManager()
 {
-    
+    delete d_ptr;
 }
 
 QVariant PageManager::data(const QModelIndex& idx, int role) const

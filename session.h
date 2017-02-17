@@ -31,10 +31,14 @@ class Session : public AbstractSession
 public:
     typedef QPair<GraphicsNode*, AbstractNode*> NodePair;
 
-    explicit Session(QNodeWidget* w);
+    explicit Session(QObject* parent, QNodeWidget* w);
+    virtual ~Session();
 
     template<typename T>
     void registerType(const QString& name, const QString& id, const QString& cat, const QIcon& icon = {});
+
+    QUrl fileName() const;
+    void setFileName(const QUrl& url);
 
     void registerInterfaceSerializer(InterfaceSerializer* ser);
 
@@ -62,6 +66,8 @@ public:
 
     virtual PageManager* pages() const override;
 
+    QNodeWidget* nodeWidget() const;
+
 public Q_SLOTS:
     NodePair addToScene(const QModelIndex& idx);
 
@@ -81,6 +87,7 @@ Q_SIGNALS:
         bool system = false,
         AbstractNode::NotifyPriority p = AbstractNode::NotifyPriority::NORMAL
     );
+    void renamed(const QString& name);
 
 private:
     NodePair addToSceneFromMetaObject(const QMetaObject& o, const QString& uid = {});

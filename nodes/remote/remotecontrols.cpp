@@ -9,13 +9,14 @@ class RemoteControlsPrivate final : public QObject
 public:
     explicit RemoteControlsPrivate(RemoteControls* p) : QObject(p), q_ptr(p) {}
 
-    RemoteWidgets m_Model{this};
+    RemoteWidgets* m_pModel{nullptr};
     RemoteControls* q_ptr;
 };
 
 RemoteControls::RemoteControls(AbstractSession* sess) : AbstractNode(sess), d_ptr(new RemoteControlsPrivate(this))
 {
-    d_ptr->m_Model.setObjectName(QStringLiteral("RemoteControl"));
+    d_ptr->m_pModel = new RemoteWidgets(this);
+    d_ptr->m_pModel->setObjectName(QStringLiteral("RemoteControl"));
 }
 
 RemoteControls::~RemoteControls()
@@ -37,7 +38,7 @@ void RemoteControls::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    d_ptr->m_Model.write(parent);
+    d_ptr->m_pModel->write(parent);
 }
 
 void RemoteControls::read(const QJsonObject &parent)
@@ -47,7 +48,7 @@ void RemoteControls::read(const QJsonObject &parent)
 
 bool RemoteControls::createSourceSocket(const QString& name)
 {
-    return d_ptr->m_Model.addRow(name);
+    return d_ptr->m_pModel->addRow(name);
 }
 
 QWidget* RemoteControls::widget() const
@@ -57,7 +58,7 @@ QWidget* RemoteControls::widget() const
 
 QAbstractItemModel* RemoteControls::sourceModel() const
 {
-    return &d_ptr->m_Model;
+    return d_ptr->m_pModel;
 }
 
 #include <remotecontrols.moc>

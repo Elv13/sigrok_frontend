@@ -64,9 +64,12 @@ QMultiModelTree::~QMultiModelTree()
 {
     d_ptr->m_hModels.clear();
     while(!d_ptr->m_lRows.isEmpty()) {
-        while(!d_ptr->m_lRows.first()->m_lChildren.isEmpty())
+        while(!d_ptr->m_lRows.first()->m_lChildren.isEmpty()) {
             delete d_ptr->m_lRows.first()->m_lChildren.first();
+            d_ptr->m_lRows.first()->m_lChildren.remove(0);
+        }
         delete d_ptr->m_lRows.first();
+        d_ptr->m_lRows.remove(0);
     }
 
     delete d_ptr;

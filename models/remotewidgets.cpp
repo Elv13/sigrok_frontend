@@ -39,7 +39,10 @@ RemoteWidgets::RemoteWidgets(QObject* o) : QAbstractListModel(o),
 
 RemoteWidgets::~RemoteWidgets()
 {
-    
+    while (!d_ptr->m_lRows.isEmpty())
+        delete d_ptr->m_lRows.takeLast();
+
+    delete d_ptr;
 }
 
 QVariant RemoteWidgets::data(const QModelIndex& idx, int role) const

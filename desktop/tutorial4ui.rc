@@ -31,7 +31,6 @@
 
     <ToolBar name="mainToolBar" >
         <text>Main Toolbar</text>
-        <Action name="clear" />
         <Action name="background" />
         <Action name="foreground" />
     </ToolBar>

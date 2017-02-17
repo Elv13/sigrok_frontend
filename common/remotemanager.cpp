@@ -2,6 +2,15 @@
 
 #include <QRemoteObjectHost>
 
+#if QT_VERSION < 0x050700
+//Q_FOREACH is deprecated and Qt CoW containers are detached on C++11 for loops
+template<typename T>
+const T& qAsConst(const T& v)
+{
+    return const_cast<const T&>(v);
+}
+#endif
+
 struct RObject
 {
     QObject* m_pObject;
@@ -10,18 +19,33 @@ struct RObject
     bool m_IsExported;
 };
 
-class RemoteManagerPrivate
+class RemoteManagerPrivate : public QObject
 {
+    Q_OBJECT
 public:
     mutable QRemoteObjectRegistryHost* m_pReg {nullptr};
     mutable QRemoteObjectHost* m_pHost {nullptr};
 
     mutable QList<RObject*> m_lObjects;
+
+    RemoteManager* q_ptr;
+
+public Q_SLOTS:
+    void garbageCollect();
+
 };
 
 RemoteManager::RemoteManager() : d_ptr(new RemoteManagerPrivate())
 {
-    
+    d_ptr->q_ptr = this;
+}
+
+RemoteManager::~RemoteManager()
+{
+    while(!d_ptr->m_lObjects.isEmpty()) {
+        delete d_ptr->m_lObjects.takeLast();
+    }
+    delete d_ptr;
 }
 
 RemoteManager* RemoteManager::instance()
@@ -69,6 +93,8 @@ void RemoteManager::addObject(QObject* o, const QString& title)
     beginInsertRows({}, d_ptr->m_lObjects.size(), d_ptr->m_lObjects.size());
     d_ptr->m_lObjects << i;
     endInsertRows();
+
+    connect(o, &QObject::destroyed, d_ptr, &RemoteManagerPrivate::garbageCollect);
 }
 
 void RemoteManager::addModel(QAbstractItemModel* m, const QVector<int>& roles, const QString& title)
@@ -82,6 +108,8 @@ void RemoteManager::addModel(QAbstractItemModel* m, const QVector<int>& roles, c
     beginInsertRows({}, d_ptr->m_lObjects.size(), d_ptr->m_lObjects.size());
     d_ptr->m_lObjects << i;
     endInsertRows();
+
+    connect(m, &QObject::destroyed, d_ptr, &RemoteManagerPrivate::garbageCollect);
 }
 
 QVariant RemoteManager::data(const QModelIndex& idx, int role) const
@@ -139,3 +167,21 @@ QAbstractItemModel* RemoteObjectList::getModel(const QModelIndex& idx) const
 {
     return RemoteManager::instance()->getModel(mapToSource(idx));
 }
+
+// Rather than try to force the nodes to notify this models, force it
+void RemoteManagerPrivate::garbageCollect()
+{
+    // There is never that many of them anyway
+    for (int i =0; i < m_lObjects.size(); i++) {
+        const auto o = m_lObjects[i];
+        if (o->m_pModel == sender() || o->m_pObject == sender()) {
+            q_ptr->beginRemoveRows({}, i, i);
+            m_lObjects.removeAt(i);
+            q_ptr->endRemoveRows();
+            delete o;
+            break;
+        }
+    }
+}
+
+#include <remotemanager.moc>

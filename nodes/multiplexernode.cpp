@@ -26,6 +26,7 @@ class MultiplexerModel final : public QAbstractListModel
 public:
     explicit MultiplexerModel(QObject* parent = nullptr) :
         QAbstractListModel(parent) {}
+    ~MultiplexerModel();
 
     virtual QVariant data(const QModelIndex& idx, int role) const override;
     virtual int rowCount(const QModelIndex& parent = {}) const override;
@@ -159,6 +160,12 @@ MultiplexerNode::MultiplexerNode(AbstractSession* sess) : AbstractNode(sess), d_
     d_ptr->m_pModel = new MultiplexerModel(this);
 }
 
+MultiplexerModel::~MultiplexerModel()
+{
+    while (!m_lRows.isEmpty())
+        delete m_lRows.takeLast();
+}
+
 MultiplexerNode::~MultiplexerNode()
 {
     delete d_ptr;
@@ -205,7 +212,7 @@ bool MultiplexerNode::createSourceSocket(const QString& name)
     auto cl  = new CloneHolder();
     cl->name = name;
     cl->init = false;
-qDebug() << "\n\n\nAAA" << name << d_ptr->m_pModel->m_lRows.size();
+
     const int pos = d_ptr->m_pModel->m_lRows.size();
     d_ptr->m_pModel->beginInsertRows({}, pos, pos);
     d_ptr->m_pModel->m_lRows << cl;

@@ -281,11 +281,15 @@ QDockWidget* MainWindow::addDock(QWidget* w, const QString& title, const QString
 Session* MainWindow::addSession(const QString& name)
 {
     auto nodeWidget = new QNodeWidget(this->m_pTabs);
-    auto sess = new Session(nodeWidget);
+    auto sess = new Session(this, nodeWidget);
     m_lSessions << sess;
+
+    auto finalName = name.isEmpty() ? tr("New session") : name;
+
     m_pTabs->addTab(nodeWidget, name);
 
     connect(sess, &Session::notify, this, &MainWindow::slotSessionMessage);
+    connect(sess, &Session::renamed, this, &MainWindow::slotSessionRenamed);
 
     connect(sess->pages(), &PageManager::pageAdded, this, &MainWindow::addDock);
     connect(nodeWidget, &QNodeWidget::currentNodeChanged, this, &MainWindow::slotSelectionChanged);
@@ -307,16 +311,14 @@ Session* MainWindow::addSession(const QString& name)
         }
     });
 
-    m_pGroups = new WidgetGroupModel(this);
     m_pGroups->addGroup(this, tr("Main"), QStringLiteral("mainWindow"));
 
-    nodeWidget->setViewport(new QGLWidget(
-            QGLFormat(QGL::SampleBuffers)));
-    nodeWidget->setViewportUpdateMode(
-        QGraphicsView::FullViewportUpdate);
+//     nodeWidget->setViewport(new QGLWidget(
+//             QGLFormat(QGL::SampleBuffers)));
+//     nodeWidget->setViewportUpdateMode(
+//         QGraphicsView::FullViewportUpdate);
+//
 
-
-    m_pInterfaceSerializer = new DesktopSerializer(this);
     sess->registerInterfaceSerializer(m_pInterfaceSerializer);
 
     sess->registerType<CurveChartNode>  (QStringLiteral("Chart")          , QStringLiteral("Widgets")   , QStringLiteral("curvedchart_node"), QIcon::fromTheme( QStringLiteral("document-edit")        ));
@@ -367,6 +369,16 @@ Session* MainWindow::currentSession() const
 void MainWindow::slotTabCloseRequested(int index)
 {
     qDebug() << "CLOSE REQUESTED!!!";
+
+    auto sess = m_lSessions[index]; //FIXME check changed
+
+    auto w = m_pTabs->widget(index);
+
+    m_lSessions.remove(index);
+    m_pTabs->removeTab(index);
+
+    delete w;
+    delete sess;
 }
 
 void MainWindow::slotTabSelected(int index)
@@ -382,12 +394,15 @@ void MainWindow::slotTabSelected(int index)
         QTimer::singleShot(0, m_pToolBox, &ToolBox::expandAll);
 }
 
-MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
+MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent),
     m_pActionCollection(new ActionCollection(this)),
     m_pSelActionCol(new SelectedActionCollection(this))
 {
     setObjectName(QStringLiteral("mainWindow"));
     m_lWindows[QStringLiteral("mainWindow")] = this;
+
+    m_pInterfaceSerializer = new DesktopSerializer(this);
+    m_pGroups = new WidgetGroupModel(this);
 
     static QResource ss(QStringLiteral(":/pref/tutorial4ui.rc"));
     Q_ASSERT(ss.isValid());
@@ -439,16 +454,24 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent), fileName(),
 
 MainWindow::~MainWindow()
 {
+    // Prevent code from being executed when closing sessions
+    disconnect(m_pTabs, &QTabWidget::tabCloseRequested,
+        this, &MainWindow::slotTabCloseRequested);
+    disconnect(m_pTabs, &QTabWidget::currentChanged,
+        this, &MainWindow::slotTabSelected);
+
+    delete m_pInterfaceSerializer;
+    delete m_pGroups;
+
+    while (!m_lSessions.isEmpty()) {
+        delete m_pTabs->widget(m_lSessions.size() - 1);
+        delete m_lSessions.takeLast();
+    }
 }
 
 
 void MainWindow::setupActions()
 {
-    QAction* clearAction = new QAction(this);
-    clearAction->setText(i18n("&Clear"));
-    clearAction->setIcon(QIcon::fromTheme(QStringLiteral("document-new")));
-    actionCollection()->setDefaultShortcut(clearAction, Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction(QStringLiteral("clear"), clearAction);
 
     QAction* addWindowAction = new QAction(this);
     addWindowAction->setText(i18n("&Add window"));
@@ -474,7 +497,7 @@ void MainWindow::setupActions()
 
 void MainWindow::newFile()
 {
-    fileName.clear();
+    addSession(tr("New Session"));
 }
 
 void MainWindow::saveFileAs(const QUrl &outputFileName)
@@ -486,10 +509,10 @@ void MainWindow::saveFileAs(const QUrl &outputFileName)
         QSaveFile file(outputFileName.path());
         file.open(QIODevice::WriteOnly);
 
+        sess->setFileName(outputFileName);
         sess->serialize(&file);
-        file.commit();
 
-        fileName = outputFileName;
+        file.commit();
 
         Settings::setLastFilePath(QUrl(outputFileName));
     }
@@ -502,8 +525,13 @@ void MainWindow::saveFileAs()
 
 void MainWindow::saveFile()
 {
-    if (!fileName.isEmpty()) {
-        saveFileAs(fileName);
+    auto sess = currentSession();
+
+    if (!sess)
+        return;
+
+    if (!sess->fileName().isEmpty()) {
+        saveFileAs(sess->fileName());
     }
     else {
         saveFileAs();
@@ -514,7 +542,6 @@ void MainWindow::openFile(const QUrl &name)
 {
     if (!name.isEmpty()) {
         KIO::Job* job = KIO::storedGet(name);
-        fileName = name;
 
         connect(job, &KJob::result, this, &MainWindow::downloadFinished);
 
@@ -542,15 +569,23 @@ void MainWindow::downloadFinished(KJob* job)
 {
     if (job->error()) {
         KMessageBox::error(this, job->errorString());
-        fileName.clear();
         return;
     }
 
     KIO::StoredTransferJob* storedJob = (KIO::StoredTransferJob*)job;
 
-    auto sess = addSession(QStringLiteral("fo"));
+    auto sess = addSession();
+
+    sess->setFileName(storedJob->url());
 
     sess->load(storedJob->data());
+
+    for (int i = 0;  i < m_pTabs->count(); i++) {
+        if (m_pTabs->widget(i) == sess->nodeWidget()) {
+            m_pTabs->setCurrentIndex(i);
+            break;
+        }
+    }
 }
 
 QMainWindow* MainWindow::slotAddMainWindow(bool)
@@ -727,6 +762,21 @@ void MainWindow::slotNodeContextMenu(const QPoint& p)
 void MainWindow::slotSessionMessage(const QString& msg)
 {
     statusBar()->showMessage(msg);
+}
+
+void MainWindow::slotSessionRenamed(const QString& name)
+{
+    auto sess = qobject_cast<Session*>(sender());
+
+    if (!sess)
+        return;
+
+    for (int i = 0;  i < m_pTabs->count(); i++) {
+        if (m_pTabs->widget(i) == sess->nodeWidget()) {
+            m_pTabs->setTabText(i, name);
+            break;
+        }
+    }
 }
 
 #include <mainwindow.moc>

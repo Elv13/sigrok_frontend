@@ -60,6 +60,17 @@ ColorNode::ColorNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new ColorNo
 
 ColorNode::~ColorNode()
 {
+    QList<SerializedRange*> ret;
+
+    QHash<QString, QList<SerializedRange*>>::const_iterator i;
+    for (i = d_ptr->m_hlSerializedRanges.constBegin(); i != d_ptr->m_hlSerializedRanges.constEnd(); ++i) {
+        for (int j=0;j< i.value().size(); j++)
+            ret << i.value()[j];
+    }
+
+    while (!ret.isEmpty())
+        delete ret.takeLast();
+
     delete d_ptr;
 }
 

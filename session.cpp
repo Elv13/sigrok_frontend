@@ -3,6 +3,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QMimeData>
 #include <QtCore/QTimer>
+#include <QtCore/QUrl>
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
@@ -67,9 +68,11 @@ class SessionPrivate
 public:
     QList<InterfaceSerializer*> m_lIS;
     PageManager m_PageManager;
+    QUrl m_Url;
+    QString m_Name;
 };
 
-Session::Session(QNodeWidget* w) : AbstractSession(w),
+Session::Session(QObject* parent, QNodeWidget* w) : AbstractSession(parent),
     m_pNodeW(w), d_ptr(new SessionPrivate)
 {
     m_pNodeW->reactiveModel()->setExtraRole(
@@ -79,6 +82,20 @@ Session::Session(QNodeWidget* w) : AbstractSession(w),
         QReactiveProxyModel::ExtraRoles::DestinationConnectionNotificationRole, 998
     );
     connect(w, SIGNAL(nodeRenamed(QString, QString, QString)), this, SLOT(renameN(QString, QString)));
+}
+
+Session::~Session()
+{
+    for (int i=0;i<m_slCategory.size();i++) {
+        auto cat = m_slCategory[i];
+        while (!cat->m_lTypes.isEmpty()) {
+            delete cat->m_lTypes.takeLast();
+        }
+        delete cat;
+    }
+    m_hIdToType.clear();
+
+    delete d_ptr;
 }
 
 PageManager* Session::pages() const
@@ -716,6 +733,25 @@ notifyForward(const QString& message, bool sys, AbstractNode::NotifyPriority p)
     Q_UNUSED(sys);
     Q_UNUSED(p);
     Q_EMIT notify( message, (AbstractNode*)QObject::sender(), sys, p );
+}
+
+QUrl Session::fileName() const
+{
+    return d_ptr->m_Url;
+}
+
+void Session::setFileName(const QUrl& url)
+{
+    d_ptr->m_Url = url;
+
+    // Prefer the "real" name if it exists, else use the file name
+    if (d_ptr->m_Name.isEmpty())
+        Q_EMIT renamed(url.fileName());
+}
+
+QNodeWidget* Session::nodeWidget() const
+{
+    return m_pNodeW;
 }
 
 #include <session.moc>

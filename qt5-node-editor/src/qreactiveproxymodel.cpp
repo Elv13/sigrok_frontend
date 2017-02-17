@@ -475,10 +475,13 @@ int ConnectedIndicesModel::columnCount(const QModelIndex& parent) const
 
 void QReactiveProxyModelPrivate::clear()
 {
+    m_pConnectionModel->beginResetModel();
     while (!m_lConnections.isEmpty()) {
         notifyDisconnect(m_lConnections.first());
         delete m_lConnections.first();
+        m_lConnections.remove(0);
     }
+    m_pConnectionModel->endResetModel();
 }
 
 void QReactiveProxyModelPrivate::notifyConnect(const QModelIndex& source, const QModelIndex& destination) const
@@ -537,6 +540,8 @@ bool QReactiveProxyModelPrivate::synchronize(const QModelIndex& s, const QModelI
             md, Qt::LinkAction, d.row(), d.column(), d.parent()
         );
         q_ptr->setData(d, s.data(role) , role);
+
+        delete md;
     }
 
     return true;

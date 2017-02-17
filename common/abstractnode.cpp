@@ -8,7 +8,7 @@
 Q_DECLARE_STREAM_METATYPE(QAbstractItemModel*)
 #endif
 
-class AbstractNodePrivate
+class AbstractNodePrivate : public QObject
 {
 public:
     QString m_Uid;
@@ -25,6 +25,7 @@ AbstractNode::AbstractNode(AbstractSession* sess) : QObject(sess),
 AbstractNode::~AbstractNode()
 {
     session()->pages()->removePage(this);
+    d_ptr->deleteLater();
 }
 
 AbstractSession* AbstractNode::session() const

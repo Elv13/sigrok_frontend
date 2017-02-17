@@ -55,7 +55,7 @@ QVariant ColoredRangeProxy::data(const QModelIndex& idx, int role) const
     if (!idx.isValid())
         return {};
 
-    const auto n = static_cast<Node*>(idx.internalPointer());
+    const auto n = static_cast<RangeProxyNode*>(idx.internalPointer());
 
     switch (role) {
         case Qt::UserRole+1:
@@ -79,12 +79,12 @@ bool ColoredRangeProxy::setData(const QModelIndex &index, const QVariant &value,
     if (!index.isValid())
         return {};
 
-    const auto n = static_cast<Node*>(index.internalPointer());
+    const auto n = static_cast<RangeProxyNode*>(index.internalPointer());
 
     switch (role) {
         case Qt::BackgroundRole:
         case Qt::ForegroundRole:
-            (*n->m_hExtraValues)[role] = value;
+            n->m_hExtraValues->insert(role,  value);
             return true;
     };
 

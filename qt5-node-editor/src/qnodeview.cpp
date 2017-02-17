@@ -17,7 +17,7 @@ class QNodeViewPrivate final : public QObject
 public:
     explicit QNodeViewPrivate(QObject* p) : QObject(p) {}
 
-    QReactiveProxyModel     m_Proxy   {this     };
+    QReactiveProxyModel*    m_pProxy  {Q_NULLPTR};
     QAbstractItemModel*     m_pModel  {Q_NULLPTR};
     QVector<GraphicsNode*>  m_lNodes  {         };
     GraphicsNodeScene       m_Scene   {this     };
@@ -33,7 +33,8 @@ QNodeView::QNodeView(QWidget* parent) : GraphicsNodeView(parent),
     d_ptr(new QNodeViewPrivate(this))
 {
     d_ptr->q_ptr = this;
-    d_ptr->m_pFactory = new QNodeEditorSocketModel(&d_ptr->m_Proxy, &d_ptr->m_Scene);
+    d_ptr->m_pProxy = new QReactiveProxyModel(this);
+    d_ptr->m_pFactory = new QNodeEditorSocketModel(d_ptr->m_pProxy, &d_ptr->m_Scene);
 
     m_pModel = d_ptr->m_pFactory; //HACK to remove
     m_pSelectionModel = new QItemSelectionModel(m_pModel);
@@ -45,6 +46,9 @@ QNodeView::QNodeView(QWidget* parent) : GraphicsNodeView(parent),
 
 QNodeView::~QNodeView()
 {
+    // Delete the proxies in order or they will crash
+    delete d_ptr->m_pFactory;
+    delete d_ptr->m_pProxy;
     delete d_ptr;
 }
 
@@ -56,7 +60,7 @@ QGraphicsScene* QNodeView::scene() const
 void QNodeView::setModel(QAbstractItemModel* m)
 {
     d_ptr->m_pModel = m;
-    d_ptr->m_Proxy.setSourceModel(m);
+    d_ptr->m_pProxy->setSourceModel(m);
 }
 
 GraphicsNode* QNodeView::getNode(const QModelIndex& idx) const
@@ -65,7 +69,7 @@ GraphicsNode* QNodeView::getNode(const QModelIndex& idx) const
         return Q_NULLPTR;
 
     const auto factoryIdx = d_ptr->m_pFactory->mapFromSource(
-        d_ptr->m_Proxy.mapFromSource(idx)
+        d_ptr->m_pProxy->mapFromSource(idx)
     );
 
     Q_ASSERT(factoryIdx.isValid());
@@ -75,7 +79,7 @@ GraphicsNode* QNodeView::getNode(const QModelIndex& idx) const
 
 QReactiveProxyModel* QNodeView::reactiveModel() const
 {
-    return &d_ptr->m_Proxy;
+    return d_ptr->m_pProxy;
 }
 
 QAbstractItemModel *QNodeView::sinkSocketModel(const QModelIndex& node) const

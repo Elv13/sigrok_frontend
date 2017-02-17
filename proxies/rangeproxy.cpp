@@ -45,15 +45,26 @@ RangeProxy::RangeProxy(QObject* parent) : ColumnProxy(parent),
                 d_ptr, &RangeProxyPrivate::slotLayoutChanged);
 }
 
+RangeProxy::~RangeProxy()
+{
+    for (auto i : d_ptr->m_lRows) {
+        for (auto j : i->m_lChildren)
+            delete j;
+
+        delete i;
+    }
+
+    delete d_ptr;
+}
 
 int RangeProxy::columnCount(const QModelIndex& parent) const
 {
     if (!parent.isValid())
         return 3;
 
-    const auto node = static_cast<Node*>(parent.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(parent.internalPointer());
 
-    return node->m_Mode == Node::Mode::CHILD ? 0 : 3;
+    return node->m_Mode == RangeProxyNode::Mode::CHILD ? 0 : 3;
 }
 
 int RangeProxy::rowCount(const QModelIndex& parent) const
@@ -61,7 +72,7 @@ int RangeProxy::rowCount(const QModelIndex& parent) const
     if (!parent.isValid())
         return ColumnProxy::rowCount(parent);
 
-    const auto node = static_cast<Node*>(parent.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(parent.internalPointer());
 
     return node->m_lChildren.size();
 }
@@ -93,7 +104,7 @@ QModelIndex RangeProxy::index(int row, int column, const QModelIndex &parent) co
         return createIndex(row, column, d_ptr->m_lRows[row]);
     }
     else if (parent.isValid()) {
-        const auto node = static_cast<Node*>(parent.internalPointer());
+        const auto node = static_cast<RangeProxyNode*>(parent.internalPointer());
 
         if (row >= node->m_lChildren.size())
             return {};
@@ -113,12 +124,12 @@ Qt::ItemFlags RangeProxy::flags(const QModelIndex &idx) const
     if (!idx.isValid())
         return Qt::NoItemFlags;
 
-    const auto node = static_cast<Node*>(idx.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(idx.internalPointer());
 
     Qt::ItemFlags ret = ColumnProxy::flags(idx);
 
     return ret | Qt::ItemIsUserCheckable | (
-        (node->m_Mode == Node::Mode::CHILD && !idx.column()) ?
+        (node->m_Mode == RangeProxyNode::Mode::CHILD && !idx.column()) ?
             Qt::ItemIsEditable : Qt::NoItemFlags
     );
 }
@@ -127,9 +138,9 @@ QVariant RangeProxy::data(const QModelIndex& idx, int role) const
 {
     if ((!idx.isValid()) || idx.column() > 0) return {};
 
-    const auto node = static_cast<Node*>(idx.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(idx.internalPointer());
 
-    if (node->m_Mode == Node::Mode::CHILD) {
+    if (node->m_Mode == RangeProxyNode::Mode::CHILD) {
         switch(role) {
 //             case Qt::DisplayRole:
 //                 return QString("%1 %2")
@@ -153,9 +164,9 @@ QModelIndex RangeProxy::parent(const QModelIndex& idx) const
     if (!idx.isValid())
         return {};
 
-    const auto node = static_cast<Node*>(idx.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(idx.internalPointer());
 
-    if (node->m_Mode == Node::Mode::CHILD)
+    if (node->m_Mode == RangeProxyNode::Mode::CHILD)
         return createIndex(node->m_pParent->m_Index, 0, node->m_pParent);
 
     return {};
@@ -166,12 +177,12 @@ void RangeProxyPrivate::slotAutoAddRows(const QModelIndex& parent)
     if ((!parent.isValid()) || parent.parent().isValid())
         return;
 
-    const auto node = static_cast<Node*>(parent.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(parent.internalPointer());
 
     // Each source column need a "NONE" or every row will always match.
     // This is fine for some use case, but breaks many more. Has it hurts,
     // it is done here.
-    for (auto n : *const_cast<const QVector<Node*>*>(&node->m_lChildren))
+    for (auto n : *const_cast<const QVector<RangeProxyNode*>*>(&node->m_lChildren))
         if (n->m_Delim == RangeProxy::Delimiter::NONE) return;
 
     q_ptr->addFilter(parent, RangeProxy::Delimiter::NONE);
@@ -182,9 +193,9 @@ bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
     if (!i.isValid())
         return false;
 
-    const auto node = static_cast<Node*>(i.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(i.internalPointer());
 
-    if (node->m_Mode != Node::Mode::CHILD || i.column())
+    if (node->m_Mode != RangeProxyNode::Mode::CHILD || i.column())
         return false;
 
     switch(role) {
@@ -323,14 +334,14 @@ QModelIndex RangeProxy::addFilter(const QModelIndex& idx, RangeProxy::Delimiter 
 
     auto i = idx.parent().isValid() ? idx.parent() : idx;
 
-    const auto node = static_cast<Node*>(i.internalPointer());
+    const auto node = static_cast<RangeProxyNode*>(i.internalPointer());
 
     const int idx2 = node->m_lChildren.size();
 
     beginInsertRows(i, idx2, idx2);
 
-    Node* nc      = new Node;
-    nc->m_Mode    = Node::Mode::CHILD;
+    RangeProxyNode* nc = new RangeProxyNode;
+    nc->m_Mode    = RangeProxyNode::Mode::CHILD;
     nc->m_Index   = idx2;
     nc->m_Delim   = delim;
     nc->m_pParent = node;
@@ -378,7 +389,7 @@ void RangeProxyPrivate::slotRowsAboutToBeInserted(const QModelIndex &parent, int
 
     for (int i = first; i <= last;i++) {
         // Add the new column
-        Node* n = new Node;
+        RangeProxyNode* n = new RangeProxyNode;
         n->m_Index = i;
         m_lRows.insert(i, n);
     }
@@ -400,6 +411,7 @@ void RangeProxyPrivate::slotRowsAboutToBeRemoved(const QModelIndex &parent, int 
     }
 
     for (int i = first; i <= last;i++) {
+        delete m_lRows[i];
         m_lRows.remove(first);
     }
 

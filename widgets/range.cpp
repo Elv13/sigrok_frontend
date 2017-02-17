@@ -38,7 +38,7 @@ Range::Range(QWidget* parent) : QWidget(parent)
 
 Range::~Range()
 {
-
+    delete m_pFiltered;
 }
 
 RangeProxy* Range::rangeProxy() const
@@ -109,27 +109,31 @@ void Range::setRangeProxy(RangeProxy* p)
 
         auto w = new QWidget();
 
-        auto ui = new Ui_RangeSelection();
-        ui->setupUi(w);
-        ui->comboBox->setModel(m_pProxy->delimiterModel());
-        ui->comboBox->setCurrentIndex(
+        Ui_RangeSelection ui;
+        ui.setupUi(w);
+        ui.comboBox->setModel(m_pProxy->delimiterModel());
+        ui.comboBox->setCurrentIndex(
             (int) qvariant_cast<RangeProxy::Delimiter>(
                 idx.data((int)RangeProxy::Role::RANGE_DELIMITER)
             )
         );
-        connect(ui->comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged)
-            , [this, ui, idx]() {
-                ui->doubleSpinBox->setEnabled(ui->comboBox->currentIndex());
+
+        auto cbb = ui.comboBox;
+        auto spb = ui.doubleSpinBox;
+
+        connect(cbb, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged)
+            , [this, cbb, spb, idx]() {
+                spb->setEnabled(cbb->currentIndex());
 
                 m_pProxy->setData(
                     idx,
-                    ui->comboBox->currentIndex(),
+                    cbb->currentIndex(),
                     (int)RangeProxy::Role::RANGE_DELIMITER
                 );
             }
         );
-        connect(ui->doubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-            [this, ui, idx](double v) {
+        connect(spb, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            [this, idx](double v) {
                 m_pProxy->setData(
                     idx,
                     v,

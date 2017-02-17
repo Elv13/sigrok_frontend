@@ -51,6 +51,11 @@ ColumnNode::~ColumnNode()
 {
     d_ptr->m_pColumnW->setModel(nullptr);
     d_ptr->m_pCheckable->setSourceModel(nullptr);
+
+    /*delete d_ptr->m_pColumnW;
+    delete d_ptr->m_pCheckable;*/ //FIXME
+    delete d_ptr->m_pColumnProxy;
+
     delete d_ptr;
 }
 

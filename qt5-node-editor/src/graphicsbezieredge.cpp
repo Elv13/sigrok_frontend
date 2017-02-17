@@ -119,9 +119,7 @@ setStop(QPointF p)
 
 GraphicsBezierEdge::GraphicsBezierEdge(QNodeEditorEdgeModel* m, const QModelIndex& index, qreal factor)
     : GraphicsDirectedEdge(m, index, factor)
-{
-    d_ptr->m_pGrpahicsItem = new GraphicsBezierItem(d_ptr);
-}
+{}
 
 void GraphicsBezierItem::
 updatePath()

@@ -44,6 +44,12 @@ GraphicsNodeSocket(const QModelIndex& index, SocketType socket_type, GraphicsNod
     d_ptr->m_pGraphicsItem->setAcceptDrops(true);
 }
 
+GraphicsNodeSocket::
+~GraphicsNodeSocket()
+{
+    delete d_ptr;
+}
+
 QGraphicsItem *GraphicsNodeSocket::
 graphicsItem() const
 {

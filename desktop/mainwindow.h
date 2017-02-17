@@ -36,7 +36,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
   private:
-    Session* addSession(const QString& name);
+    Session* addSession(const QString& name = QString());
     Session* currentSession() const;
     QNodeWidget* currentNodeWidget() const;
 
@@ -51,8 +51,6 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     ActionCollection* m_pActionCollection;
     SelectedActionCollection* m_pSelActionCol;
 
-    QUrl fileName;
-
   private Q_SLOTS:
     QDockWidget* addDock(QWidget* w, const QString& title, const QString& uid);
     void settingsConfigure();
@@ -66,6 +64,7 @@ class MainWindow : public KXmlGuiWindow, public Ui_MainWindow
     QMainWindow* slotAddMainWindow(bool);
     QMainWindow* slotSelectionChanged();
     void slotSessionMessage(const QString& msg);
+    void slotSessionRenamed(const QString& name);
 
     void zoomIn();
     void zoomOut();

@@ -378,7 +378,8 @@ graphicsItem() const
 GraphicsNode::
 ~GraphicsNode()
 {
-    Q_ASSERT(!d_ptr->m_pGraphicsItem->scene());
+//     Q_ASSERT(!d_ptr->m_pGraphicsItem->scene());
+
     // The widget proxy doesn't own the widget unless specified
     if (d_ptr->_central_proxy) {
         delete d_ptr->_central_proxy;

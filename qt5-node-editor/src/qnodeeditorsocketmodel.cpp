@@ -161,6 +161,7 @@ public Q_SLOTS:
     void slotConnectionsInserted(const QModelIndex& parent, int first, int last);
     void slotConnectionsChanged (const QModelIndex& tl, const QModelIndex& br  );
     void slotAboutRemoveItem    (const QModelIndex &parent, int first, int last);
+    void slotConnectionsAboutToReset();
     void exitDraggingMode();
 };
 
@@ -192,20 +193,36 @@ QNodeEditorSocketModel::QNodeEditorSocketModel( QReactiveProxyModel* rmodel, Gra
     connect(&d_ptr->m_EdgeModel, &QAbstractItemModel::rowsInserted,
         d_ptr, &QNodeEditorSocketModelPrivate::slotConnectionsInserted);
 
+    connect(&d_ptr->m_EdgeModel, &QAbstractItemModel::modelAboutToBeReset,
+        d_ptr, &QNodeEditorSocketModelPrivate::slotConnectionsAboutToReset);
+
     connect(&d_ptr->m_EdgeModel, &QAbstractItemModel::dataChanged,
         d_ptr, &QNodeEditorSocketModelPrivate::slotConnectionsChanged);
-
 
     rmodel->setCurrentProxy(this);
 }
 
 QNodeEditorSocketModel::~QNodeEditorSocketModel()
 {
-    while (!d_ptr->m_lEdges.isEmpty())
-        delete d_ptr->m_lEdges.takeLast();
+    // Delete all edges
+    d_ptr->slotConnectionsAboutToReset();
 
-    while (!d_ptr->m_lWrappers.isEmpty())
-        delete d_ptr->m_lWrappers.takeLast();
+    while (!d_ptr->m_lWrappers.isEmpty()) {
+        auto node = d_ptr->m_lWrappers.takeLast();
+
+        for (auto sw : qAsConst(node->m_lSources))
+            delete sw;
+
+        for (auto sw : qAsConst(node->m_lSinks))
+            delete sw;
+
+        node->m_lSources.clear();
+        node->m_lSinks.clear();
+
+        //d_ptr->m_pScene->removeItem(node->m_Node.graphicsItem());
+
+        delete node;
+    }
 
     delete d_ptr;
 }
@@ -789,6 +806,22 @@ void QNodeEditorSocketModelPrivate::slotConnectionsInserted(const QModelIndex& p
     // Avoid pointless indentation
     if (last > first)
         slotConnectionsInserted(parent, ++first, last);
+}
+
+void QNodeEditorSocketModelPrivate::slotConnectionsAboutToReset()
+{
+    // Clear all edges references
+    for (auto nw : qAsConst(m_lWrappers)) {
+        for (auto sw : qAsConst(nw->m_lSources))
+            sw->m_EdgeWrapper = Q_NULLPTR;
+        for (auto sw : qAsConst(nw->m_lSinks))
+            sw->m_EdgeWrapper = Q_NULLPTR;
+    }
+
+    for (auto ew : qAsConst(m_lEdges))
+        delete ew;
+
+    m_lEdges.clear();
 }
 
 void QNodeEditorSocketModelPrivate::slotConnectionsChanged(const QModelIndex& tl, const QModelIndex& br)

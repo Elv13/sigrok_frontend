@@ -20,7 +20,7 @@ ManualAquisitionNode::ManualAquisitionNode(AbstractSession* sess) :
 
 ManualAquisitionNode::~ManualAquisitionNode()
 {
-    
+    delete d_ptr;
 }
 
 QString ManualAquisitionNode::title() const

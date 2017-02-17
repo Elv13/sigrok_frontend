@@ -12,9 +12,9 @@ ToolBox::ToolBox(QWidget* parent) : QDockWidget(parent)
     setupUi(this);
 
     setWindowTitle(tr("Tool box"));
-    auto del = new CategorizedDelegate(m_pToolBox);
-    del->setChildDelegate(new AutoCompletionDelegate());
-    m_pToolBox->setItemDelegate(del);
+    m_pDel = new CategorizedDelegate(m_pToolBox);
+    m_pDel->setChildDelegate(new AutoCompletionDelegate());
+    m_pToolBox->setItemDelegate(m_pDel);
     m_pToolBox->setIndentation(5);
 
     m_pProxy = new KRecursiveFilterProxyModel(this);
@@ -29,7 +29,8 @@ ToolBox::ToolBox(QWidget* parent) : QDockWidget(parent)
 
 ToolBox::~ToolBox()
 {
-
+    m_pToolBox->setItemDelegate(nullptr);
+    delete m_pDel;
 }
 
 void ToolBox::setModel(QAbstractItemModel* m)

@@ -41,6 +41,8 @@ public:
 
 private:
     explicit RemoteManager();
+    virtual ~RemoteManager();
 
     RemoteManagerPrivate* d_ptr;
+    Q_DECLARE_PRIVATE(RemoteManager)
 };

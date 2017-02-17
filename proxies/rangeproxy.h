@@ -39,6 +39,7 @@ public:
     };
 
     explicit RangeProxy(QObject* parent = nullptr);
+    virtual ~RangeProxy();
 
     virtual int columnCount(const QModelIndex& parent = {}) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

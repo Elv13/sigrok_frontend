@@ -11,20 +11,20 @@
  * performance).
  */
 
-struct Node
+struct RangeProxyNode
 {
     enum class Mode {
         ROOT,
         CHILD
     };
 
-    int                   m_Index       { 0                           };
-    Mode                  m_Mode        { Mode::ROOT                  };
-    Node*                 m_pParent     { nullptr                     };
-    RangeProxy::Delimiter m_Delim       { RangeProxy::Delimiter::ANY  };
-    QVariant              m_RangeValue  { QString()                   };
-    QHash<int, QVariant>* m_hExtraValues{ new QHash<int, QVariant>()  };
-    QVector<Node*>        m_lChildren   {                             };
+    int                      m_Index       { 0                           };
+    Mode                     m_Mode        { Mode::ROOT                  };
+    RangeProxyNode*          m_pParent     { nullptr                     };
+    RangeProxy::Delimiter    m_Delim       { RangeProxy::Delimiter::ANY  };
+    QVariant                 m_RangeValue  { QString()                   };
+    QHash<int, QVariant>*    m_hExtraValues{ new QHash<int, QVariant>()  };
+    QVector<RangeProxyNode*> m_lChildren   {                             };
 };
 
 class RangeProxyPrivate : public QObject
@@ -32,7 +32,7 @@ class RangeProxyPrivate : public QObject
     Q_OBJECT
 public:
     int m_ExtraColumnCount {0};
-    QVector<Node*> m_lRows;
+    QVector<RangeProxyNode*> m_lRows;
     bool m_MatchAllColumns{false};
 
     static QStringListModel* s_pDelimiterModel;

@@ -50,7 +50,7 @@ CurveChartNode::CurveChartNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(n
 
 CurveChartNode::~CurveChartNode()
 {
-    
+    delete d_ptr;
 }
 
 QString CurveChartNode::title() const

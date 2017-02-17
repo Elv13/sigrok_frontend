@@ -3,25 +3,25 @@
 #include <QtCore/QDebug>
 #include <QtCore/QJsonArray>
 
-struct Node final
+struct MementoItem final
 {
     int m_Row;
     int m_Column;
-    Node* m_pParent;
+    MementoItem* m_pParent;
     QHash<int, QVariant> m_hData;
-    QVector<QVector<Node*>> m_llChildren;
+    QVector<QVector<MementoItem*>> m_llChildren;
 };
 
 class MementoProxyPrivate
 {
 public:
-    QVector<QVector<Node*>> m_llRoots {};
+    QVector<QVector<MementoItem*>> m_llRoots {};
     QAbstractItemModel* m_pSourceModel {nullptr};
     QVector<int> m_lRoles;
 
     void setupExtraRole(const QModelIndex& idx);
-    void createSkeleton(const QModelIndex& root, Node* parent);
-    void copyData(const QModelIndex& idx, Node* node);
+    void createSkeleton(const QModelIndex& root, MementoItem* parent);
+    void copyData(const QModelIndex& idx, MementoItem* node);
     void clear();
 };
 
@@ -45,7 +45,7 @@ d_ptr(new MementoProxyPrivate())
 
         for (int col = 0; col < r.size(); ++col) {
             //TODO support trees
-            auto node = new Node {
+            auto node = new MementoItem {
                 row, col, nullptr, {}, {}
             };
 
@@ -69,6 +69,11 @@ d_ptr(new MementoProxyPrivate())
 
 MementoProxy::~MementoProxy()
 {
+    while (!d_ptr->m_llRoots.isEmpty()) {
+        auto i = d_ptr->m_llRoots.takeLast();
+        while (!i.isEmpty())
+            delete i.takeLast();
+    }
     delete d_ptr;
 }
 
@@ -87,7 +92,7 @@ QVariant MementoProxy::data(const QModelIndex& idx, int role) const
     if (!idx.isValid())
         return {};
 
-    const auto n = static_cast<Node*>(idx.internalPointer());
+    const auto n = static_cast<MementoItem*>(idx.internalPointer());
 
     return n->m_hData[role];
 }
@@ -97,7 +102,7 @@ bool MementoProxy::setData(const QModelIndex &index, const QVariant &value, int 
     if ((!index.isValid()) || !index.model())
         return false;
 
-    const auto n = static_cast<Node*>(index.internalPointer());
+    const auto n = static_cast<MementoItem*>(index.internalPointer());
 
     n->m_hData[role] = value;
 
@@ -115,7 +120,7 @@ int MementoProxy::rowCount(const QModelIndex& parent) const
     if (!d_ptr->m_llRoots.size()) return 0;
     if (!parent.isValid()) return d_ptr->m_llRoots.size();
 
-    const auto n = static_cast<Node*>(parent.internalPointer());
+    const auto n = static_cast<MementoItem*>(parent.internalPointer());
     return n->m_llChildren.size();
 }
 
@@ -125,7 +130,7 @@ int MementoProxy::columnCount(const QModelIndex& parent) const
 
     if (!parent.isValid()) return d_ptr->m_llRoots[0].size();
 
-    const auto n = static_cast<Node*>(parent.internalPointer());
+    const auto n = static_cast<MementoItem*>(parent.internalPointer());
     if (n->m_llChildren.size()) return n->m_llChildren[0].size();
 
     return 0;
@@ -155,7 +160,7 @@ Qt::ItemFlags MementoProxy::flags(const QModelIndex &idx) const
 QModelIndex MementoProxy::parent(const QModelIndex& idx) const
 {
     if (idx.isValid()) {
-        if (auto n = static_cast<Node*>(idx.internalPointer())->m_pParent)
+        if (auto n = static_cast<MementoItem*>(idx.internalPointer())->m_pParent)
             return createIndex(n->m_Row, n->m_Column, n);
     }
 
@@ -178,7 +183,7 @@ void MementoProxyPrivate::setupExtraRole(const QModelIndex& idx)
     }
 }
 
-void MementoProxyPrivate::copyData(const QModelIndex& idx, Node* node)
+void MementoProxyPrivate::copyData(const QModelIndex& idx, MementoItem* node)
 {
     const auto roles = m_lRoles; //Avoid detaching the container
 
@@ -187,7 +192,7 @@ void MementoProxyPrivate::copyData(const QModelIndex& idx, Node* node)
     }
 }
 
-void MementoProxyPrivate::createSkeleton(const QModelIndex& root, Node* parent)
+void MementoProxyPrivate::createSkeleton(const QModelIndex& root, MementoItem* parent)
 {
     const int rc = m_pSourceModel->rowCount(root);
     const int cc = m_pSourceModel->columnCount(root);
@@ -206,7 +211,7 @@ void MementoProxyPrivate::createSkeleton(const QModelIndex& root, Node* parent)
 
         for (int j=0; j < cc; j++) {
             const auto idx = m_pSourceModel->index(i, j, root);
-            auto n = new Node {
+            auto n = new MementoItem {
                 i, j, parent, {}, {}
             };
 

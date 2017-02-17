@@ -55,6 +55,7 @@ QNodeWidget::QNodeWidget(QWidget* parent) : QNodeView(parent),
 
 QNodeWidget::~QNodeWidget()
 {
+    setModel(nullptr);
     delete d_ptr;
 }
 
