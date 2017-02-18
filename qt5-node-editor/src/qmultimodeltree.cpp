@@ -326,7 +326,7 @@ void QMultiModelTreePrivate::slotAddRows(const QModelIndex& parent, int first, i
     for (int i = last+1; i < p->m_lChildren.size(); i++)
         p->m_lChildren[i]->m_Index += delta;
 
-    p->m_RowCountLock = false; //FIXME still added twice
+    p->m_RowCountLock = false;
     q_ptr->endInsertRows();
 }
 
@@ -357,7 +357,7 @@ QModelIndex QMultiModelTree::appendModel(QAbstractItemModel* model, const QVaria
     if ((!model) || d_ptr->m_hModels[model]) return {};
 
     beginInsertRows({}, d_ptr->m_lRows.size(), d_ptr->m_lRows.size());
-    d_ptr->m_hModels[model] = new MMTInternalItem {
+    auto p = new MMTInternalItem {
         d_ptr->m_lRows.size(),
         MMTInternalItem::Mode::ROOT,
         model,
@@ -367,10 +367,11 @@ QModelIndex QMultiModelTree::appendModel(QAbstractItemModel* model, const QVaria
         true,
         id, {}, {}, {}
     };
-    d_ptr->m_lRows << d_ptr->m_hModels[model];
+    d_ptr->m_hModels[model] = p;
+    d_ptr->m_lRows << p;
     endInsertRows();
 
-    d_ptr->slotAddRows({}, 0, model->rowCount(), model);
+    d_ptr->slotAddRows({}, 0, model->rowCount() - 1, model);
 
     //TODO connect to the model row moved/removed/reset
     connect(model, &QAbstractItemModel::rowsInserted,

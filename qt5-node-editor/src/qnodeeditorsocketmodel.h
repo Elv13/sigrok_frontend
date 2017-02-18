@@ -65,6 +65,10 @@ public:
     int sourceSocketCount(const QModelIndex& idx) const;
     int sinkSocketCount(const QModelIndex& idx) const;
 
+    /// Limit the numbers of edges (connections) between a socket pair to one.
+    bool isSingleEdgeEnforced() const;
+    void setEnforceSingleEdge(bool value);
+
     QNodeEditorEdgeModel* edgeModel() const;
 
     GraphicsNodeScene* scene() const;

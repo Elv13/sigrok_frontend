@@ -585,21 +585,26 @@ void Session::load(const QByteArray& data)
                 continue;
             }
 
+            const auto lnode  = edgeM->index(row,0);
+            const auto rnode  = edgeM->index(row,2);
+
+            bool isValid = lnode.data(
+                QReactiveProxyModel::ConnectionsRoles::IS_VALID
+            ).toBool();
+
             const bool ret1 = edgeM->setData(
-                edgeM->index(row, 0),
+                lnode,
                 srcSock,
                 QReactiveProxyModel::ConnectionsRoles::SOURCE_INDEX
             );
             const bool ret2 = edgeM->setData(
-                edgeM->index(row, 2),
+                rnode,
                 sinkSock,
                 QReactiveProxyModel::ConnectionsRoles::DESTINATION_INDEX
             );
 
             // Validate if the connection is broken
-            const auto lnode  = edgeM->index(row,0);
-
-            const bool isValid = lnode.data(
+            isValid = lnode.data(
                 QReactiveProxyModel::ConnectionsRoles::IS_VALID
             ).toBool();
 

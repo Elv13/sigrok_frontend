@@ -129,6 +129,7 @@ public:
     GraphicsNodeScene*    m_pScene;
     State                 m_State {State::NORMAL};
     quint32               m_CurrentTypeId {QMetaType::UnknownType};
+    bool                  m_IsSingleEdge {true};
 
     // helper
     GraphicsNode* insertNode(int idx);
@@ -434,6 +435,17 @@ QNodeEditorEdgeModel* QNodeEditorSocketModel::edgeModel() const
     return &d_ptr->m_EdgeModel;
 }
 
+
+bool QNodeEditorSocketModel::isSingleEdgeEnforced() const
+{
+    return d_ptr->m_IsSingleEdge;
+}
+
+void QNodeEditorSocketModel::setEnforceSingleEdge(bool value)
+{
+    d_ptr->m_IsSingleEdge = value;
+}
+
 GraphicsDirectedEdge* QNodeEditorSocketModelPrivate::initiateConnectionFromSource( const QModelIndex& idx, GraphicsNodeSocket::SocketType type, const QPointF& point )
 {
     Q_UNUSED(type ); //TODO use it or delete it
@@ -516,7 +528,7 @@ void QNodeEditorSocketModelPrivate::slotRowsInserted(const QModelIndex& parent, 
             const auto idx = q_ptr->index(i, 0);
             if (idx.isValid()) {
                 insertNode(idx.row());
-                slotRowsInserted(idx, 0, q_ptr->rowCount(idx));
+                slotRowsInserted(idx, 0, q_ptr->rowCount(idx) - 1);
             }
         }
     }
@@ -525,10 +537,10 @@ void QNodeEditorSocketModelPrivate::slotRowsInserted(const QModelIndex& parent, 
             const int delta = (last - first) + 1;
 
             // Sync the mapping from the socket row to the source row
-            for (int i = first; i < nodew->m_lSourcesToSrc.size(); i++) {
-                nodew->m_lSourcesToSrc += delta;
-                nodew->m_lSinksToSrc   += delta;
-            }
+            for (int i = first; i < nodew->m_lSourcesToSrc.size(); i++)
+                nodew->m_lSourcesToSrc[i] += delta;
+            for (int i = first; i < nodew->m_lSinksToSrc.size(); i++)
+                nodew->m_lSinksToSrc[i]   += delta;
 
             // Sync the source row -> socket row table
             for (int i = first; i <= last; i++) {
@@ -700,6 +712,73 @@ bool QNodeEditorEdgeModel::setData(const QModelIndex &index, const QVariant &val
     // SocketModel can be invalid while the reactive one is
     auto i = value.toModelIndex();
 
+    // Exit early to keep the code simple. It wont work anyway unless someone
+    // use this in very "creative" ways.
+    if (i.isValid() && !i.parent().isValid()) {
+        qWarning() << "Trying to use a node as a socket"
+            << index.data() << i.data();
+        return false;
+    }
+
+    // Prevent already connected sockets to be connected again. In many
+    // scenarios, having multiple edges bring more complexity than sense. So
+    // it is better to prevent it altogether.
+    if (d_ptr->m_IsSingleEdge) {
+        Q_ASSERT((!i.isValid()) || i.model() == d_ptr->q_ptr);
+        switch(index.column()) {
+            case 0: {
+                const auto self  = d_ptr->getSinkSocket(index);
+                const auto other = d_ptr->getSourceSocket(i);
+
+                // If `i` isn't valid, then it's a disconnection
+                if (Q_UNLIKELY(i.isValid() && self)) {
+                    qWarning() << "The sink socket is already connected"
+                        << index.data() << i.data();
+                    return false;
+                }
+
+                if (Q_UNLIKELY(i.isValid() && !other)) {
+                    qWarning() << "The other socket doesn't exist"
+                        << index.data() << i.data();
+                    return false;
+                }
+
+                // Other can be nil of the edge is dropped on empty space
+                if (Q_UNLIKELY(other && other->m_EdgeWrapper)) {
+                    qWarning() << "The source socket is already connected"
+                        << index.data() << i.data();
+                    return false;
+                }
+
+            } break;
+            case 2: {
+                const auto self  = d_ptr->getSourceSocket(index);
+                const auto other = d_ptr->getSinkSocket(i);
+
+                // If `i` isn't valid, then it's a disconnection
+                if (Q_UNLIKELY(i.isValid() && self)) {
+                    qWarning() << "The source socket is already connected"
+                        << index.data() << i.data();
+                    return false;
+                }
+
+                if (Q_UNLIKELY(i.isValid() && !other)) {
+                    qWarning() << "The other socket doesn't exist"
+                        << index.data() << i.data();
+                    return false;
+                }
+
+                // Other can be nil of the edge is dropped on empty space
+                if (Q_UNLIKELY(other && other->m_EdgeWrapper)) {
+                    qWarning() << "The sink socket is already connected"
+                        << index.data() << i.data();
+                    return false;
+                }
+
+            } break;
+        };
+    }
+
     if (i.isValid()) {
         switch(index.column()) {
             case 0:
@@ -855,6 +934,13 @@ void QNodeEditorSocketModelPrivate::slotConnectionsChanged(const QModelIndex& tl
             }
 
             if (e->m_pSource) {
+
+                // Assert early to prevent the model from going into an invalid
+                // state. `setData` should have prevented this already.
+                if (m_IsSingleEdge)
+                    Q_ASSERT((!e->m_pSource->m_EdgeWrapper)
+                        || (e->m_pSource->m_EdgeWrapper == e));
+
                 e->m_pSource->m_EdgeWrapper = e;
             }
         }
@@ -872,8 +958,16 @@ void QNodeEditorSocketModelPrivate::slotConnectionsChanged(const QModelIndex& tl
                 oldSink->m_EdgeWrapper = Q_NULLPTR;
             }
 
-            if (e->m_pSink)
+            if (e->m_pSink) {
+
+                // Assert early to prevent the model from going into an invalid
+                // state. `setData` should have prevented this already.
+                if (m_IsSingleEdge)
+                    Q_ASSERT((!e->m_pSink->m_EdgeWrapper)
+                        || (e->m_pSink->m_EdgeWrapper == e));
+
                 e->m_pSink->m_EdgeWrapper = e;
+            }
         }
 
         // Update the graphic item
@@ -922,7 +1016,7 @@ void QNodeEditorSocketModelPrivate::slotAboutRemoveItem(const QModelIndex &paren
             Q_ASSERT(parent == nw->m_Node.index());
 
             Q_ASSERT(nw->m_lSinksFromSrc.size() == nw->m_lSourcesFromSrc.size());
-            Q_ASSERT(nw->m_lSourcesFromSrc.size() > q_ptr->rowCount(parent));
+            Q_ASSERT(nw->m_lSourcesFromSrc.size() > q_ptr->rowCount(parent) - 1);
 
             int sid = nw->m_lSourcesFromSrc[i] - 1;
             if (sid >= 0) {

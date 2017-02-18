@@ -117,15 +117,11 @@ bool MultiplexerModel::setData(const QModelIndex& idx, const QVariant& value, in
 
         // Always add more rows when the last once is used
         if (!wasInit) {
-            QTimer::singleShot(0, [this]() {
-                beginInsertRows({}, m_lRows.size(), m_lRows.size());
-                m_lRows << new CloneHolder();
-                m_lRows.last()->name += QString(" (%1)").arg(m_lRows.size());
-                endInsertRows();
-            });
+            beginInsertRows({}, 1, 1);
+            m_lRows.insert(0, new CloneHolder());
+            m_lRows.first()->name += QString(" (%1)").arg(m_lRows.size());
+            endInsertRows();
         }
-
-        Q_EMIT dataChanged(idx, idx);
 
         return true;
     }
@@ -211,11 +207,10 @@ bool MultiplexerNode::createSourceSocket(const QString& name)
 
     auto cl  = new CloneHolder();
     cl->name = name;
-    cl->init = false;
+    cl->init = true;
 
-    const int pos = d_ptr->m_pModel->m_lRows.size();
-    d_ptr->m_pModel->beginInsertRows({}, pos, pos);
-    d_ptr->m_pModel->m_lRows << cl;
+    d_ptr->m_pModel->beginInsertRows({}, 1, 1);
+    d_ptr->m_pModel->m_lRows.insert(0, cl);
     d_ptr->m_pModel->endInsertRows();
 
     return true;
