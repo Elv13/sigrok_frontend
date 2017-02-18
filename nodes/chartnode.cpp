@@ -1,7 +1,5 @@
 #include "chartnode.h"
 
-#include "widgets/aquisition.h"
-
 #include <KChartPlotter>
 #include <KChartAbstractProxyModel.h>
 #include <KChartAttributesModel.h>

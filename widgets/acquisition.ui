@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Aquisition</class>
- <widget class="QWidget" name="Aquisition">
+ <class>Acquisition</class>
+ <widget class="QWidget" name="Acquisition">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -72,6 +72,13 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="1">
+      <widget class="QPushButton" name="m_pAcquire">
+       <property name="text">
+        <string>Acquire</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QPushButton" name="m_pStart">
        <property name="text">
@@ -90,13 +97,6 @@
       <widget class="QPushButton" name="m_pClear">
        <property name="text">
         <string>Clear</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="m_pAquire">
-       <property name="text">
-        <string>Aquire</string>
        </property>
       </widget>
      </item>
@@ -120,9 +120,9 @@
  <resources/>
  <connections>
   <connection>
-   <sender>Aquisition</sender>
-   <signal>showAquire(bool)</signal>
-   <receiver>m_pAquire</receiver>
+   <sender>Acquisition</sender>
+   <signal>showAcquire(bool)</signal>
+   <receiver>m_pAcquire</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -138,15 +138,15 @@
   <connection>
    <sender>m_pStart</sender>
    <signal>clicked()</signal>
-   <receiver>Aquisition</receiver>
+   <receiver>Acquisition</receiver>
    <slot>slotStarted()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>27</x>
-     <y>46</y>
+     <x>28</x>
+     <y>82</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-4</x>
+     <x>0</x>
      <y>59</y>
     </hint>
    </hints>
@@ -154,15 +154,15 @@
   <connection>
    <sender>m_pStop</sender>
    <signal>clicked()</signal>
-   <receiver>Aquisition</receiver>
+   <receiver>Acquisition</receiver>
    <slot>slotStopped()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>39</y>
+     <x>172</x>
+     <y>82</y>
     </hint>
     <hint type="destinationlabel">
-     <x>192</x>
+     <x>173</x>
      <y>42</y>
     </hint>
    </hints>
@@ -170,7 +170,7 @@
   <connection>
    <sender>m_pClear</sender>
    <signal>clicked()</signal>
-   <receiver>Aquisition</receiver>
+   <receiver>Acquisition</receiver>
    <slot>slotCleared()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -178,33 +178,33 @@
      <y>93</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-12</x>
+     <x>0</x>
      <y>92</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>m_pAquire</sender>
+   <sender>m_pAcquire</sender>
    <signal>clicked(bool)</signal>
-   <receiver>Aquisition</receiver>
-   <slot>slotAquire()</slot>
+   <receiver>Acquisition</receiver>
+   <slot>slotAcquire()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>88</y>
+     <x>172</x>
+     <y>120</y>
     </hint>
     <hint type="destinationlabel">
-     <x>191</x>
+     <x>173</x>
      <y>87</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
-  <signal>showAquire(bool)</signal>
+  <signal>showAcquire(bool)</signal>
   <slot>slotStarted()</slot>
   <slot>slotStopped()</slot>
   <slot>slotCleared()</slot>
-  <slot>slotAquire()</slot>
+  <slot>slotAcquire()</slot>
  </slots>
 </ui>

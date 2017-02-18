@@ -6,7 +6,7 @@
 
 #include "widgets/chrono.h"
 
-#include "sigrokd/aquisitionmodel.h"
+#include "sigrokd/acquisitionmodel.h"
 
 class ChronoNodePrivate final : public QObject
 {
@@ -23,7 +23,7 @@ ChronoNode::ChronoNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new Chron
 {
     d_ptr->q_ptr = this;
     d_ptr->m_Proxy.setTimeSourceColumn(0);
-    d_ptr->m_Proxy.setTimeSourceRole((int)AquisitionModel::Role::U_TIMESTAMP);
+    d_ptr->m_Proxy.setTimeSourceRole((int)AcquisitionModel::Role::U_TIMESTAMP);
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ChronoNodePrivate::slotModelChanged);
 }
 
@@ -31,7 +31,6 @@ ChronoNode::~ChronoNode()
 {
     delete d_ptr;
 }
-
 
 QAbstractItemModel* ChronoNode::filteredModel() const
 {

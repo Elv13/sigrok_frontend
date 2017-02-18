@@ -22,7 +22,7 @@
 
 #include <QtOpenGL/QGLWidget>
 
-#include "sigrokd/aquisitionmodel.h"
+#include "sigrokd/acquisitionmodel.h"
 
 #include "docktitle.h"
 #include "toolbox.h"
@@ -31,8 +31,8 @@
 #include "session.h"
 #include "models/remotewidgets.h"
 
-#include "nodes/aquisitionnode.h"
-#include "nodes/manualaquisitionnode.h"
+#include "nodes/liveacquisitionnode.h"
+#include "nodes/manualacquisitionnode.h"
 // #include "nodes/chartnode.h"
 #include "nodes/curvechartnode.h"
 #include "nodes/tablenode.h"
@@ -330,8 +330,8 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<ColorNode>  (QStringLiteral("Range Colorizer"), QStringLiteral("Metadata")  , QStringLiteral("color_node"), QIcon::fromTheme( QStringLiteral("colors-chromablue")   ));
     sess->registerType<ColumnNode> (QStringLiteral("Column filter")  , QStringLiteral("Filters")   , QStringLiteral("column_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
     sess->registerType<DeduplicateNode> (QStringLiteral("Deduplicate")  , QStringLiteral("Filters")   , QStringLiteral("deduplicate_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
-    sess->registerType<AquisitionNode> (QStringLiteral("Live aquisition") , QStringLiteral("Sources")  , QStringLiteral("aquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
-    sess->registerType<ManualAquisitionNode> (QStringLiteral("Manual aquisition") , QStringLiteral("Sources")  , QStringLiteral("manualaquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<AcquisitionNode> (QStringLiteral("Live acquisition") , QStringLiteral("Sources")  , QStringLiteral("acquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<ManualAcquisitionNode> (QStringLiteral("Manual acquisition") , QStringLiteral("Sources")  , QStringLiteral("manualacquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
     sess->registerType<MementoNode>(QStringLiteral("Memento")         , QStringLiteral("Sources")  , QStringLiteral("memento_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
     sess->registerType<MultiplexerNode>(QStringLiteral("Multiplexer") , QStringLiteral("Tools")    , QStringLiteral("multiplexer_node"), QIcon::fromTheme( QStringLiteral("edit-copy")          ));
     sess->registerType<TailNode>   (QStringLiteral("Tail filter")     , QStringLiteral("Filters")  , QStringLiteral("tail_node")  , QIcon::fromTheme( QStringLiteral("kt-add-filters")   ));

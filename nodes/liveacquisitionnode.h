@@ -10,15 +10,15 @@
 
 #include "sigrokd/sigrokdevice.h"
 
-class AquisitionModel;
+class AcquisitionModel;
 
-class AquisitionNodePrivate;
+class AcquisitionNodePrivate;
 
 namespace sigrok {
     class HardwareDevice;
 }
 
-class Q_DECL_EXPORT AquisitionNode : public AbstractNode
+class Q_DECL_EXPORT AcquisitionNode : public AbstractNode
 {
     Q_OBJECT
 
@@ -32,9 +32,9 @@ public:
     Q_PROPERTY(bool stop WRITE stop USER true)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY runningChanged USER true)
 
-    Q_INVOKABLE explicit AquisitionNode(AbstractSession* sess);
+    Q_INVOKABLE explicit AcquisitionNode(AbstractSession* sess);
 
-    virtual ~AquisitionNode();
+    virtual ~AcquisitionNode();
 
     virtual QString title() const override;
 
@@ -42,8 +42,8 @@ public:
 
     virtual void write(QJsonObject &parent) const override;
 
-    void setModel(AquisitionModel* m);
-    AquisitionModel* aqModel() const;
+    void setModel(AcquisitionModel* m);
+    AcquisitionModel* aqModel() const;
 
     bool isRunning() const;
 
@@ -69,9 +69,9 @@ Q_SIGNALS:
     void runningChanged(bool);
 
 private:
-    AquisitionNodePrivate* d_ptr;
-    Q_DECLARE_PRIVATE(AquisitionNode)
+    AcquisitionNodePrivate* d_ptr;
+    Q_DECLARE_PRIVATE(AcquisitionNode)
 
 };
 
-Q_DECLARE_METATYPE(AquisitionNode*)
+Q_DECLARE_METATYPE(AcquisitionNode*)

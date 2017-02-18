@@ -11,8 +11,8 @@ namespace sigrok {
 
 class SigrokDevice;
 
-class AquisitionModelPrivate;
-class Q_DECL_EXPORT AquisitionModel : public QAbstractTableModel
+class AcquisitionModelPrivate;
+class Q_DECL_EXPORT AcquisitionModel : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -41,10 +41,10 @@ public:
         STARTED, /* Everything is going well */
         ERROR  , /* There was an error       */
     };
-    Q_ENUMS(AquisitionModel::STATE)
+    Q_ENUMS(AcquisitionModel::STATE)
 
-    explicit AquisitionModel(SigrokDevice* device);
-    virtual ~AquisitionModel();
+    explicit AcquisitionModel(SigrokDevice* device);
+    virtual ~AcquisitionModel();
 
     void setMode(Mode m);
 
@@ -73,6 +73,6 @@ Q_SIGNALS:
     void stateChanged(State s, State old);
 
 private:
-    AquisitionModelPrivate* d_ptr;
-    Q_DECLARE_PRIVATE(AquisitionModel)
+    AcquisitionModelPrivate* d_ptr;
+    Q_DECLARE_PRIVATE(AcquisitionModel)
 };

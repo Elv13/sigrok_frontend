@@ -3,7 +3,6 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDebug>
 
-#include "widgets/aquisition.h"
 
 class ProxyNodePrivate : public QObject
 {
@@ -26,7 +25,7 @@ ProxyNode::~ProxyNode()
 
 QString ProxyNode::title() const
 {
-    return QStringLiteral("Aquisition");
+    return QStringLiteral("Proxy node");
 }
 
 QString ProxyNode::id() const
@@ -36,7 +35,7 @@ QString ProxyNode::id() const
 
 QWidget* ProxyNode::widget() const
 {
-    return new Aquisition();
+    return nullptr;
 }
 
 QAbstractItemModel* ProxyNode::model() const

@@ -1,7 +1,7 @@
-#include "aquisitionnode.h"
+#include "liveacquisitionnode.h"
 
-#include "widgets/aquisition.h"
-#include "sigrokd/aquisitionmodel.h"
+#include "widgets/acquisition.h"
+#include "sigrokd/acquisitionmodel.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
@@ -15,114 +15,114 @@
 Q_DECLARE_STREAM_METATYPE(SigrokDevice*)
 #endif
 
-class AquisitionNodePrivate : public QObject
+class AcquisitionNodePrivate : public QObject
 {
     Q_OBJECT
 public:
-    AquisitionModel* m_pModel {nullptr};
-    Aquisition* m_pWidget {nullptr};
-    QString m_Title {QStringLiteral("Live Aquisition")};
+    AcquisitionModel* m_pModel {nullptr};
+    Acquisition* m_pWidget {nullptr};
+    QString m_Title {QStringLiteral("Live Acquisition")};
     SigrokDevice* m_pDevice;
     QTimer* m_pTimer {nullptr};
 
-    AquisitionNode* q_ptr;
+    AcquisitionNode* q_ptr;
 
 public Q_SLOTS:
     void slotClear();
     void slotStop();
     void slotStart();
-    void slotState(AquisitionModel::State, AquisitionModel::State);
+    void slotState(AcquisitionModel::State, AcquisitionModel::State);
     void slotTick();
     void slotDestroyed();
 };
 
-AquisitionNode::AquisitionNode(AbstractSession* sess) :
-    AbstractNode(sess), d_ptr(new AquisitionNodePrivate())
+AcquisitionNode::AcquisitionNode(AbstractSession* sess) :
+    AbstractNode(sess), d_ptr(new AcquisitionNodePrivate())
 {
     d_ptr->q_ptr = this;
 }
 
-AquisitionNode::~AquisitionNode()
+AcquisitionNode::~AcquisitionNode()
 {
     if (isRunning())
         d_ptr->m_pModel->stop();
     delete d_ptr;
 }
 
-QString AquisitionNode::title() const
+QString AcquisitionNode::title() const
 {
     return d_ptr->m_Title;
 }
 
-QString AquisitionNode::id() const
+QString AcquisitionNode::id() const
 {
-    return QStringLiteral("aquisition_node");
+    return QStringLiteral("acquisition_node");
 }
 
-void AquisitionNode::write(QJsonObject &parent) const
+void AcquisitionNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 }
 
-QWidget* AquisitionNode::widget() const
+QWidget* AcquisitionNode::widget() const
 {
     if (!d_ptr->m_pWidget) {
-        d_ptr->m_pWidget = new Aquisition(false);
+        d_ptr->m_pWidget = new Acquisition(false);
 
-        QObject::connect(d_ptr->m_pWidget, &Aquisition::started, d_ptr,
-            &AquisitionNodePrivate::slotStart);
-        QObject::connect(d_ptr->m_pWidget, &Aquisition::stopped, d_ptr,
-            &AquisitionNodePrivate::slotStop);
-        QObject::connect(d_ptr->m_pWidget, &Aquisition::cleared, d_ptr,
-            &AquisitionNodePrivate::slotClear);
+        QObject::connect(d_ptr->m_pWidget, &Acquisition::started, d_ptr,
+            &AcquisitionNodePrivate::slotStart);
+        QObject::connect(d_ptr->m_pWidget, &Acquisition::stopped, d_ptr,
+            &AcquisitionNodePrivate::slotStop);
+        QObject::connect(d_ptr->m_pWidget, &Acquisition::cleared, d_ptr,
+            &AcquisitionNodePrivate::slotClear);
         QObject::connect(d_ptr->m_pWidget, &QObject::destroyed, d_ptr,
-            &AquisitionNodePrivate::slotDestroyed);
+            &AcquisitionNodePrivate::slotDestroyed);
     }
 
     return d_ptr->m_pWidget;
 }
 
-bool AquisitionNode::isRunning() const
+bool AcquisitionNode::isRunning() const
 {
     if (!d_ptr->m_pModel)
         return false;
 
-    return d_ptr->m_pModel->state() == AquisitionModel::State::STARTED;
+    return d_ptr->m_pModel->state() == AcquisitionModel::State::STARTED;
 }
 
-void AquisitionNode::setModel(AquisitionModel* m)
+void AcquisitionNode::setModel(AcquisitionModel* m)
 {
     if (m == d_ptr->m_pModel)
         return;
 
     if (d_ptr->m_pModel)
-        disconnect(d_ptr->m_pModel, &AquisitionModel::stateChanged,
-            d_ptr, &AquisitionNodePrivate::slotState);
+        disconnect(d_ptr->m_pModel, &AcquisitionModel::stateChanged,
+            d_ptr, &AcquisitionNodePrivate::slotState);
 
     d_ptr->m_pModel = m;
 
-    connect(d_ptr->m_pModel, &AquisitionModel::stateChanged,
-        d_ptr, &AquisitionNodePrivate::slotState);
+    connect(d_ptr->m_pModel, &AcquisitionModel::stateChanged,
+        d_ptr, &AcquisitionNodePrivate::slotState);
 
     Q_EMIT modelChanged(m);
 }
 
-AquisitionModel* AquisitionNode::aqModel() const
+AcquisitionModel* AcquisitionNode::aqModel() const
 {
     return d_ptr->m_pModel;
 }
 
-QAbstractItemModel* AquisitionNode::model() const
+QAbstractItemModel* AcquisitionNode::model() const
 {
     return d_ptr->m_pModel;
 }
 
-SigrokDevice* AquisitionNode::device() const
+SigrokDevice* AcquisitionNode::device() const
 {
     return d_ptr->m_pDevice;
 }
 
-void AquisitionNode::setDevice(SigrokDevice* dev)
+void AcquisitionNode::setDevice(SigrokDevice* dev)
 {
     if (d_ptr->m_pDevice == dev)
         return;
@@ -137,15 +137,15 @@ void AquisitionNode::setDevice(SigrokDevice* dev)
 
     DeviceModel::instance();
 
-    setModel(new AquisitionModel(dev));
+    setModel(new AcquisitionModel(dev));
 }
 
-bool AquisitionNode::dummy() const{
+bool AcquisitionNode::dummy() const{
     // do nothing, the property is a trigger
     return false;
 }
 
-void AquisitionNodePrivate::slotClear()
+void AcquisitionNodePrivate::slotClear()
 {
     if (!m_pModel)
         return;
@@ -155,31 +155,31 @@ void AquisitionNodePrivate::slotClear()
     Q_EMIT q_ptr->cleared();
 }
 
-void AquisitionNodePrivate::slotStop()
+void AcquisitionNodePrivate::slotStop()
 {
     if (!m_pModel)
         return;
 
-    if (m_pModel->state() == AquisitionModel::State::STOPPED)
+    if (m_pModel->state() == AcquisitionModel::State::STOPPED)
         return;
 
     m_pModel->stop();
 
 }
 
-void AquisitionNodePrivate::slotStart()
+void AcquisitionNodePrivate::slotStart()
 {
     if (!m_pModel)
         return;
 
     switch(m_pModel->state()) {
-        case AquisitionModel::State::STOPPED:
-        case AquisitionModel::State::TIMEOUT:
-        case AquisitionModel::State::ERROR:
+        case AcquisitionModel::State::STOPPED:
+        case AcquisitionModel::State::TIMEOUT:
+        case AcquisitionModel::State::ERROR:
             break;
-        case AquisitionModel::State::STARTED:
-        case AquisitionModel::State::INIT:
-        case AquisitionModel::State::IDLE:
+        case AcquisitionModel::State::STARTED:
+        case AcquisitionModel::State::INIT:
+        case AcquisitionModel::State::IDLE:
             return;
     }
 
@@ -188,7 +188,7 @@ void AquisitionNodePrivate::slotStart()
     Q_EMIT q_ptr->runningChanged(true);
 }
 
-void AquisitionNodePrivate::slotState(AquisitionModel::State n, AquisitionModel::State o)
+void AcquisitionNodePrivate::slotState(AcquisitionModel::State n, AcquisitionModel::State o)
 {
     Q_UNUSED(o)
 
@@ -199,17 +199,17 @@ void AquisitionNodePrivate::slotState(AquisitionModel::State n, AquisitionModel:
     static const QString idle    = tr("Idle");
     static const QString init    = tr("Initializing");
     switch(n) {
-        case AquisitionModel::State::ERROR:
-        case AquisitionModel::State::STOPPED:
+        case AcquisitionModel::State::ERROR:
+        case AcquisitionModel::State::STOPPED:
             if (m_pTimer) {
                 m_pTimer->stop();
             }
             break;
-        case AquisitionModel::State::TIMEOUT:
-        case AquisitionModel::State::STARTED:
+        case AcquisitionModel::State::TIMEOUT:
+        case AcquisitionModel::State::STARTED:
             if (!m_pTimer) {
                 m_pTimer = new QTimer(this);
-                connect(m_pTimer, &QTimer::timeout, this, &AquisitionNodePrivate::slotTick);
+                connect(m_pTimer, &QTimer::timeout, this, &AcquisitionNodePrivate::slotTick);
             }
 
             if (!m_pTimer->isActive()) {
@@ -217,48 +217,48 @@ void AquisitionNodePrivate::slotState(AquisitionModel::State n, AquisitionModel:
                 m_pTimer->start();
             }
             break;
-        case AquisitionModel::State::INIT:
-        case AquisitionModel::State::IDLE:
+        case AcquisitionModel::State::INIT:
+        case AcquisitionModel::State::IDLE:
             break;
     }
 
     switch(n) {
-        case AquisitionModel::State::STOPPED:
+        case AcquisitionModel::State::STOPPED:
             if (m_pWidget)
                 m_pWidget->setStatus(stopped);
             Q_EMIT q_ptr->notify(stopped);
             Q_EMIT q_ptr->runningChanged(false);
             break;
-        case AquisitionModel::State::TIMEOUT:
+        case AcquisitionModel::State::TIMEOUT:
             if (m_pWidget)
                 m_pWidget->setStatus(timeout);
             Q_EMIT q_ptr->notify(timeout);
             Q_EMIT q_ptr->runningChanged(false);
             break;
-        case AquisitionModel::State::STARTED:
+        case AcquisitionModel::State::STARTED:
             if (m_pWidget)
                 m_pWidget->setStatus(started);
             Q_EMIT q_ptr->notify(started);
             Q_EMIT q_ptr->runningChanged(true);
             break;
-        case AquisitionModel::State::ERROR:
+        case AcquisitionModel::State::ERROR:
             if (m_pWidget)
                 m_pWidget->setStatus(error);
             Q_EMIT q_ptr->notify(error);
             Q_EMIT q_ptr->runningChanged(false);
             break;
-        case AquisitionModel::State::INIT:
+        case AcquisitionModel::State::INIT:
             if (m_pWidget)
                 m_pWidget->setStatus(init);
             break;
-        case AquisitionModel::State::IDLE:
+        case AcquisitionModel::State::IDLE:
             if (m_pWidget)
                 m_pWidget->setStatus(idle);
             break;
     }
 }
 
-void AquisitionNodePrivate::slotTick()
+void AcquisitionNodePrivate::slotTick()
 {
     if (m_pModel && m_pWidget) {
         m_pWidget->setCount(m_pModel->rowCount());
@@ -266,29 +266,29 @@ void AquisitionNodePrivate::slotTick()
     }
 }
 
-void AquisitionNodePrivate::slotDestroyed()
+void AcquisitionNodePrivate::slotDestroyed()
 {
     m_pWidget = nullptr;
 }
 
-void AquisitionNode::clear(bool value)
+void AcquisitionNode::clear(bool value)
 {
     Q_UNUSED(value)
     d_ptr->slotClear();
 }
 
-void AquisitionNode::start(bool value)
+void AcquisitionNode::start(bool value)
 {
     Q_UNUSED(value)
 
     d_ptr->slotStart();
 }
 
-void AquisitionNode::stop(bool value)
+void AcquisitionNode::stop(bool value)
 {
     Q_UNUSED(value)
 
     d_ptr->slotStop();
 }
 
-#include <aquisitionnode.moc>
+#include <liveacquisitionnode.moc>

@@ -1,7 +1,5 @@
 #include "curvechartnode.h"
 
-#include "widgets/aquisition.h"
-
 #include "widgets/curvechart.h"
 
 #include "widgets/charttype.h"

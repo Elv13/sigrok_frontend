@@ -1,4 +1,4 @@
-#include "aquisitionmodel.h"
+#include "acquisitionmodel.h"
 
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
@@ -28,7 +28,7 @@ struct Row {
     QVariant commonRole(int role) const;
 };
 
-class AquisitionModelPrivate
+class AcquisitionModelPrivate
 {
 public:
     enum Column {
@@ -43,24 +43,24 @@ public:
         STOPPING,
         STARTING,
     };
-    Q_ENUMS(AquisitionModelPrivate::Action)
+    Q_ENUMS(AcquisitionModelPrivate::Action)
 
     QVector<Row*> m_lRows;
     Row* m_pLastValue {nullptr};
-    AquisitionModel::State m_State {AquisitionModel::State::STOPPED};
-    AquisitionModel::Mode m_Mode {AquisitionModel::Mode::UNTHROTTLED};
+    AcquisitionModel::State m_State {AcquisitionModel::State::STOPPED};
+    AcquisitionModel::Mode m_Mode {AcquisitionModel::Mode::UNTHROTTLED};
     std::shared_ptr<sigrok::HardwareDevice> m_pDev;
     std::shared_ptr<sigrok::Session> m_pSess;
     std::shared_ptr<sigrok::Context> m_pContext;
 
-    void initialize(AquisitionModel* self);
+    void initialize(AcquisitionModel* self);
 
     void performAction(Action a);
 
-    AquisitionModel* q_ptr;
+    AcquisitionModel* q_ptr;
 };
 
-void AquisitionModelPrivate::initialize(AquisitionModel* self)
+void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
 {
 
     auto analog_datafeed_callback = [self,this](
@@ -82,7 +82,7 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
             performAction(Action::NEW_SAMPLE);
 
             switch (m_Mode) {
-                case AquisitionModel::Mode::UNTHROTTLED:
+                case AcquisitionModel::Mode::UNTHROTTLED:
                     self->beginInsertRows({}, m_lRows.size(), m_lRows.size());
                     m_lRows << new Row {
                         m_lRows.size(),
@@ -99,7 +99,7 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
                     };
                     self->endInsertRows();
                     break;
-                case AquisitionModel::Mode::MANUAL:
+                case AcquisitionModel::Mode::MANUAL:
                     m_pLastValue = new Row { //FIXME leak like hell
                         m_lRows.size(),
                         0,
@@ -159,31 +159,31 @@ void AquisitionModelPrivate::initialize(AquisitionModel* self)
     m_pSess->set_stopped_callback(stopped_callback);
 }
 
-AquisitionModel::AquisitionModel(SigrokDevice* dev) :
-    QAbstractTableModel(nullptr), d_ptr(new AquisitionModelPrivate())
+AcquisitionModel::AcquisitionModel(SigrokDevice* dev) :
+    QAbstractTableModel(nullptr), d_ptr(new AcquisitionModelPrivate())
 {
     d_ptr->q_ptr = this;
     d_ptr->m_pDev = dev->native();
     d_ptr->m_pContext = DeviceModel::instance()->context();;
 }
 
-AquisitionModel::~AquisitionModel()
+AcquisitionModel::~AcquisitionModel()
 {
     delete d_ptr;
 }
 
-void AquisitionModel::setMode(Mode m)
+void AcquisitionModel::setMode(Mode m)
 {
     d_ptr->m_Mode = m;
 }
 
 
-int AquisitionModel::channelCount() const
+int AcquisitionModel::channelCount() const
 {
     return d_ptr->m_lRows.size() ? d_ptr->m_lRows.last()->m_lChans.size() : 0;
 }
 
-QList<float> AquisitionModel::currentValues() const
+QList<float> AcquisitionModel::currentValues() const
 {
     if (!d_ptr->m_lRows.size()) return {};
 
@@ -200,26 +200,26 @@ QList<float> AquisitionModel::currentValues() const
 QVariant Row::commonRole(int role) const
 {
     switch(role) {
-        case (int) AquisitionModel::Role::IS_CHANNEL:
+        case (int) AcquisitionModel::Role::IS_CHANNEL:
             return false;
-        case (int) AquisitionModel::Role::CHANNEL_NAME:
+        case (int) AcquisitionModel::Role::CHANNEL_NAME:
             return QString();
-        case (int) AquisitionModel::Role::CHANNEL_ENABLED:
+        case (int) AcquisitionModel::Role::CHANNEL_ENABLED:
             return QString();
-        case (int) AquisitionModel::Role::UNIT:
+        case (int) AcquisitionModel::Role::UNIT:
             return QString();
-        case (int) AquisitionModel::Role::UNIT_NAME:
+        case (int) AcquisitionModel::Role::UNIT_NAME:
             return QString();
-        case (int) AquisitionModel::Role::QUANTITY:
+        case (int) AcquisitionModel::Role::QUANTITY:
             return QString();
-        case (int) AquisitionModel::Role::QUANTITY_NAME:
+        case (int) AcquisitionModel::Role::QUANTITY_NAME:
             return QString();
     };
 
     return {};
 }
 
-QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
+QVariant AcquisitionModel::data(const QModelIndex& idx, int role) const
 {
     if (!idx.isValid()) return {};
 
@@ -231,18 +231,18 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
     Q_ASSERT(r);
 
     switch (idx.column()) {
-        case AquisitionModelPrivate::Column::ID:
+        case AcquisitionModelPrivate::Column::ID:
 
             switch(role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
                     return r->m_Id.isValid() ? r->m_Id :idx.row();
-                case (int) AquisitionModel::Role::U_TIMESTAMP:
+                case (int) AcquisitionModel::Role::U_TIMESTAMP:
                     return r->m_Epoch;
             };
             return r->commonRole(role);
 
-        case AquisitionModelPrivate::Column::CHANS:
+        case AcquisitionModelPrivate::Column::CHANS:
 
             switch(role) {
                 case Qt::DisplayRole:
@@ -250,17 +250,17 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
                     if (!r->m_lChans.isEmpty())
                         return r->m_lChans[0]->m_AnalogValue;
                     break;
-                case (int) AquisitionModel::Role::IS_CHANNEL:
+                case (int) AcquisitionModel::Role::IS_CHANNEL:
                     return true;
-                case (int) AquisitionModel::Role::CHANNEL_ENABLED:
+                case (int) AcquisitionModel::Role::CHANNEL_ENABLED:
                     return true;
-                case (int) AquisitionModel::Role::UNIT:
-                case (int) AquisitionModel::Role::UNIT_NAME:
+                case (int) AcquisitionModel::Role::UNIT:
+                case (int) AcquisitionModel::Role::UNIT_NAME:
                     return r->m_Unit;
-                case (int) AquisitionModel::Role::QUANTITY:
-                case (int) AquisitionModel::Role::QUANTITY_NAME:
+                case (int) AcquisitionModel::Role::QUANTITY:
+                case (int) AcquisitionModel::Role::QUANTITY_NAME:
                     return r->m_Quantity;
-                case (int) AquisitionModel::Role::U_TIMESTAMP:
+                case (int) AcquisitionModel::Role::U_TIMESTAMP:
                     return r->m_Epoch;
             };
     }
@@ -268,7 +268,7 @@ QVariant AquisitionModel::data(const QModelIndex& idx, int role) const
     return {};
 }
 
-bool AquisitionModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool AcquisitionModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid())
         return false;
@@ -285,24 +285,24 @@ bool AquisitionModel::setData(const QModelIndex &index, const QVariant &value, i
     return false;
 }
 
-int AquisitionModel::rowCount(const QModelIndex& parent) const
+int AcquisitionModel::rowCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : d_ptr->m_lRows.size();
 }
 
-int AquisitionModel::columnCount(const QModelIndex& parent) const
+int AcquisitionModel::columnCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : 2;
 }
 
-QVariant AquisitionModel::headerData(int sec, Qt::Orientation ori, int role) const
+QVariant AcquisitionModel::headerData(int sec, Qt::Orientation ori, int role) const
 {
     if (ori == Qt::Horizontal) {
         if (role == Qt::DisplayRole) {
             switch(sec) {
-                case AquisitionModelPrivate::Column::ID:
+                case AcquisitionModelPrivate::Column::ID:
                     return QStringLiteral("ID");
-                case AquisitionModelPrivate::Column::CHANS:
+                case AcquisitionModelPrivate::Column::CHANS:
                     return QStringLiteral("Channel 1");
             }
         }
@@ -311,7 +311,7 @@ QVariant AquisitionModel::headerData(int sec, Qt::Orientation ori, int role) con
     return {};
 }
 
-void AquisitionModel::start()
+void AcquisitionModel::start()
 {
 //     if (!(d_ptr->m_pSess && d_ptr->m_pSess->is_running()))
 //         return;
@@ -323,7 +323,7 @@ void AquisitionModel::start()
         d_ptr->m_pSess->add_device(d_ptr->m_pDev);
         d_ptr->m_pDev->open();
         d_ptr->m_pSess->start();
-        d_ptr->performAction(AquisitionModelPrivate::Action::STARTING);
+        d_ptr->performAction(AcquisitionModelPrivate::Action::STARTING);
     }
     catch (const sigrok::Error& e) {
         qWarning() << "Starting device failed because:" << e.what();
@@ -331,33 +331,33 @@ void AquisitionModel::start()
 
 }
 
-void AquisitionModel::stop()
+void AcquisitionModel::stop()
 {
     if (!(d_ptr->m_pSess && d_ptr->m_pSess->is_running()))
         return;
 
-    d_ptr->performAction(AquisitionModelPrivate::Action::STOPPING);
+    d_ptr->performAction(AcquisitionModelPrivate::Action::STOPPING);
 
     d_ptr->m_pSess->stop();
     d_ptr->m_pDev->close();
 }
 
-void AquisitionModel::clear()
+void AcquisitionModel::clear()
 {
     beginResetModel();
     d_ptr->m_lRows.clear(); //TODO leak
     endResetModel();
 }
 
-bool AquisitionModel::addLastSample()
+bool AcquisitionModel::addLastSample()
 {
-    if (d_ptr->m_Mode != AquisitionModel::Mode::MANUAL || !d_ptr->m_pLastValue)
+    if (d_ptr->m_Mode != AcquisitionModel::Mode::MANUAL || !d_ptr->m_pLastValue)
         return false;
 
     if (d_ptr->m_pLastValue
       && (!d_ptr->m_lRows.isEmpty())
       && d_ptr->m_pLastValue == d_ptr->m_lRows.last()) {
-        d_ptr->performAction(AquisitionModelPrivate::Action::MISSED);
+        d_ptr->performAction(AcquisitionModelPrivate::Action::MISSED);
         return false;
     }
 
@@ -368,12 +368,12 @@ bool AquisitionModel::addLastSample()
     return true;
 }
 
-void AquisitionModelPrivate::performAction(Action a)
+void AcquisitionModelPrivate::performAction(Action a)
 {
-    typedef AquisitionModel::State S;
+    typedef AcquisitionModel::State S;
 
     // The idea is to have a deterministic state
-    constexpr static const AquisitionModel::State matrix[6][5] = {
+    constexpr static const AcquisitionModel::State matrix[6][5] = {
         /*              NEW_SAMPLE   MISSED      ERROR     STOPPING  STARTING */
         /*STOPPED */ { S::ERROR   , S::ERROR  , S::ERROR , S::STOPPED, S::INIT },
         /*INIT    */ { S::STARTED , S::ERROR  , S::ERROR , S::STOPPED, S::ERROR},
@@ -391,12 +391,12 @@ void AquisitionModelPrivate::performAction(Action a)
     }
 }
 
-AquisitionModel::State AquisitionModel::state() const
+AcquisitionModel::State AcquisitionModel::state() const
 {
     return d_ptr->m_State;
 }
 
-QDateTime AquisitionModel::lastSampleDateTime() const
+QDateTime AcquisitionModel::lastSampleDateTime() const
 {
     if (d_ptr->m_lRows.isEmpty())
         return {};

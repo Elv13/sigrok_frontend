@@ -44,7 +44,7 @@ SET(libnodes_SRCS
     lcdmeternode.cpp
     remoteaction.cpp
     deduplicatenode.cpp
-    manualaquisitionnode.cpp
+    manualacquisitionnode.cpp
     sequencenode.cpp
     remote/remotetable.cpp
     remote/remotemeter.cpp
@@ -54,7 +54,7 @@ SET(libnodes_SRCS
 if(NOT DISABLE_SIGROK)
     SET(libnodes_SRCS
         ${libnodes_SRCS}
-        aquisitionnode.cpp #FIXME is doesn't have to be there
+        liveacquisitionnode.cpp #FIXME is doesn't have to be there
         devicelistnode.cpp
     )
 endif()

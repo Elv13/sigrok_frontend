@@ -29,7 +29,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${Qt5Core_INCLUDES})
 
 SET(libsigrokd_SRCS
     devicemodel.cpp
-    aquisitionmodel.cpp
+    acquisitionmodel.cpp
     sigrokdevice.cpp
 )
 

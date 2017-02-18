@@ -5,17 +5,17 @@
 
 class QPushButton;
 class QLabel;
-class AquisitionModel;
+class AcquisitionModel;
 
-class Aquisition : public QWidget
+class Acquisition : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Aquisition(bool showAquired = true, QWidget* parent = nullptr);
+    explicit Acquisition(bool showAcquired = true, QWidget* parent = nullptr);
 
     void setShowAcquire(bool v);
 
-    virtual ~Aquisition();
+    virtual ~Acquisition();
 
     void setStatus(const QString& st);
     void setCount(int count);
@@ -25,14 +25,14 @@ public Q_SLOTS:
     void slotStarted();
     void slotStopped();
     void slotCleared();
-    void slotAquire();
+    void slotAcquire();
 
 Q_SIGNALS:
     void started();
     void stopped();
     void cleared();
-    void aquired();
-    void showAquire(bool);
+    void acquired();
+    void showAcquire(bool);
 
 private:
     QPushButton* m_pAcqB;

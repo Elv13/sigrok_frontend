@@ -31,7 +31,7 @@ include(../cmake/extrawarnings.cmake)
 SET(libnodewidgets_SRCS
     statusbar.cpp
     current.cpp
-    aquisition.cpp
+    acquisition.cpp
     devicelist.cpp
 #     charttype.cpp
     categorizedtree.cpp
@@ -70,7 +70,7 @@ QT5_WRAP_UI(libnodewidgets_SRCS
     rangeselection.ui
     range.ui
     current.ui
-    aquisition.ui
+    acquisition.ui
     lcdmeter.ui
     controls.ui
     controlschooser.ui

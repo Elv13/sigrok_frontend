@@ -1,7 +1,5 @@
 #include "tablenode.h"
 
-#include "widgets/aquisition.h"
-
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QTableView>
 

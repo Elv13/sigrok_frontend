@@ -12,7 +12,7 @@ class ChronometerProxyPrivate;
  *
  *  * live data sources
  *  * events logging
- *  * data aquisition
+ *  * data acquisition
  *
  *TODO also compute the mean / rate over the last `n` samples.
  */
