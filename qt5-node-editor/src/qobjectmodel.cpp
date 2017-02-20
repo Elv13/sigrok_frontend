@@ -173,7 +173,6 @@ bool QObjectModel::setData(const QModelIndex &index, const QVariant &value, int 
     if (!value.canConvert(item->m_pProp->metaType))
         return false;
 
-
     item->m_pObject->setProperty(item->m_pProp->name, value);
     return true;
 }

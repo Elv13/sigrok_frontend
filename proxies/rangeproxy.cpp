@@ -366,13 +366,16 @@ void RangeProxyPrivate::slotLayoutChanged()
     if (!delta) return;
 
     if (m_lRows.size()-1 > rc) {
-        for(int i=rc; i < m_lRows.size(); i++) {
+        const int target = m_lRows.size();
+        for(int i=rc; i < target; i++) {
             delete m_lRows[rc];
             m_lRows.remove(rc);
         }
     }
 
-    slotRowsAboutToBeInserted({}, m_lRows.size(), m_lRows.size() + delta - 1);
+    if (delta > 0)
+        slotRowsAboutToBeInserted({}, m_lRows.size(), m_lRows.size() + delta - 1);
+
     Q_ASSERT(m_lRows.size() == rc);
 }
 

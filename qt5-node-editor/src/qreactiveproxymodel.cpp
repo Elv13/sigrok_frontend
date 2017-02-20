@@ -35,12 +35,15 @@ private:
 
 struct ConnectionHolder
 {
+    explicit ConnectionHolder(int i) : index(i) {}
     int index;
+    bool isPointer {false};
+    int pointerType {};
 
-    QPersistentModelIndex source;
-    QPersistentModelIndex destination;
-    void* sourceIP;
-    void* destinationIP;
+    QPersistentModelIndex source {};
+    QPersistentModelIndex destination {};
+    void* sourceIP {Q_NULLPTR};
+    void* destinationIP {Q_NULLPTR};
 
     bool isValid() const {
         return source.isValid() && destination.isValid();
@@ -48,6 +51,30 @@ struct ConnectionHolder
 
     bool isUsed() const {
         return source.isValid() || destination.isValid();
+    }
+
+    // When disconnecting, then nullptr have to be set on the sink. For that,
+    // we need to keep track of pointer types
+    void detectPointer() {
+        if (isPointer || !isUsed())
+            return;
+
+        const auto v1 = source     .data(Qt::EditRole);
+        const auto v2 = destination.data(Qt::EditRole);
+
+
+        if (QByteArray(v1.typeName()).right(1) == QChar('*')) {
+            isPointer = true;
+            pointerType = v1.userType();
+            return;
+        }
+
+        if (QByteArray(v2.typeName()).right(1) == QChar('*')) {
+            isPointer = true;
+            pointerType = v2.userType();
+            return;
+        }
+
     }
 };
 
@@ -74,6 +101,7 @@ public:
     void clear();
     bool synchronize(const QModelIndex& source, const QModelIndex& destination) const;
     ConnectionHolder* newConnection();
+    void cleanPointers(const QModelIndex& destination, ConnectionHolder* conn);
 
     void notifyConnect(const QModelIndex& source, const QModelIndex& destination) const;
     void notifyDisconnect(const QModelIndex& source, const QModelIndex& destination) const;
@@ -260,7 +288,7 @@ ConnectionHolder* QReactiveProxyModelPrivate::newConnection()
     if (m_lConnections.isEmpty() || m_lConnections.last()->isUsed()) {
         const int id = m_lConnections.size();
 
-        auto conn = new ConnectionHolder { id, {}, {}, {}, {}, };
+        auto conn = new ConnectionHolder(id);
 
         // Register the connection
         //m_pConnectionModel->beginInsertRows({}, id, id); //FIXME conflict with rowCount
@@ -303,6 +331,11 @@ bool QReactiveProxyModel::connectIndices(const QModelIndex& srcIdx, const QModel
     if (destIdx.internalPointer())
         d_ptr->m_hDirectMapping[ destIdx.internalPointer() ] = conn; //FIXME this limits the number of connections to 1
 
+    // Detect if the connection is a pointer type. This is necessary as when
+    // the disconnection is made, the sink has to be set to nullptr or it will
+    // crash sooner or later.
+    conn->detectPointer();
+
     // Sync the current source value into the sink
     d_ptr->synchronize(srcIdx, destIdx);
 
@@ -331,6 +364,17 @@ QList<QModelIndex> QReactiveProxyModel::receiveFrom(const QModelIndex& destinati
 }
 
 
+void QReactiveProxyModelPrivate::
+cleanPointers(const QModelIndex& oldDest, ConnectionHolder* conn)
+{
+    //FIXME only supports Qt::EditRole
+    if (!conn->isPointer)
+        return;
+
+    QVariant nullVar(conn->pointerType, Q_NULLPTR);
+    q_ptr->setData(oldDest, nullVar, Qt::EditRole);
+}
+
 bool ConnectedIndicesModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     Q_ASSERT((!index.isValid()) || index.model() == this); //TODO remove
@@ -356,6 +400,7 @@ bool ConnectedIndicesModel::setData(const QModelIndex &index, const QVariant &va
     const auto conn = d_ptr->m_lConnections[index.row()];
 
     const bool wasValid = conn->isValid();
+    const auto oldDest  = conn->destination;
 
     switch (role) {
         case QReactiveProxyModel::ConnectionsRoles::SOURCE_INDEX: // also DEST
@@ -367,13 +412,17 @@ bool ConnectedIndicesModel::setData(const QModelIndex &index, const QVariant &va
                     Q_EMIT d_ptr->q_ptr->disconnected(conn->source, conn->destination);
 
                 conn->source = i;
+                conn->detectPointer();
 
                 if (i.isValid()) {
                     conn->sourceIP = i.internalPointer();
                     d_ptr->m_hDirectMapping[i.internalPointer()] = conn;
                 }
-                else
+                else {
+                    if (wasValid)
+                        d_ptr->cleanPointers(oldDest, conn);
                     conn->sourceIP = nullptr;
+                }
                 d_ptr->synchronize(conn->source, conn->destination);
 
                 if (conn->isValid())
@@ -386,13 +435,17 @@ bool ConnectedIndicesModel::setData(const QModelIndex &index, const QVariant &va
                     Q_EMIT d_ptr->q_ptr->disconnected(conn->source, conn->destination);
 
                 conn->destination = i;
+                conn->detectPointer();
 
                 if (i.isValid()) {
                     conn->destinationIP = i.internalPointer();
                     d_ptr->m_hDirectMapping[i.internalPointer()] = conn;
                 }
-                else
+                else {
+                    if (wasValid)
+                        d_ptr->cleanPointers(oldDest, conn);
                     conn->destinationIP = nullptr;
+                }
                 d_ptr->synchronize(conn->source, conn->destination);
 
                 if (conn->isValid())
@@ -536,7 +589,7 @@ bool QReactiveProxyModelPrivate::synchronize(const QModelIndex& s, const QModelI
     for (int role : qAsConst(*roles)) {
         const auto md = q_ptr->mimeData({s});
 
-        q_ptr->canDropMimeData(
+        q_ptr->canDropMimeData( //FIXME should this be an IF?
             md, Qt::LinkAction, d.row(), d.column(), d.parent()
         );
         q_ptr->setData(d, s.data(role) , role);
@@ -599,6 +652,8 @@ void QReactiveProxyModelPrivate::slotRemoveItem(const QModelIndex &parent, int f
         for (int j=0 ; j < cc; j++) {
             const auto idx = q_ptr->index(i, j, parent);
             if (auto conn = m_hDirectMapping[idx.internalPointer()]) {
+                const auto oldDest = conn->destination;
+
                 conn->source        = QModelIndex();
                 conn->destination   = QModelIndex();
                 conn->sourceIP      = Q_NULLPTR;
@@ -608,6 +663,10 @@ void QReactiveProxyModelPrivate::slotRemoveItem(const QModelIndex &parent, int f
                     m_pConnectionModel->index(conn->index, 0),
                     m_pConnectionModel->index(conn->index, 2)
                 );
+
+                // Prevent crash on (soon to be?) invalid pointer
+                if (oldDest.isValid())
+                    cleanPointers(oldDest, conn);
             }
 
             if (const int rc = q_ptr->rowCount(idx))
