@@ -29,16 +29,6 @@ TailNode::~TailNode()
     delete d_ptr;
 }
 
-QString TailNode::title() const
-{
-    return QStringLiteral("Tail filter");
-}
-
-QString TailNode::id() const
-{
-    return QStringLiteral("tail_node");
-}
-
 void TailNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -93,19 +83,6 @@ void TailNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractIt
     Q_UNUSED(old)
 
     m_Proxy.setSourceModel(newModel);
-}
-
-QStringList TailNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("slice"),
-        QStringLiteral("frame"),
-        QStringLiteral("wave"),
-        QStringLiteral("still"),
-        QStringLiteral("window"),
-    };
-
-    return l;
 }
 
 #include <tailnode.moc>

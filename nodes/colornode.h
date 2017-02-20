@@ -11,15 +11,12 @@ class Q_DECL_EXPORT ColorNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("color_node", "Color", "", /*Tags:*/ "range", "alerts")
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
     Q_INVOKABLE explicit ColorNode(AbstractSession* sess);
     virtual ~ColorNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual QWidget* widget() const override;
 
@@ -27,8 +24,6 @@ public:
     virtual void read(const QJsonObject &parent) override;
 
     QAbstractItemModel* filteredModel() const;
-
-    virtual QStringList searchTags() const override;
 
 Q_SIGNALS:
     void test2Changed(bool);

@@ -24,16 +24,6 @@ RemoteControls::~RemoteControls()
     delete d_ptr;
 }
 
-QString RemoteControls::title() const
-{
-    return QStringLiteral("Control widgets");
-}
-
-QString RemoteControls::id() const
-{
-    return QStringLiteral("remotecontrols_node");
-}
-
 void RemoteControls::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);

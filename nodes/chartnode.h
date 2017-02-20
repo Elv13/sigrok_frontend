@@ -10,18 +10,15 @@ class Q_DECL_EXPORT ChartNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("chart_node", "Chart", "", /*Tags:*/ "graph")
 public:
     Q_INVOKABLE explicit ChartNode(AbstractSession* sess);
     virtual ~ChartNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 
-    virtual QStringList searchTags() const override;
 
 private:
     ChartNodePrivate* d_ptr;

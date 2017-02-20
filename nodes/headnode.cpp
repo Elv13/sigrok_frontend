@@ -29,16 +29,6 @@ HeadNode::~HeadNode()
     delete d_ptr;
 }
 
-QString HeadNode::title() const
-{
-    return QStringLiteral("Head filter");
-}
-
-QString HeadNode::id() const
-{
-    return QStringLiteral("head_node");
-}
-
 void HeadNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);

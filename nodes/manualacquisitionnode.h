@@ -20,6 +20,11 @@ class Q_DECL_EXPORT ManualAcquisitionNode : public AcquisitionNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("manualacquisition_node", "Manual acquisition", "", /*Tags:*/
+        "hardware",
+        "sample",
+        "sampling"
+    )
 public:
     Q_PROPERTY(bool acquire WRITE acquireSample USER true)
     Q_PROPERTY(QString acquireAs WRITE acquireSampleAs USER true)
@@ -30,17 +35,11 @@ public:
 
     virtual ~ManualAcquisitionNode();
 
-    virtual QString title() const override;
-
-    virtual QString id() const override;
-
     virtual void write(QJsonObject &parent) const override;
 
     virtual QWidget* widget() const override;
 
     virtual void setDevice(SigrokDevice* dev) override;
-
-    virtual QStringList searchTags() const override;
 
 public Q_SLOTS:
     void acquireSample(bool=false);

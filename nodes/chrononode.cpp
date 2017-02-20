@@ -37,16 +37,6 @@ QAbstractItemModel* ChronoNode::filteredModel() const
     return &d_ptr->m_Proxy;
 }
 
-QString ChronoNode::title() const
-{
-    return QStringLiteral("Chronometer");
-}
-
-QString ChronoNode::id() const
-{
-    return QStringLiteral("chrono_node");
-}
-
 void ChronoNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -137,21 +127,6 @@ bool ChronoNode::hasTimestampColumn() const
 bool ChronoNode::hasDateTimeColumn() const
 {
     return d_ptr->m_Proxy.extraColumns() & ChronometerProxy::ExtraColumns::DATE_TIME;
-}
-
-QStringList ChronoNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("counter"),
-        QStringLiteral("delay"),
-        QStringLiteral("latency"),
-        QStringLiteral("duration"),
-        QStringLiteral("time"),
-        QStringLiteral("microseconds"),
-        QStringLiteral("milliseconds"),
-    };
-
-    return l;
 }
 
 #include <chrononode.moc>

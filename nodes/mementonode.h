@@ -10,6 +10,13 @@ class Q_DECL_EXPORT MementoNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("memento_node", "Snapshot", "", /*Tags:*/
+        "memento",
+        "save",
+        "buffer",
+        "copy",
+        "backup",
+    )
 public:
     Q_PROPERTY(QAbstractItemModel* selectedMemento READ selectedMemento NOTIFY selectedMementoChanged USER true)
     Q_PROPERTY(QAbstractItemModel* lastestMemento READ lastestMemento NOTIFY mementoAdded USER true)
@@ -18,18 +25,13 @@ public:
     Q_INVOKABLE explicit MementoNode(AbstractSession* sess);
     virtual ~MementoNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
     QAbstractItemModel* selectedMemento() const;
     QAbstractItemModel* lastestMemento() const;
-
-    virtual QStringList searchTags() const override;
 
     //Mutator
     void takeMemento(bool _);

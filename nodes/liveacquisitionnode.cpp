@@ -49,16 +49,6 @@ AcquisitionNode::~AcquisitionNode()
     delete d_ptr;
 }
 
-QString AcquisitionNode::title() const
-{
-    return d_ptr->m_Title;
-}
-
-QString AcquisitionNode::id() const
-{
-    return QStringLiteral("acquisition_node");
-}
-
 void AcquisitionNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -289,17 +279,6 @@ void AcquisitionNode::stop(bool value)
     Q_UNUSED(value)
 
     d_ptr->slotStop();
-}
-
-QStringList AcquisitionNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("hardware"),
-        QStringLiteral("sampling"),
-        QStringLiteral("sample"),
-    };
-
-    return l;
 }
 
 #include <liveacquisitionnode.moc>

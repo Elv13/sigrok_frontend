@@ -11,15 +11,12 @@ class Q_DECL_EXPORT ColumnNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("column_node", "Column", "", /*Tags:*/ "")
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
     Q_INVOKABLE explicit ColumnNode(AbstractSession* sess);
     virtual ~ColumnNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;

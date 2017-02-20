@@ -59,11 +59,6 @@ ColumnNode::~ColumnNode()
     delete d_ptr;
 }
 
-QString ColumnNode::title() const
-{
-    return QStringLiteral("Column");
-}
-
 void ColumnNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -74,11 +69,6 @@ void ColumnNode::write(QJsonObject &parent) const
 void ColumnNode::read(const QJsonObject &parent)
 {
     d_ptr->m_Serializer.read(parent);
-}
-
-QString ColumnNode::id() const
-{
-    return QStringLiteral("column_node");
 }
 
 QWidget* ColumnNode::widget() const

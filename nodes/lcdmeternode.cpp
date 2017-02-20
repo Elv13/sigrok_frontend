@@ -62,16 +62,6 @@ LCDMeterNode::~LCDMeterNode()
     delete d_ptr;
 }
 
-QString LCDMeterNode::title() const
-{
-    return QStringLiteral("LCD Meter");
-}
-
-QString LCDMeterNode::id() const
-{
-    return QStringLiteral("lcdmeter_node");
-}
-
 void LCDMeterNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -128,18 +118,6 @@ QString LCDMeterNode::remoteModelName() const
 QString LCDMeterNode::remoteWidgetType() const
 {
     return id();
-}
-
-QStringList LCDMeterNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("display"),
-        QStringLiteral("view"),
-        QStringLiteral("lcd"),
-        QStringLiteral("segments"),
-    };
-
-    return l;
 }
 
 #include "lcdmeternode.moc"

@@ -12,15 +12,12 @@ class Q_DECL_EXPORT ProxyNode : public AbstractNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("proxy_node", "Proxy node", "", /*Tags:*/ "")
 public:
     Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged USER true)
 
     Q_INVOKABLE explicit ProxyNode(AbstractSession* sess);
     virtual ~ProxyNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual QWidget* widget() const override;
 

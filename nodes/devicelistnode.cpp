@@ -19,16 +19,6 @@ DeviceListNode::~DeviceListNode()
     delete d_ptr;
 }
 
-QString DeviceListNode::title() const
-{
-    return QStringLiteral("Local device list");
-}
-
-QString DeviceListNode::id() const
-{
-    return QStringLiteral("devicelist_node");
-}
-
 void DeviceListNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);

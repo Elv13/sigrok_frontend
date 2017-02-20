@@ -45,11 +45,6 @@ SequenceNode::~SequenceNode()
     delete d_ptr;
 }
 
-QString SequenceNode::title() const
-{
-    return QStringLiteral("Sequence");
-}
-
 QWidget* SequenceNode::widget() const
 {
     if (!d_ptr->m_pWidget) {
@@ -60,11 +55,6 @@ QWidget* SequenceNode::widget() const
     }
 
     return d_ptr->m_pWidget;
-}
-
-QString SequenceNode::id() const
-{
-    return QStringLiteral("sequence_node");
 }
 
 void SequenceNode::forward(bool)
@@ -230,20 +220,6 @@ void SequenceNodePrivate::slotCurrentChanged(const QModelIndex& idx)
 {
     if (idx.row() != m_Current)
        q_ptr->setCurrent(idx.row());
-}
-
-QStringList SequenceNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("automation"),
-        QStringLiteral("set"),
-        QStringLiteral("loop"),
-        QStringLiteral("names"),
-        QStringLiteral("tags"),
-        QStringLiteral("label"),
-    };
-
-    return l;
 }
 
 #include <sequencenode.moc>

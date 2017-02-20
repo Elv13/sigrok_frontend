@@ -10,6 +10,15 @@ class Q_DECL_EXPORT SequenceNode : public AbstractNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("sequence_node", "Sequence", "", /*Tags:*/
+        "automation",
+        "set",
+        "loop",
+        "names",
+        "tags",
+        "label"
+    )
+
 public:
     Q_PROPERTY(bool forward WRITE forward USER true)
     Q_PROPERTY(bool backward WRITE backward USER true)
@@ -24,9 +33,7 @@ public:
     Q_INVOKABLE explicit SequenceNode(AbstractSession* sess);
     virtual ~SequenceNode();
 
-    virtual QString  title () const override;
     virtual QWidget* widget() const override;
-    virtual QString  id    () const override;
 
     void forward(bool);
     void backward(bool);
@@ -45,8 +52,6 @@ public:
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
-
-    virtual QStringList searchTags() const override;
 
 Q_SIGNALS:
     void currentIndexChanged(int);

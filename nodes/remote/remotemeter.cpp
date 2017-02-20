@@ -45,16 +45,6 @@ RemoteMeter::~RemoteMeter()
     delete d_ptr;
 }
 
-QString RemoteMeter::title() const
-{
-    return QStringLiteral("Remote meter");
-}
-
-QString RemoteMeter::id() const
-{
-    return QStringLiteral("remotemeter_node");
-}
-
 void RemoteMeter::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);

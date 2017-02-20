@@ -11,13 +11,16 @@ class Q_DECL_EXPORT MeterNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("meter_node", "Meter", "", /*Tags:*/
+        "display",
+        "view",
+        "lcd",
+        "segments",
+        "statistics"
+    )
 public:
     Q_INVOKABLE explicit MeterNode(AbstractSession* sess);
     virtual ~MeterNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
@@ -25,8 +28,6 @@ public:
     virtual QString remoteWidgetType() const override;
 
     virtual QWidget* widget() const override;
-
-    virtual QStringList searchTags() const override;
 
 private:
     MeterNodePrivate* d_ptr;

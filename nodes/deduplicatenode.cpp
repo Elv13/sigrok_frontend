@@ -46,11 +46,6 @@ DeduplicateNode::~DeduplicateNode()
     delete d_ptr;
 }
 
-QString DeduplicateNode::title() const
-{
-    return QStringLiteral("Squash");
-}
-
 void DeduplicateNode::read(const QJsonObject &parent)
 {
     AbstractNode::read(parent);
@@ -93,12 +88,6 @@ void DeduplicateNode::setThreshold(qreal v)
     Q_EMIT thresholdChanged(v);
 }
 
-
-QString DeduplicateNode::id() const
-{
-    return QStringLiteral("deduplicate_node");
-}
-
 QWidget* DeduplicateNode::widget() const
 {
     if (!d_ptr->m_pDeduplicate) {
@@ -130,17 +119,6 @@ void DeduplicateNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbs
         m_pDeduplicate->setModel(newModel);
 
     m_pFilteredModel->setSourceModel(newModel);
-}
-
-QStringList DeduplicateNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("squash"),
-        QStringLiteral("merge"),
-        QStringLiteral("deduplicate"),
-    };
-
-    return l;
 }
 
 #include <deduplicatenode.moc>

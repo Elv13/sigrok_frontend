@@ -42,16 +42,6 @@ TableNode::~TableNode()
     delete d_ptr;
 }
 
-QString TableNode::title() const
-{
-    return QStringLiteral("Table");
-}
-
-QString TableNode::id() const
-{
-    return QStringLiteral("table_node");
-}
-
 void TableNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -102,17 +92,6 @@ QString TableNode::remoteModelName() const
     }
 
     return d_ptr->m_Id;
-}
-
-QStringList TableNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("matrix"),
-        QStringLiteral("spreadsheet"),
-        QStringLiteral("widget"),
-    };
-
-    return l;
 }
 
 #include <tablenode.moc>

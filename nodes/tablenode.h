@@ -10,13 +10,15 @@ class Q_DECL_EXPORT TableNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("table_node", "Table", "", /*Tags:*/
+        "matrix",
+        "spreadsheet",
+        "widget"
+    )
+
 public:
     Q_INVOKABLE explicit TableNode(AbstractSession* sess);
     virtual ~TableNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 
@@ -24,10 +26,6 @@ public:
 
     virtual QString remoteModelName() const override;
     virtual QString remoteWidgetType() const override;
-
-    virtual QStringList searchTags() const override;
-
-//     virtual void connectTo(AbstractNode* other, QAbstractItemModel* model, int col) override;
 
 private:
     TableNodePrivate* d_ptr;

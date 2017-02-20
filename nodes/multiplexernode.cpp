@@ -167,16 +167,6 @@ MultiplexerNode::~MultiplexerNode()
     delete d_ptr;
 }
 
-QString MultiplexerNode::title() const
-{
-    return QStringLiteral("Multiplexer");
-}
-
-QString MultiplexerNode::id() const
-{
-    return QStringLiteral("multiplexer_node");
-}
-
 void MultiplexerNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -214,15 +204,6 @@ bool MultiplexerNode::createSourceSocket(const QString& name)
     d_ptr->m_pModel->endInsertRows();
 
     return true;
-}
-
-QStringList MultiplexerNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("divider"),
-    };
-
-    return l;
 }
 
 #include <multiplexernode.moc>

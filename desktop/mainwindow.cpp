@@ -321,42 +321,41 @@ Session* MainWindow::addSession(const QString& name)
 
     sess->registerInterfaceSerializer(m_pInterfaceSerializer);
 
-    sess->registerType<CurveChartNode>  (QStringLiteral("Chart")          , QStringLiteral("Widgets")   , QStringLiteral("curvedchart_node"), QIcon::fromTheme( QStringLiteral("document-edit")        ));
-    sess->registerType<TableNode>  (QStringLiteral("Table")          , QStringLiteral("Widgets")   , QStringLiteral("table_node"), QIcon::fromTheme( QStringLiteral("configure-shortcuts")  ));
-    sess->registerType<MeterNode>  (QStringLiteral("Meter")          , QStringLiteral("Widgets")   , QStringLiteral("meter_node"), QIcon::fromTheme( QStringLiteral("bookmark-new")         ));
-    sess->registerType<RemoteActionNode>  (QStringLiteral("Controls")          , QStringLiteral("Widgets")   , QStringLiteral("remoteaction_node"), QIcon::fromTheme( QStringLiteral("bookmark-new")         ));
-    sess->registerType<LCDMeterNode>  (QStringLiteral("LCD Meter")      , QStringLiteral("Widgets")   , QStringLiteral("lcdmeter_node"), QIcon::fromTheme( QStringLiteral("bookmark-new")         ));
-    sess->registerType<ColumnNode> (QStringLiteral("Range filter")   , QStringLiteral("Filters")   , QStringLiteral("range_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
-    sess->registerType<ColorNode>  (QStringLiteral("Range Colorizer"), QStringLiteral("Metadata")  , QStringLiteral("color_node"), QIcon::fromTheme( QStringLiteral("colors-chromablue")   ));
-    sess->registerType<ColumnNode> (QStringLiteral("Column filter")  , QStringLiteral("Filters")   , QStringLiteral("column_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
-    sess->registerType<DeduplicateNode> (QStringLiteral("Deduplicate")  , QStringLiteral("Filters")   , QStringLiteral("deduplicate_node"), QIcon::fromTheme( QStringLiteral("view-filter")          ));
-    sess->registerType<AcquisitionNode> (QStringLiteral("Live acquisition") , QStringLiteral("Sources")  , QStringLiteral("acquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
-    sess->registerType<ManualAcquisitionNode> (QStringLiteral("Manual acquisition") , QStringLiteral("Sources")  , QStringLiteral("manualacquisition_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
-    sess->registerType<MementoNode>(QStringLiteral("Memento")         , QStringLiteral("Sources")  , QStringLiteral("memento_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
-    sess->registerType<MultiplexerNode>(QStringLiteral("Multiplexer") , QStringLiteral("Tools")    , QStringLiteral("multiplexer_node"), QIcon::fromTheme( QStringLiteral("edit-copy")          ));
-    sess->registerType<TailNode>   (QStringLiteral("Tail filter")     , QStringLiteral("Filters")  , QStringLiteral("tail_node")  , QIcon::fromTheme( QStringLiteral("kt-add-filters")   ));
-    sess->registerType<HeadNode>   (QStringLiteral("Head filter")     , QStringLiteral("Filters")  , QStringLiteral("head_node") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
-    sess->registerType<CurrentValues>(QStringLiteral("Current Values"), QStringLiteral("Sinks")    , QStringLiteral("currentvalues_node") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
-    sess->registerType<TimerNode>  (QStringLiteral("Timer")           , QStringLiteral("Tools")    , QStringLiteral("timer_node"), QIcon::fromTheme( QStringLiteral("chronometer")          ));
-    sess->registerType<SequenceNode>  (QStringLiteral("Sequence")           , QStringLiteral("Tools")    , QStringLiteral("sequence_node"), QIcon::fromTheme( QStringLiteral("chronometer")          ));
-    sess->registerType<ChronoNode> (QStringLiteral("Chronometer")     , QStringLiteral("Metadata") , QStringLiteral("chrono_node"), QIcon::fromTheme( QStringLiteral("chronometer")        ));
-    sess->registerType<DeviceListNode> (QStringLiteral("Device List")      , QStringLiteral("Sources")  , QStringLiteral("devicelist_node"), QIcon::fromTheme( QStringLiteral("document-open")          ));
-
-    sess->registerType<RemoteTable>(QStringLiteral("Table")         , QStringLiteral("Remote widgets")  , QStringLiteral("remotetable_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
-    sess->registerType<RemoteMeter>(QStringLiteral("Meter")         , QStringLiteral("Remote widgets")  , QStringLiteral("remotemeter_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
-    sess->registerType<RemoteControls>(QStringLiteral("Controls")      , QStringLiteral("Remote widgets")  , QStringLiteral("remotecontrols_node"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")          ));
+    sess->registerType<CurveChartNode>       (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("document-edit")         ));
+    sess->registerType<TableNode>            (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("configure-shortcuts")   ));
+    sess->registerType<MeterNode>            (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("bookmark-new")          ));
+    sess->registerType<RemoteActionNode>     (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("bookmark-new")          ));
+    sess->registerType<LCDMeterNode>         (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("bookmark-new")          ));
+    sess->registerType<ColumnNode>           (QStringLiteral("Filters")       , QIcon::fromTheme( QStringLiteral("view-filter")           ));
+    sess->registerType<ColorNode>            (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("colors-chromablue")     ));
+    sess->registerType<ColumnNode>           (QStringLiteral("Filters")       , QIcon::fromTheme( QStringLiteral("view-filter")           ));
+    sess->registerType<DeduplicateNode>      (QStringLiteral("Filters")       , QIcon::fromTheme( QStringLiteral("view-filter")           ));
+    sess->registerType<AcquisitionNode>      (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
+    sess->registerType<ManualAcquisitionNode>(QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
+    sess->registerType<MementoNode>          (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
+    sess->registerType<MultiplexerNode>      (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("edit-copy")             ));
+    sess->registerType<TailNode>             (QStringLiteral("Filters")       , QIcon::fromTheme( QStringLiteral("kt-add-filters")        ));
+    sess->registerType<HeadNode>             (QStringLiteral("Filters")       , QIcon::fromTheme( QStringLiteral("kt-remove-filters")     ));
+    sess->registerType<CurrentValues>        (QStringLiteral("Sinks")         , QIcon::fromTheme( QStringLiteral("kt-remove-filters")     ));
+    sess->registerType<TimerNode>            (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
+    sess->registerType<SequenceNode>         (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
+    sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
+    sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
+    sess->registerType<RemoteTable>          (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
+    sess->registerType<RemoteMeter>          (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
+    sess->registerType<RemoteControls>       (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
 
     //DUMMY
-    sess->registerType<ColorNode> (QStringLiteral("File")            , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-open")          ));
-    sess->registerType<ColorNode> (QStringLiteral("External device") , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")          )); //allow async memento transfer from other instances
-    sess->registerType<ColorNode> (QStringLiteral("Statistics")      , QStringLiteral("Metadata") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("format-number-percent")        ));
-    sess->registerType<ColorNode> (QStringLiteral("CSV")             , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save")      ));
-    sess->registerType<ColorNode> (QStringLiteral("XLSX")            , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")     ));
-    sess->registerType<ColorNode> (QStringLiteral("ODS")             , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save-all")  ));
-    sess->registerType<ColorNode> (QStringLiteral("PCAP (WireShark)"), QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save-as")   ));
-
-    sess->registerType<ColorNode> (QStringLiteral("Rate watchdog")   , QStringLiteral("Sinks")    , QLatin1String("") , QIcon::fromTheme( QStringLiteral("mail-forward")     ));
-    sess->registerType<ColorNode> (QStringLiteral("Unit filter")     , QStringLiteral("Filters")  , QLatin1String("") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
+//     sess->registerType<ColorNode> (QStringLiteral("File")            , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-open")          ));
+//     sess->registerType<ColorNode> (QStringLiteral("External device") , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")          )); //allow async memento transfer from other instances
+//     sess->registerType<ColorNode> (QStringLiteral("Statistics")      , QStringLiteral("Metadata") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("format-number-percent")        ));
+//     sess->registerType<ColorNode> (QStringLiteral("CSV")             , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save")      ));
+//     sess->registerType<ColorNode> (QStringLiteral("XLSX")            , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")     ));
+//     sess->registerType<ColorNode> (QStringLiteral("ODS")             , QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save-all")  ));
+//     sess->registerType<ColorNode> (QStringLiteral("PCAP (WireShark)"), QStringLiteral("Exporter") , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-save-as")   ));
+//
+//     sess->registerType<ColorNode> (QStringLiteral("Rate watchdog")   , QStringLiteral("Sinks")    , QLatin1String("") , QIcon::fromTheme( QStringLiteral("mail-forward")     ));
+//     sess->registerType<ColorNode> (QStringLiteral("Unit filter")     , QStringLiteral("Filters")  , QLatin1String("") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
 
     return sess;
 }

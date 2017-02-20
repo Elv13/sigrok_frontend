@@ -10,15 +10,14 @@ class RemoteMeter : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("remotemeter_node", "Remote meter", "", /*Tags:*/ "")
+
 public:
 
     Q_INVOKABLE explicit RemoteMeter(AbstractSession* sess);
     virtual ~RemoteMeter();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 

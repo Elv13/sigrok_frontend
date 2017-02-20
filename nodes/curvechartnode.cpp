@@ -51,21 +51,10 @@ CurveChartNode::~CurveChartNode()
     delete d_ptr;
 }
 
-QString CurveChartNode::title() const
-{
-    return QStringLiteral("Chart");
-}
-
-QString CurveChartNode::id() const
-{
-    return QStringLiteral("curvedchart_node");
-}
-
 void CurveChartNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    
 }
 
 QWidget* CurveChartNode::widget() const
@@ -101,15 +90,6 @@ QString CurveChartNode::remoteModelName() const
 QString CurveChartNode::remoteWidgetType() const
 {
     return id();
-}
-
-QStringList CurveChartNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("graph"),
-    };
-
-    return l;
 }
 
 #include <curvechartnode.moc>

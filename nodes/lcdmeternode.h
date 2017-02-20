@@ -11,13 +11,15 @@ class Q_DECL_EXPORT LCDMeterNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("lcdmeter_node", "LCD Meter", "", /*Tags:*/
+        "display",
+        "view",
+        "LCD",
+        "segments"
+    )
 public:
     Q_INVOKABLE explicit LCDMeterNode(AbstractSession* sess);
     virtual ~LCDMeterNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
@@ -26,8 +28,6 @@ public:
     virtual QString remoteModelName() const override;
 
     virtual QWidget* widget() const override;
-
-    virtual QStringList searchTags() const override;
 
 private:
     LCDMeterNodePrivate* d_ptr;

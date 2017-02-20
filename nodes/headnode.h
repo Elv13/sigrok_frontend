@@ -10,6 +10,7 @@ class Q_DECL_EXPORT HeadNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("head_node", "Head filter", "", /*Tags:*/ "")
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
@@ -17,10 +18,7 @@ public:
     Q_INVOKABLE explicit HeadNode(AbstractSession* sess);
     virtual ~HeadNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;

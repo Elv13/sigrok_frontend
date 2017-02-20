@@ -145,16 +145,6 @@ MementoNode::~MementoNode()
     delete d_ptr;
 }
 
-QString MementoNode::title() const
-{
-    return QStringLiteral("Memento");
-}
-
-QString MementoNode::id() const
-{
-    return QStringLiteral("memento_node");
-}
-
 void MementoNode::read(const QJsonObject &parent)
 {
     const auto mementos = parent[QStringLiteral("mementos")].toArray();
@@ -254,19 +244,6 @@ void MementoNodePrivate::slotSelectionChanged()
 {
 
     Q_EMIT q_ptr->selectedMementoChanged(q_ptr->selectedMemento());
-}
-
-QStringList MementoNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("memento"),
-        QStringLiteral("save"),
-        QStringLiteral("buffer"),
-        QStringLiteral("copy"),
-        QStringLiteral("backup"),
-    };
-
-    return l;
 }
 
 #include "mementonode.moc"

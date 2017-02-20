@@ -10,6 +10,14 @@ class Q_DECL_EXPORT TailNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("tail_node", "Tail filter", "d", //Tags:
+        "slice",
+        "frame",
+        "wave",
+        "still",
+        "window"
+    )
+
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
@@ -17,10 +25,7 @@ public:
     Q_INVOKABLE explicit TailNode(AbstractSession* sess);
     virtual ~TailNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
@@ -33,7 +38,6 @@ public:
 
     QAbstractItemModel* filteredModel() const;
 
-    virtual QStringList searchTags() const override;
 
 Q_SIGNALS:
     void filteredModelChanged(); //dummy

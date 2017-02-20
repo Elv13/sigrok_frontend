@@ -25,16 +25,6 @@ RemoteTable::~RemoteTable()
     delete d_ptr;
 }
 
-QString RemoteTable::title() const
-{
-    return QStringLiteral("Remote table");
-}
-
-QString RemoteTable::id() const
-{
-    return QStringLiteral("remotetable_node");
-}
-
 void RemoteTable::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);

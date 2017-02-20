@@ -10,14 +10,12 @@ class Q_DECL_EXPORT MultiplexerNode : public AbstractNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("multiplexer_node", "Multiplexer", "", /*Tags:*/ "divider")
 public:
     Q_INVOKABLE explicit MultiplexerNode(AbstractSession* sess);
     virtual ~MultiplexerNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual Mode mode() const override {return AbstractNode::Mode::MODEL;}
 
@@ -28,7 +26,6 @@ public:
     virtual bool createSinkSocket(const QString& name) override;
     virtual bool createSourceSocket(const QString& name) override;
 
-    virtual QStringList searchTags() const override;
 // Q_SIGNALS:
 //     void modelChangedCopy(QAbstractItemModel* newModel, QAbstractItemModel* old);
 

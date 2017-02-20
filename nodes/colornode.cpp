@@ -74,16 +74,6 @@ ColorNode::~ColorNode()
     delete d_ptr;
 }
 
-QString ColorNode::title() const
-{
-    return QStringLiteral("Color");
-}
-
-QString ColorNode::id() const
-{
-    return QStringLiteral("color_node");
-}
-
 void ColorNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -177,16 +167,6 @@ void ColorNodePrivate::slotRowsInserted(const QModelIndex& parent, int first, in
 void ColorNodePrivate::slotModelReset()
 {
     slotRowsInserted({}, 0, m_pRangeProxy->rowCount());
-}
-
-QStringList ColorNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("range"),
-        QStringLiteral("alerts"),
-    };
-
-    return l;
 }
 
 #include <colornode.moc>

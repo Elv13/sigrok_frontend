@@ -10,17 +10,15 @@ class RemoteControls : public AbstractNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("remotecontrols_node", "Control widgets", "", /*Tags:*/ "")
 public:
 
     Q_INVOKABLE explicit RemoteControls(AbstractSession* sess);
     virtual ~RemoteControls();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
 
     virtual Mode mode() const override {return AbstractNode::Mode::MODEL;}
-
-    virtual QString id() const override;
 
     virtual QAbstractItemModel* sourceModel() const override;
 

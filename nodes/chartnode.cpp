@@ -49,16 +49,6 @@ ChartNode::~ChartNode()
     
 }
 
-QString ChartNode::title() const
-{
-    return "Chart";
-}
-
-QString ChartNode::id() const
-{
-    return QStringLiteral("chart_node");
-}
-
 void ChartNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -75,13 +65,4 @@ void ChartNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractI
 {
     Q_UNUSED(old)
     m_pPlotter->setModel(newModel);
-}
-
-QStringList ChartNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("graph"),
-    };
-
-    return l;
 }

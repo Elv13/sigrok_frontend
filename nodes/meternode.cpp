@@ -54,16 +54,6 @@ MeterNode::~MeterNode()
     
 }
 
-QString MeterNode::title() const
-{
-    return QStringLiteral("Meter");
-}
-
-QString MeterNode::id() const
-{
-    return QStringLiteral("meter_node");
-}
-
 void MeterNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -117,17 +107,5 @@ QString MeterNode::remoteWidgetType() const
     return id();
 }
 
-QStringList MeterNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("display"),
-        QStringLiteral("view"),
-        QStringLiteral("lcd"),
-        QStringLiteral("segments"),
-        QStringLiteral("statistics"),
-    };
-
-    return l;
-}
 
 #include "meternode.moc"

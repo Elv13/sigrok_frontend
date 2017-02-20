@@ -35,7 +35,7 @@ public:
     virtual ~Session();
 
     template<typename T>
-    void registerType(const QString& name, const QString& id, const QString& cat, const QIcon& icon = {});
+    void registerType(const QString& cat, const QIcon& icon = {});
 
     QUrl fileName() const;
     void setFileName(const QUrl& url);
@@ -115,7 +115,7 @@ private:
 Q_DECLARE_METATYPE(Session*)
 
 template<typename T>
-void Session::registerType(const QString& name, const QString& category, const QString& id, const QIcon& icon )
+void Session::registerType(const QString& category, const QIcon& icon )
 {
     // Look for the category
     Category* cat = nullptr;
@@ -136,8 +136,10 @@ void Session::registerType(const QString& name, const QString& category, const Q
         endInsertRows();
     }
 
+    auto md = T::nodeMetaData();
+
     auto mi = new Session::MetaInfo {
-        cat->m_lTypes.size(), T::staticMetaObject, name, icon, {}
+        cat->m_lTypes.size(), T::staticMetaObject, md.title, icon, {}
     };
 
 //     const auto idx = index(m_slCategory.size()-1, 0);
@@ -146,5 +148,5 @@ void Session::registerType(const QString& name, const QString& category, const Q
     cat->m_lTypes << mi;
 //     endInsertRows();
 
-    m_hIdToType[id] = mi;
+    m_hIdToType[md.name] = mi;
 }

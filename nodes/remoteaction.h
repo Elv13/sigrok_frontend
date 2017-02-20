@@ -11,13 +11,11 @@ class Q_DECL_EXPORT RemoteActionNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("remoteaction_node", "Controls", "", /*Tags:*/ "")
+
 public:
     Q_INVOKABLE explicit RemoteActionNode(AbstractSession* sess);
     virtual ~RemoteActionNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 

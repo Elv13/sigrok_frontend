@@ -10,6 +10,16 @@ class Q_DECL_EXPORT ChronoNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("chrono_node", "Chronometer", "", /*Tags:*/
+        "counter",
+        "delay",
+        "latency",
+        "duration",
+        "time",
+        "microseconds",
+        "milliseconds",
+    )
+
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 
@@ -17,10 +27,7 @@ public:
     Q_INVOKABLE explicit ChronoNode(AbstractSession* sess);
     virtual ~ChronoNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
@@ -31,8 +38,6 @@ public:
     bool hasDateTimeColumn () const;
 
     QAbstractItemModel* filteredModel() const;
-
-    virtual QStringList searchTags() const override;
 
 public Q_SLOTS:
     void enableDelta(bool);

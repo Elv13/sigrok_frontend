@@ -10,15 +10,13 @@ class RemoteTable : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("remotetable_node", "Remote table", "", /*Tags:*/ "")
 public:
 
     Q_INVOKABLE explicit RemoteTable(AbstractSession* sess);
     virtual ~RemoteTable();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 

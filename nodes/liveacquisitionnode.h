@@ -22,6 +22,11 @@ class Q_DECL_EXPORT AcquisitionNode : public AbstractNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("acquisition_node", "Live Acquisition", "", /*Tags:*/
+        "hardware",
+        "sample",
+        "sampling"
+    )
 public:
     Q_PROPERTY(QAbstractItemModel* model READ model NOTIFY modelChanged USER true)
     Q_PROPERTY(SigrokDevice* device WRITE setDevice USER true)
@@ -35,10 +40,6 @@ public:
     Q_INVOKABLE explicit AcquisitionNode(AbstractSession* sess);
 
     virtual ~AcquisitionNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
 
@@ -59,8 +60,6 @@ public:
     virtual void setDevice(SigrokDevice* dev);
 
     virtual QWidget* widget() const override;
-
-    virtual QStringList searchTags() const override;
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel*);

@@ -11,16 +11,16 @@ class Q_DECL_EXPORT DeduplicateNode : public ProxyNode
 {
     Q_OBJECT
 
+    REGISTER_META_DATA("deduplicate_node", "Squash", "", /*Tags:*/
+        "merge",
+        "deduplicate"
+    )
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
     Q_PROPERTY(qreal threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged USER true)
 
     Q_INVOKABLE explicit DeduplicateNode(AbstractSession* sess);
     virtual ~DeduplicateNode();
-
-    virtual QString title() const override;
-
-    virtual QString id() const override;
 
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
@@ -33,8 +33,6 @@ public:
     void setThreshold(qreal v);
 
     QAbstractItemModel* filteredModel() const;
-
-    virtual QStringList searchTags() const override;
 
 Q_SIGNALS:
     void filteredModelChanged(); //dummy

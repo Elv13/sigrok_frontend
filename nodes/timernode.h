@@ -3,12 +3,15 @@
 #include "abstractnode.h"
 
 #include <QtCore/QObject>
+#include <QtCore/QByteArray>
 
 class TimerNodePrivate;
 
 class Q_DECL_EXPORT TimerNode : public AbstractNode
 {
     Q_OBJECT
+
+    REGISTER_META_DATA("timer_node", "Clock / Timer", "d", /*Tags:*/"timer")
 
 public:
     Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activated USER true)
@@ -19,10 +22,7 @@ public:
     Q_INVOKABLE explicit TimerNode(AbstractSession* sess);
     virtual ~TimerNode();
 
-    virtual QString title() const override;
     virtual QWidget* widget() const override;
-
-    virtual QString id() const override;
 
     int milliseconds() const;
     int seconds() const;
@@ -33,7 +33,6 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
-    virtual QStringList searchTags() const override;
 
 public Q_SLOTS:
     void setMilliseconds(int value);

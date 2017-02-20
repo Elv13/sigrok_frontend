@@ -23,16 +23,6 @@ ManualAcquisitionNode::~ManualAcquisitionNode()
     delete d_ptr;
 }
 
-QString ManualAcquisitionNode::title() const
-{
-    return QStringLiteral("Manual acquisition");
-}
-
-QString ManualAcquisitionNode::id() const
-{
-    return QStringLiteral("manualacquisition_node");
-}
-
 void ManualAcquisitionNode::write(QJsonObject &parent) const
 {
     AcquisitionNode::write(parent);
@@ -72,15 +62,4 @@ void ManualAcquisitionNode::setDevice(SigrokDevice* dev)
     AcquisitionNode::setDevice(dev);
 
     aqModel()->setMode(AcquisitionModel::Mode::MANUAL);
-}
-
-QStringList ManualAcquisitionNode::searchTags() const
-{
-    static QStringList l {
-        QStringLiteral("hardware"),
-        QStringLiteral("sampling"),
-        QStringLiteral("sample"),
-    };
-
-    return l;
 }

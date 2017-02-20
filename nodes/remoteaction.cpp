@@ -40,16 +40,6 @@ RemoteActionNode::~RemoteActionNode()
     delete d_ptr;
 }
 
-QString RemoteActionNode::title() const
-{
-    return QStringLiteral("Controls");
-}
-
-QString RemoteActionNode::id() const
-{
-    return QStringLiteral("remoteaction_node");
-}
-
 void RemoteActionNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
@@ -98,6 +88,5 @@ void RemoteActionNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAb
     m_pSource = newModel;
     m_Current.setModel(newModel);
 }
-
 
 #include <remoteaction.moc>

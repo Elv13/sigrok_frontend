@@ -58,16 +58,6 @@ CurrentValues::~CurrentValues()
     delete d_ptr;
 }
 
-QString CurrentValues::title() const
-{
-    return QStringLiteral("Current Values");
-}
-
-QString CurrentValues::id() const
-{
-    return QStringLiteral("currentvalues_node");
-}
-
 QAbstractItemModel* CurrentValues::sourceModel() const
 {
     return &d_ptr->m_Concat;
