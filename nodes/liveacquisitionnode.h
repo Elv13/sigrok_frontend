@@ -60,7 +60,7 @@ public:
 
     virtual QWidget* widget() const override;
 
-
+    virtual QStringList searchTags() const override;
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel*);

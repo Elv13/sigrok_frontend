@@ -27,6 +27,8 @@ public:
 
     virtual QWidget* widget() const override;
 
+    virtual QStringList searchTags() const override;
+
 private:
     LCDMeterNodePrivate* d_ptr;
     Q_DECLARE_PRIVATE(LCDMeterNode)

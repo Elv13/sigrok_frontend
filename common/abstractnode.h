@@ -31,7 +31,6 @@ public:
 
     explicit AbstractNode(AbstractSession* sess);
     virtual ~AbstractNode();
-//     virtual ~AbstractNode() {}
 
     virtual QString title() const = 0;
     virtual QString id() const = 0;
@@ -54,6 +53,8 @@ public:
 
     virtual void write(QJsonObject &parent) const;
     virtual void read(const QJsonObject &parent);
+
+    virtual QStringList searchTags() const;
 
 Q_SIGNALS:
     void titleChanged(const QString& title);

@@ -179,4 +179,14 @@ void ColorNodePrivate::slotModelReset()
     slotRowsInserted({}, 0, m_pRangeProxy->rowCount());
 }
 
+QStringList ColorNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("range"),
+        QStringLiteral("alerts"),
+    };
+
+    return l;
+}
+
 #include <colornode.moc>

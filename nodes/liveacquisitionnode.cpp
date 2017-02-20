@@ -291,4 +291,15 @@ void AcquisitionNode::stop(bool value)
     d_ptr->slotStop();
 }
 
+QStringList AcquisitionNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("hardware"),
+        QStringLiteral("sampling"),
+        QStringLiteral("sample"),
+    };
+
+    return l;
+}
+
 #include <liveacquisitionnode.moc>

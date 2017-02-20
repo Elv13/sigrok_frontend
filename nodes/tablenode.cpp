@@ -104,4 +104,15 @@ QString TableNode::remoteModelName() const
     return d_ptr->m_Id;
 }
 
+QStringList TableNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("matrix"),
+        QStringLiteral("spreadsheet"),
+        QStringLiteral("widget"),
+    };
+
+    return l;
+}
+
 #include <tablenode.moc>

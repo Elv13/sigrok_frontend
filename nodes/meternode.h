@@ -26,6 +26,8 @@ public:
 
     virtual QWidget* widget() const override;
 
+    virtual QStringList searchTags() const override;
+
 private:
     MeterNodePrivate* d_ptr;
     Q_DECLARE_PRIVATE(MeterNode)

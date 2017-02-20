@@ -139,4 +139,19 @@ bool ChronoNode::hasDateTimeColumn() const
     return d_ptr->m_Proxy.extraColumns() & ChronometerProxy::ExtraColumns::DATE_TIME;
 }
 
+QStringList ChronoNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("counter"),
+        QStringLiteral("delay"),
+        QStringLiteral("latency"),
+        QStringLiteral("duration"),
+        QStringLiteral("time"),
+        QStringLiteral("microseconds"),
+        QStringLiteral("milliseconds"),
+    };
+
+    return l;
+}
+
 #include <chrononode.moc>

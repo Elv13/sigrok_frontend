@@ -130,4 +130,16 @@ QString LCDMeterNode::remoteWidgetType() const
     return id();
 }
 
+QStringList LCDMeterNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("display"),
+        QStringLiteral("view"),
+        QStringLiteral("lcd"),
+        QStringLiteral("segments"),
+    };
+
+    return l;
+}
+
 #include "lcdmeternode.moc"

@@ -46,6 +46,8 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
+    virtual QStringList searchTags() const override;
+
 Q_SIGNALS:
     void currentIndexChanged(int);
     void previousChanged(const QString&);

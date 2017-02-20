@@ -117,4 +117,17 @@ QString MeterNode::remoteWidgetType() const
     return id();
 }
 
+QStringList MeterNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("display"),
+        QStringLiteral("view"),
+        QStringLiteral("lcd"),
+        QStringLiteral("segments"),
+        QStringLiteral("statistics"),
+    };
+
+    return l;
+}
+
 #include "meternode.moc"

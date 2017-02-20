@@ -27,6 +27,8 @@ public:
 
     virtual bool createSinkSocket(const QString& name) override;
     virtual bool createSourceSocket(const QString& name) override;
+
+    virtual QStringList searchTags() const override;
 // Q_SIGNALS:
 //     void modelChangedCopy(QAbstractItemModel* newModel, QAbstractItemModel* old);
 

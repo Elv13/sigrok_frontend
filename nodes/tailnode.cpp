@@ -95,5 +95,17 @@ void TailNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractIt
     m_Proxy.setSourceModel(newModel);
 }
 
-#include <tailnode.moc>
+QStringList TailNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("slice"),
+        QStringLiteral("frame"),
+        QStringLiteral("wave"),
+        QStringLiteral("still"),
+        QStringLiteral("window"),
+    };
 
+    return l;
+}
+
+#include <tailnode.moc>

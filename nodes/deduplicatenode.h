@@ -34,6 +34,8 @@ public:
 
     QAbstractItemModel* filteredModel() const;
 
+    virtual QStringList searchTags() const override;
+
 Q_SIGNALS:
     void filteredModelChanged(); //dummy
     void thresholdChanged(qreal);

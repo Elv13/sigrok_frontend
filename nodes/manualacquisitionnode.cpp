@@ -73,3 +73,14 @@ void ManualAcquisitionNode::setDevice(SigrokDevice* dev)
 
     aqModel()->setMode(AcquisitionModel::Mode::MANUAL);
 }
+
+QStringList ManualAcquisitionNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("hardware"),
+        QStringLiteral("sampling"),
+        QStringLiteral("sample"),
+    };
+
+    return l;
+}

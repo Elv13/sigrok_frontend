@@ -28,6 +28,8 @@ public:
 
     QAbstractItemModel* filteredModel() const;
 
+    virtual QStringList searchTags() const override;
+
 Q_SIGNALS:
     void test2Changed(bool);
     void filteredModelChanged(); //dummy

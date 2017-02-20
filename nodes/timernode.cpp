@@ -32,7 +32,7 @@ TimerNode::~TimerNode()
 
 QString TimerNode::title() const
 {
-    return QStringLiteral("Timer");
+    return QStringLiteral("Clock / Timer");
 }
 
 QString TimerNode::id() const
@@ -138,6 +138,15 @@ void TimerNode::setActive(bool value)
 }
 
 bool TimerNode::dummy() const {return false;}
+
+QStringList TimerNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("timer"),
+    };
+
+    return l;
+}
 
 #include <timernode.moc>
 

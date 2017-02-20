@@ -40,6 +40,8 @@ public:
 
     virtual void setDevice(SigrokDevice* dev) override;
 
+    virtual QStringList searchTags() const override;
+
 public Q_SLOTS:
     void acquireSample(bool=false);
     void acquireSampleAs(const QString& name);

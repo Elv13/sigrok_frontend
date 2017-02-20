@@ -24,6 +24,8 @@ public:
     virtual QString remoteWidgetType() const override;
     virtual QString remoteModelName() const override;
 
+    virtual QStringList searchTags() const override;
+
 private:
     CurveChartNodePrivate* d_ptr;
     Q_DECLARE_PRIVATE(CurveChartNode)

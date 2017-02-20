@@ -29,6 +29,8 @@ public:
     QAbstractItemModel* selectedMemento() const;
     QAbstractItemModel* lastestMemento() const;
 
+    virtual QStringList searchTags() const override;
+
     //Mutator
     void takeMemento(bool _);
 

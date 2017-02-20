@@ -32,6 +32,8 @@ public:
 
     QAbstractItemModel* filteredModel() const;
 
+    virtual QStringList searchTags() const override;
+
 public Q_SLOTS:
     void enableDelta(bool);
     void enableMsEpoch(bool);

@@ -216,4 +216,13 @@ bool MultiplexerNode::createSourceSocket(const QString& name)
     return true;
 }
 
+QStringList MultiplexerNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("divider"),
+    };
+
+    return l;
+}
+
 #include <multiplexernode.moc>

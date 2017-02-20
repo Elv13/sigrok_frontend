@@ -76,3 +76,12 @@ void ChartNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractI
     Q_UNUSED(old)
     m_pPlotter->setModel(newModel);
 }
+
+QStringList ChartNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("graph"),
+    };
+
+    return l;
+}

@@ -232,4 +232,18 @@ void SequenceNodePrivate::slotCurrentChanged(const QModelIndex& idx)
        q_ptr->setCurrent(idx.row());
 }
 
+QStringList SequenceNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("automation"),
+        QStringLiteral("set"),
+        QStringLiteral("loop"),
+        QStringLiteral("names"),
+        QStringLiteral("tags"),
+        QStringLiteral("label"),
+    };
+
+    return l;
+}
+
 #include <sequencenode.moc>

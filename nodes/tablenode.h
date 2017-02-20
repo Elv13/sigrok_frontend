@@ -25,6 +25,8 @@ public:
     virtual QString remoteModelName() const override;
     virtual QString remoteWidgetType() const override;
 
+    virtual QStringList searchTags() const override;
+
 //     virtual void connectTo(AbstractNode* other, QAbstractItemModel* model, int col) override;
 
 private:

@@ -84,3 +84,8 @@ QString AbstractNode::uid() const
     Q_ASSERT(!d_ptr->m_Uid.isEmpty());
     return d_ptr->m_Uid;
 }
+
+QStringList AbstractNode::searchTags() const
+{
+    return {};
+}

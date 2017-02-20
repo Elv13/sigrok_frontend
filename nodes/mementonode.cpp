@@ -256,4 +256,17 @@ void MementoNodePrivate::slotSelectionChanged()
     Q_EMIT q_ptr->selectedMementoChanged(q_ptr->selectedMemento());
 }
 
+QStringList MementoNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("memento"),
+        QStringLiteral("save"),
+        QStringLiteral("buffer"),
+        QStringLiteral("copy"),
+        QStringLiteral("backup"),
+    };
+
+    return l;
+}
+
 #include "mementonode.moc"

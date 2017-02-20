@@ -33,6 +33,8 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
+    virtual QStringList searchTags() const override;
+
 public Q_SLOTS:
     void setMilliseconds(int value);
     void setSeconds(int value);

@@ -21,6 +21,8 @@ public:
 
     virtual void write(QJsonObject &parent) const override;
 
+    virtual QStringList searchTags() const override;
+
 private:
     ChartNodePrivate* d_ptr;
     Q_DECLARE_PRIVATE(ChartNode)

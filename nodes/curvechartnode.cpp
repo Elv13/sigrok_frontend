@@ -103,4 +103,13 @@ QString CurveChartNode::remoteWidgetType() const
     return id();
 }
 
+QStringList CurveChartNode::searchTags() const
+{
+    static QStringList l {
+        QStringLiteral("graph"),
+    };
+
+    return l;
+}
+
 #include <curvechartnode.moc>
