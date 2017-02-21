@@ -29,12 +29,12 @@ class CurrentValuesPrivate final : public QObject
 public:
     CurrentValuesPrivate(CurrentValues* q) : QObject(q), q_ptr(q) {}
 
-    AdditionalProperties m_Obj;
+    AdditionalProperties* m_pObj {new AdditionalProperties};
     LastRowToListProxy* m_pProxy{new LastRowToListProxy(this)};
     KConcatenateRowsProxyModel* m_pConcat{new KConcatenateRowsProxyModel(this)};
 
     QObjectModel* m_pObjModel {new QObjectModel {
-        {&this->m_Obj},
+        {this->m_pObj},
         Qt::Vertical,
         QObjectModel::Role::PropertyNameRole,
         this
@@ -52,7 +52,7 @@ CurrentValues::CurrentValues(AbstractSession* sess) : ProxyNode(sess), d_ptr(new
     d_ptr->m_pConcat->addSourceModel(d_ptr->m_pProxy);
     d_ptr->m_pConcat->addSourceModel(d_ptr->m_pObjModel);
 
-    QObject::connect(&d_ptr->m_Obj, &AdditionalProperties::modelChanged, d_ptr, &CurrentValuesPrivate::slotModelChanged);
+    QObject::connect(d_ptr->m_pObj, &AdditionalProperties::modelChanged, d_ptr, &CurrentValuesPrivate::slotModelChanged);
 }
 
 CurrentValues::~CurrentValues()
