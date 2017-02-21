@@ -21,6 +21,7 @@ Range::Range(QWidget* parent) : QWidget(parent)
     ui.setupUi(this);
     m_pTree = ui.treeView;
     m_pColumn = ui.comboBox;
+    m_pCheckBox = ui.checkBox;
     auto del = new CategorizedDelegate(m_pTree);
     del->setChildDelegate(new ColorDelegate(this));
     m_pTree->setItemDelegate(del);
@@ -54,6 +55,10 @@ RangeProxy* Range::rangeProxy() const
 void Range::setRangeProxy(RangeProxy* p)
 {
     m_pProxy = p;
+
+    blockSignals(true);
+    m_pCheckBox->setChecked(m_pProxy->matchAllFilters());
+    blockSignals(false);
 
     // Act on clicks
     auto sm = m_pTree->selectionModel();
@@ -248,4 +253,15 @@ void Range::cancelClicked()
     m_pButtonBox->setVisible (false);
     m_pMainWidget->setHidden (false);
     m_CurrentIdx = QModelIndex();
+}
+
+
+bool Range::isAllColumns() const
+{
+    return m_pCheckBox->isChecked();
+}
+
+void Range::setAllColumns(bool v)
+{
+    m_pCheckBox->setChecked(v);
 }

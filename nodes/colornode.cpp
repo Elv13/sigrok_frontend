@@ -104,6 +104,8 @@ void ColorNode::write(QJsonObject &parent) const
     }
 
     parent[QStringLiteral("columns")] = columns;
+
+    parent[QStringLiteral("apply_to_column")] = d_ptr->m_pWidget && d_ptr->m_pWidget->isAllColumns();
 }
 
 void ColorNode::read(const QJsonObject &parent)
@@ -119,6 +121,10 @@ void ColorNode::read(const QJsonObject &parent)
             elem[ "fg"        ].toString(),
         };
     }
+
+    d_ptr->m_pRangeProxy->setMatchAllFilters(
+        parent[QStringLiteral("apply_to_column")].toBool()
+    );
 }
 
 QWidget* ColorNode::widget() const

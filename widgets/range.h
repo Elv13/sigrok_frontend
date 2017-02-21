@@ -10,6 +10,7 @@ class RangeProxy;
 class FilterTopLevelProxy;
 class QVBoxLayout;
 class QDialogButtonBox;
+class QCheckBox;
 
 namespace color_widgets {
     class ColorWheel;
@@ -26,6 +27,9 @@ public:
     RangeProxy* rangeProxy() const;
     void setRangeProxy(RangeProxy* p);
 
+    bool isAllColumns() const;
+    void setAllColumns(bool v);
+
     void setColumnWidgetFactory(
         int col,
         const std::function<QWidget*(const QPersistentModelIndex& idx)>& w
@@ -38,6 +42,7 @@ private:
     QVector< std::function<QWidget*(const QPersistentModelIndex&)> > m_lWidgetFactoriesChild;
     QTreeView* m_pTree;
     QComboBox* m_pColumn;
+    QCheckBox* m_pCheckBox;
     bool m_Mutex {false};
     QWidget* m_pMainWidget;
     QVBoxLayout* m_pLayout;
