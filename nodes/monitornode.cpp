@@ -45,9 +45,7 @@ QWidget* MonitorNode::widget() const
 
 void MonitorNode::setValue(const QVariant& v)
 {
-        qDebug() << "\n\n\SET" << v.data() << v.typeName();
     if (d_ptr->m_pWidget) {
-//         d_ptr->m_pWidget->setName(v.toString());
         d_ptr->m_pWidget->setType(v.typeName());
         d_ptr->m_pWidget->setTime(QDateTime::currentDateTime().toString());
         d_ptr->m_pWidget->setContent(v.toString());

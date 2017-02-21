@@ -1,5 +1,7 @@
 #include "currentvalues.h"
 
+#include <QtCore/QDebug>
+
 #include "proxies/lastrowtolistproxy.h"
 
 #include <kconcatenaterowsproxymodel.h>
@@ -28,27 +30,27 @@ public:
     CurrentValuesPrivate(CurrentValues* q) : QObject(q), q_ptr(q) {}
 
     AdditionalProperties m_Obj;
-    LastRowToListProxy m_Proxy{this};
-    KConcatenateRowsProxyModel m_Concat{this};
+    LastRowToListProxy* m_pProxy{new LastRowToListProxy(this)};
+    KConcatenateRowsProxyModel* m_pConcat{new KConcatenateRowsProxyModel(this)};
 
-    QObjectModel m_ObjModel{
+    QObjectModel* m_pObjModel {new QObjectModel {
         {&this->m_Obj},
         Qt::Vertical,
         QObjectModel::Role::PropertyNameRole,
         this
-    };
+    }};
 
     CurrentValues* q_ptr;
 public Q_SLOTS:
+    void slotDataChanged();
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
 CurrentValues::CurrentValues(AbstractSession* sess) : ProxyNode(sess), d_ptr(new CurrentValuesPrivate(this))
 {
-    d_ptr->m_Proxy.setUsingHeaderAsDisplayRole(true);
-    d_ptr->m_Concat.addSourceModel(&d_ptr->m_Proxy);
-    d_ptr->m_Concat.addSourceModel(&d_ptr->m_ObjModel);
-
+    d_ptr->m_pProxy->setUsingHeaderAsDisplayRole(true);
+    d_ptr->m_pConcat->addSourceModel(d_ptr->m_pProxy);
+    d_ptr->m_pConcat->addSourceModel(d_ptr->m_pObjModel);
 
     QObject::connect(&d_ptr->m_Obj, &AdditionalProperties::modelChanged, d_ptr, &CurrentValuesPrivate::slotModelChanged);
 }
@@ -60,7 +62,7 @@ CurrentValues::~CurrentValues()
 
 QAbstractItemModel* CurrentValues::sourceModel() const
 {
-    return &d_ptr->m_Concat;
+    return d_ptr->m_pConcat;
 }
 
 void CurrentValues::write(QJsonObject &parent) const
@@ -76,7 +78,9 @@ QWidget* CurrentValues::widget() const
 void CurrentValuesPrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     Q_UNUSED(old)
-    m_Proxy.setSourceModel(newModel);
+    m_pProxy->setSourceModel(newModel);
+
+    connect(newModel, &QAbstractItemModel::rowsInserted, this, &CurrentValuesPrivate::slotDataChanged);
 }
 
 QAbstractItemModel* AdditionalProperties::model() const
@@ -94,4 +98,10 @@ void AdditionalProperties::setModel(QAbstractItemModel* m)
     Q_EMIT modelChanged(m, o);
 }
 
+void CurrentValuesPrivate::slotDataChanged()
+{
+    Q_EMIT m_pConcat->dataChanged(
+        m_pConcat->index(0,0),m_pConcat->index(m_pConcat->rowCount()-2,0)
+    );
+}
 #include "currentvalues.moc"

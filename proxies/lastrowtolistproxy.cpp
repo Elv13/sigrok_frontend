@@ -60,6 +60,9 @@ QVariant LastRowToListProxy::data(const QModelIndex& idx, int role) const
     if (role == Qt::DisplayRole && d_ptr->m_UseHeaderDR)
         return headerData(idx.row(), Qt::Vertical, Qt::DisplayRole);
 
+    if (role == 257)
+        return mapToSource(idx).data(Qt::EditRole);
+
     return mapToSource(idx).data(role);
 }
 
