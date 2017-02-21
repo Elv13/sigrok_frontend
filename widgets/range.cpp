@@ -31,6 +31,11 @@ Range::Range(QWidget* parent) : QWidget(parent)
     m_pLayout = ui.verticalLayout_2;
     m_pMainWidget = ui.m_pMainWidget;
 
+    m_pColumn->view()->setAutoFillBackground(true);
+    m_pColumn->view()->setStyleSheet("background-color:"
+        +QApplication::palette().color(QPalette::Base).name()
+    );
+
     connect(m_pFiltered, &FilterTopLevelProxy::layoutChanged  , this, &Range::slotAjustColumns);
     connect(m_pFiltered, &FilterTopLevelProxy::columnsInserted, this, &Range::slotAjustColumns);
     connect(m_pFiltered, &FilterTopLevelProxy::rowsInserted   , this, &Range::slotAjustColumns);
@@ -120,6 +125,11 @@ void Range::setRangeProxy(RangeProxy* p)
 
         auto cbb = ui.comboBox;
         auto spb = ui.doubleSpinBox;
+
+        cbb->view()->setAutoFillBackground(true);
+        cbb->view()->setStyleSheet("background-color:"
+            +QApplication::palette().color(QPalette::Base).name()
+        );
 
         connect(cbb, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged)
             , [this, cbb, spb, idx]() {
