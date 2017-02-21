@@ -65,7 +65,7 @@ void HeadNode::setMaximumRows(int v)
 
 QWidget* HeadNode::widget() const
 {
-    if (d_ptr->m_pWidget) {
+    if (!d_ptr->m_pWidget) {
         d_ptr->m_pWidget = new RowSubset();
         QObject::connect(d_ptr->m_pWidget, &RowSubset::maxRowChanged, &d_ptr->m_Proxy, &HeadProxy::setMaximum);
         QObject::connect(d_ptr->m_pWidget, &RowSubset::limitChanged, &d_ptr->m_Proxy, &HeadProxy::setLimited);

@@ -46,6 +46,7 @@ SET(libnodewidgets_SRCS
     controlschooser.cpp
     curvechart.cpp
     sequence.cpp
+    monitor.cpp
 )
 
 if (NOT BUILD_MOBILE)
@@ -77,6 +78,7 @@ QT5_WRAP_UI(libnodewidgets_SRCS
     deduplicate.ui
     sequence.ui
     chrono.ui
+    monitor.ui
 )
 
 # QT5_ADD_RESOURCES(libnodewidgets_SRCS

@@ -293,12 +293,20 @@ Qt::ItemFlags QNodeEditorSocketModel::flags(const QModelIndex &idx) const
 {
     Qt::ItemFlags f = QTypeColoriserProxy::flags(idx);
 
-    // Disable everything but compatible sockets
+    const auto editRole = idx.data(Qt::EditRole);
+
+    // Disable everything but compatible sockets. Also allow sockets with
+    // unknown types as they are probably generic sockets where the type
+    // is irrelevant.
     return f ^ ((
         d_ptr->m_State == QNodeEditorSocketModelPrivate::State::DRAGGING &&
-        (!idx.data(Qt::EditRole).canConvert(d_ptr->m_CurrentTypeId)) &&
+        (
+            editRole.userType() != QMetaType::QVariant &&
+            editRole.userType() != QMetaType::UnknownType &&
+            (!editRole.canConvert(d_ptr->m_CurrentTypeId))
+        ) &&
         f | Qt::ItemIsEnabled
-    ) ? Qt::ItemIsEnabled : Qt::NoItemFlags);;
+    ) ? Qt::ItemIsEnabled : Qt::NoItemFlags);
 }
 
 void QNodeEditorSocketModelPrivate::exitDraggingMode()

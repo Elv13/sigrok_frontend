@@ -46,6 +46,7 @@
 #include "nodes/timernode.h"
 #include "nodes/chrononode.h"
 #include "nodes/sequencenode.h"
+#include "nodes/monitornode.h"
 #include "nodes/currentvalues.h"
 #include "nodes/remoteaction.h"
 #include "nodes/devicelistnode.h"
@@ -339,6 +340,7 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<CurrentValues>        (QStringLiteral("Sinks")         , QIcon::fromTheme( QStringLiteral("kt-remove-filters")     ));
     sess->registerType<TimerNode>            (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<SequenceNode>         (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
+    sess->registerType<MonitorNode>          (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
     sess->registerType<RemoteTable>          (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
