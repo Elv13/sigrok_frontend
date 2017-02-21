@@ -445,7 +445,7 @@ MainWindow::MainWindow(QWidget *parent) : KXmlGuiWindow(parent),
 
     setupActions();
 
-
+qDebug() << "\n\n\n\nSTART " << Settings::lastFilePath() << Settings::openLastFile();
     if (Settings::openLastFile() && !Settings::lastFilePath().isEmpty())
         openFile(Settings::lastFilePath());
     else
@@ -533,6 +533,7 @@ void MainWindow::saveFile()
 
     if (!sess->fileName().isEmpty()) {
         saveFileAs(sess->fileName());
+        Settings::setLastFilePath(sess->fileName());
     }
     else {
         saveFileAs();
@@ -578,6 +579,8 @@ void MainWindow::downloadFinished(KJob* job)
     auto sess = addSession();
 
     sess->setFileName(storedJob->url());
+    Settings::setLastFilePath(storedJob->url());
+    Settings::openLastFile();
 
     sess->load(storedJob->data());
 
