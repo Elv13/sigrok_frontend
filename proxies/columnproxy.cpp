@@ -149,9 +149,11 @@ QModelIndex ColumnProxy::parent(const QModelIndex& idx) const
 
 void ColumnProxyPrivate::slotLayoutChanged()
 {
+    Q_EMIT q_ptr->beginResetModel();
+
     m_RowCount = q_ptr->sourceModel() ? q_ptr->sourceModel()->columnCount() : 0;
 
-    Q_EMIT q_ptr->layoutChanged();
+    Q_EMIT q_ptr->endResetModel();
 }
 
 void ColumnProxyPrivate::slotColumnsInserted(const QModelIndex& p, int first, int last)

@@ -38,11 +38,11 @@ RangeProxy::RangeProxy(QObject* parent) : ColumnProxy(parent),
     connect(this, &QAbstractItemModel::rowsAboutToBeInserted,
             d_ptr, &RangeProxyPrivate::slotRowsAboutToBeInserted);
     connect(this, &QAbstractItemModel::rowsAboutToBeRemoved,
-                d_ptr, &RangeProxyPrivate::slotRowsAboutToBeRemoved);
+            d_ptr, &RangeProxyPrivate::slotRowsAboutToBeRemoved);
     connect(this, &QAbstractItemModel::layoutChanged,
-                d_ptr, &RangeProxyPrivate::slotLayoutChanged);
+            d_ptr, &RangeProxyPrivate::slotLayoutChanged);
     connect(this, &QAbstractItemModel::modelReset,
-                d_ptr, &RangeProxyPrivate::slotLayoutChanged);
+            d_ptr, &RangeProxyPrivate::slotLayoutChanged);
 }
 
 RangeProxy::~RangeProxy()

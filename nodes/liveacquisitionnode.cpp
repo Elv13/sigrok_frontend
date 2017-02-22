@@ -121,13 +121,13 @@ void AcquisitionNode::setDevice(SigrokDevice* dev)
 
     d_ptr->m_pDevice = dev;
 
-    d_ptr->m_Title = dev->name();
+    d_ptr->m_Title = dev ? dev->name() : QString();
 
     Q_EMIT titleChanged(d_ptr->m_Title);
 
     DeviceModel::instance();
 
-    setModel(new AcquisitionModel(dev));
+    setModel(dev ? new AcquisitionModel(dev) : nullptr);
 }
 
 bool AcquisitionNode::dummy() const{
