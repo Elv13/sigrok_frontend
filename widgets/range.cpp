@@ -118,27 +118,34 @@ void Range::setRangeProxy(RangeProxy* p)
     setColumnWidgetFactory(0, [this](const QPersistentModelIndex& idx) -> QWidget* {
 
         auto w = new QWidget();
-
         Ui_RangeSelection ui;
         ui.setupUi(w);
-        ui.comboBox->setModel(m_pProxy->delimiterModel());
-        ui.comboBox->setCurrentIndex(
-            (int) qvariant_cast<RangeProxy::Delimiter>(
-                idx.data((int)RangeProxy::Role::RANGE_DELIMITER)
-            )
-        );
 
         auto cbb = ui.comboBox;
         auto spb = ui.doubleSpinBox;
 
+        cbb->setModel(m_pProxy->delimiterModel());
+        cbb->setCurrentIndex(
+            (int) qvariant_cast<RangeProxy::Delimiter>(
+                idx.data((int)RangeProxy::Role::RANGE_DELIMITER)
+            )
+        );
+        spb->setValue(
+            qvariant_cast<qreal>(
+                idx.data((int)RangeProxy::Role::RANGE_VALUE)
+            ));
+        spb->setEnabled(cbb->currentIndex() != (int)RangeProxy::Delimiter::NONE);
+
         cbb->view()->setAutoFillBackground(true);
-        cbb->view()->setStyleSheet("background-color:"
+        cbb->view()->setStyleSheet(QStringLiteral("background-color:")
             +QApplication::palette().color(QPalette::Base).name()
         );
 
         connect(cbb, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged)
             , [this, cbb, spb, idx]() {
-                spb->setEnabled(cbb->currentIndex());
+                spb->setEnabled(
+                    cbb->currentIndex() != (int)RangeProxy::Delimiter::NONE
+                );
 
                 m_pProxy->setData(
                     idx,

@@ -28,6 +28,7 @@ struct SerializedRange
     QString delimiter;
     QString bg;
     QString fg;
+    double  value;
 };
 
 class ColorNodePrivate : public QObject
@@ -94,6 +95,8 @@ void ColorNode::write(QJsonObject &parent) const
                 .data(Qt::ForegroundRole).toString();
             col[ QStringLiteral("delimiter") ] = d_ptr->m_pRangeProxy->index(j, 0, idx)
                 .data((int)RangeProxy::Role::RANGE_DELIMITER_NAME).toString();
+            col[ QStringLiteral("value") ] = d_ptr->m_pRangeProxy->index(j, 0, idx)
+                .data((int)RangeProxy::Role::RANGE_VALUE).toDouble();
 
             Q_ASSERT(d_ptr->m_pRangeProxy->index(j, 0, idx).parent() == idx);
             Q_ASSERT(d_ptr->m_pRangeProxy->index(j, 1, idx).parent() == idx);
@@ -119,6 +122,7 @@ void ColorNode::read(const QJsonObject &parent)
             elem[ "delimiter" ].toString(),
             elem[ "bg"        ].toString(),
             elem[ "fg"        ].toString(),
+            elem[ "value"     ].toDouble(),
         };
     }
 
@@ -156,6 +160,8 @@ void ColorNodePrivate::slotRowsInserted(const QModelIndex& parent, int first, in
     if (parent.isValid() || !last)
         return;
 
+    constexpr int valueRole = (int) RangeProxy::Role::RANGE_VALUE;
+
     for (int i = first; i <= last; i++) {
         const auto idx  = m_pRangeProxy->index(i, 0, parent);
         const auto name = idx.data().toString();
@@ -163,8 +169,9 @@ void ColorNodePrivate::slotRowsInserted(const QModelIndex& parent, int first, in
             for (auto row : qAsConst(m_hlSerializedRanges[name])) {
                 auto idx2 = m_pRangeProxy->addFilter(idx, row->delimiter);
                 Q_ASSERT(idx2.isValid());
-                m_pRangeProxy->setData(idx2, row->bg, Qt::BackgroundRole);
-                m_pRangeProxy->setData(idx2, row->fg, Qt::ForegroundRole);
+                m_pRangeProxy->setData(idx2, row->bg   , Qt::BackgroundRole);
+                m_pRangeProxy->setData(idx2, row->fg   , Qt::ForegroundRole);
+                m_pRangeProxy->setData(idx2, row->value, valueRole         );
             }
         }
     }
