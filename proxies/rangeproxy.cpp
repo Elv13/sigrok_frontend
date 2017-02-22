@@ -203,11 +203,13 @@ bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
             if (value.canConvert<RangeProxy::Delimiter>()) {
                 node->m_Delim = qvariant_cast<RangeProxy::Delimiter>(value);
                 d_ptr->slotAutoAddRows(i.parent());
+                Q_EMIT dataChanged(i,i);
                 return true;
             }
             else if (value.canConvert<int>()) {
                 node->m_Delim = static_cast<RangeProxy::Delimiter>(value.toInt());
                 d_ptr->slotAutoAddRows(i.parent());
+                Q_EMIT dataChanged(i,i);
                 return true;
             }
             break;
@@ -215,6 +217,7 @@ bool RangeProxy::setData(const QModelIndex &i, const QVariant &value, int role)
         case (int) Role::RANGE_VALUE:
             node->m_RangeValue = value;
             d_ptr->slotAutoAddRows(i.parent());
+            Q_EMIT dataChanged(i,i);
             return true;
     }
 

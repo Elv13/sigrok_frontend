@@ -22,7 +22,7 @@ struct RangeProxyNode
     Mode                     m_Mode        { Mode::ROOT                  };
     RangeProxyNode*          m_pParent     { nullptr                     };
     RangeProxy::Delimiter    m_Delim       { RangeProxy::Delimiter::ANY  };
-    QVariant                 m_RangeValue  { QString()                   };
+    QVariant                 m_RangeValue  { 0                           };
     QHash<int, QVariant>*    m_hExtraValues{ new QHash<int, QVariant>()  };
     QVector<RangeProxyNode*> m_lChildren   {                             };
 };

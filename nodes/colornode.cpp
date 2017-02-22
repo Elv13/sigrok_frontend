@@ -181,9 +181,9 @@ void ColorNodePrivate::slotRowsInserted(const QModelIndex& parent, int first, in
                 if (!row->added) {
                     auto idx2 = m_pRangeProxy->addFilter(idx, row->delimiter);
                     Q_ASSERT(idx2.isValid());
-                    m_pRangeProxy->setData(idx2, row->bg   , Qt::BackgroundRole);
-                    m_pRangeProxy->setData(idx2, row->fg   , Qt::ForegroundRole);
-                    m_pRangeProxy->setData(idx2, row->value, valueRole         );
+                    m_pRangeProxy->setData(idx2, QColor(row->bg), Qt::BackgroundRole);
+                    m_pRangeProxy->setData(idx2, QColor(row->fg), Qt::ForegroundRole);
+                    m_pRangeProxy->setData(idx2, row->value     , valueRole         );
                     row->added = true;
                 }
             }
