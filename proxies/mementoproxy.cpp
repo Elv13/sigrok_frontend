@@ -269,7 +269,28 @@ QJsonObject MementoProxy::toJson() const
             QJsonObject cell;
 
             for (const int role : roles) {
-                cell[QByteArray::number(role)] = d_ptr->m_llRoots[i][j]->m_hData[role].toString();
+                const auto dt = d_ptr->m_llRoots[i][j]->m_hData[role];
+                switch (dt.userType()){
+                    case QMetaType::Bool     :
+                    case QMetaType::Int      :
+                    case QMetaType::UInt     :
+                    case QMetaType::Double   :
+                    case QMetaType::Long     :
+                    case QMetaType::LongLong :
+                    case QMetaType::Short    :
+                    case QMetaType::Char     :
+                    case QMetaType::ULong    :
+                    case QMetaType::ULongLong:
+                    case QMetaType::UShort   :
+                    case QMetaType::SChar    :
+                    case QMetaType::UChar    :
+                    case QMetaType::Float    :
+                        cell[QByteArray::number(role)] = dt.toDouble();
+                        break;
+                    default:
+                        cell[QByteArray::number(role)] = dt.toString();
+                        break;
+                }
             }
 
             row.append(cell);
