@@ -169,7 +169,6 @@ bool QObjectModel::setData(const QModelIndex &index, const QVariant &value, int 
         return false;
 
     const auto item = static_cast<InternalItem*>(index.internalPointer());
-
     if ((!value.canConvert(item->m_pProp->metaType))
       && item->m_pProp->metaType != QMetaType::QVariant)
         return false;

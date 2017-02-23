@@ -341,6 +341,11 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
 
+
+#ifdef WITH_QWT
+
+#endif
+
     //DUMMY
 //     sess->registerType<ColorNode> (QStringLiteral("File")            , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-open")          ));
 //     sess->registerType<ColorNode> (QStringLiteral("External device") , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-share")          )); //allow async memento transfer from other instances

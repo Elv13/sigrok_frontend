@@ -43,10 +43,16 @@ find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
     ItemModels
 )
 
+find_package(Qwt OPTIONAL_COMPONENTS)
+
 add_subdirectory(common)
 
 if (BUILD_MOBILE)
     set(DISABLE_SIGROK 1)
+endif()
+
+if (QWT_FOUND)
+    add_definitions(-DWITH_QWT)
 endif()
 
 # SIGROK is GPL and cannot be shipped in the mobile binary
