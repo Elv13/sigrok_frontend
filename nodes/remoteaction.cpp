@@ -1,10 +1,11 @@
 #include "remoteaction.h"
 
 #include "widgets/controls.h"
-#include "widgets/controlschooser.h"
 
 #include "common/pagemanager.h"
 #include "common/abstractsession.h"
+
+#include "../models/remotewidgets.h"
 
 #include "remotemanager.h"
 
@@ -16,23 +17,23 @@ class RemoteActionNodePrivate : public QObject
 {
     Q_OBJECT
 public:
+
+    RemoteWidgets* m_pModel{nullptr};
     Controls m_Current;
-    ControlsChooser* m_pControlCW {nullptr};
-    QAbstractItemModel* m_pSource {nullptr};
     QString m_Id;
     bool m_IsRegistered {false};
 
-public Q_SLOTS:
-    void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
 };
 
 RemoteActionNode::RemoteActionNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new RemoteActionNodePrivate())
 {
+    d_ptr->m_pModel = new RemoteWidgets(this);
+    d_ptr->m_pModel->setObjectName(QStringLiteral("RemoteControl"));
+    d_ptr->m_Current.setModel(d_ptr->m_pModel->clientModel());
+
     QTimer::singleShot(0, [this]() {
         session()->pages()->addPage(this, &d_ptr->m_Current, title(), uid());
     });
-
-    QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &RemoteActionNodePrivate::slotModelChanged);
 }
 
 RemoteActionNode::~RemoteActionNode()
@@ -43,18 +44,11 @@ RemoteActionNode::~RemoteActionNode()
 void RemoteActionNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
-
-    
 }
 
 QWidget* RemoteActionNode::widget() const
 {
-    if (!d_ptr->m_pControlCW) {
-        d_ptr->m_pControlCW = new ControlsChooser();
-        d_ptr->m_Current.setModel(d_ptr->m_pControlCW->currentModel());
-    }
-
-    return d_ptr->m_pControlCW;
+    return nullptr;
 }
 
 QString RemoteActionNode::remoteModelName() const
@@ -66,7 +60,7 @@ QString RemoteActionNode::remoteModelName() const
         d_ptr->m_Id = QStringLiteral("remoteaction")+QString::number(count++);
 
     if (!d_ptr->m_IsRegistered)
-        RemoteManager::instance()->addModel(d_ptr->m_pControlCW->currentModel(), {
+        RemoteManager::instance()->addModel(d_ptr->m_pModel, {
             Qt::DisplayRole,
             Qt::EditRole,
         }, d_ptr->m_Id);
@@ -81,12 +75,14 @@ QString RemoteActionNode::remoteWidgetType() const
     return id();
 }
 
-
-void RemoteActionNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
+bool RemoteActionNode::createSourceSocket(const QString& name)
 {
-    Q_UNUSED(old)
-    m_pSource = newModel;
-    m_Current.setModel(newModel);
+    return d_ptr->m_pModel->addRow(name);
+}
+
+QAbstractItemModel* RemoteActionNode::sourceModel() const
+{
+    return d_ptr->m_pModel;
 }
 
 #include <remoteaction.moc>

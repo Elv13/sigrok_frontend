@@ -47,9 +47,6 @@ SET(libnodes_SRCS
     manualacquisitionnode.cpp
     sequencenode.cpp
     monitornode.cpp
-    remote/remotetable.cpp
-    remote/remotemeter.cpp
-    remote/remotecontrols.cpp
 )
 
 if(NOT DISABLE_SIGROK)

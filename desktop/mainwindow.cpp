@@ -53,9 +53,6 @@
 #include "nodes/multiplexernode.h"
 #include "nodes/remoteaction.h"
 #include "nodes/deduplicatenode.h"
-#include "nodes/remote/remotetable.h"
-#include "nodes/remote/remotemeter.h"
-#include "nodes/remote/remotecontrols.h"
 
 #include "widgets/devicelist.h"
 #include "widgets/charttype.h"
@@ -343,9 +340,6 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<MonitorNode>          (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
-    sess->registerType<RemoteTable>          (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
-    sess->registerType<RemoteMeter>          (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
-    sess->registerType<RemoteControls>       (QStringLiteral("Remote widgets"), QIcon::fromTheme( QStringLiteral("view-calendar-timeline")));
 
     //DUMMY
 //     sess->registerType<ColorNode> (QStringLiteral("File")            , QStringLiteral("Sources")  , QStringLiteral(" "), QIcon::fromTheme( QStringLiteral("document-open")          ));

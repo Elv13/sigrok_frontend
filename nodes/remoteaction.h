@@ -11,7 +11,10 @@ class Q_DECL_EXPORT RemoteActionNode : public ProxyNode
 {
     Q_OBJECT
 
-    REGISTER_META_DATA("remoteaction_node", "Controls", "", /*Tags:*/ "")
+    REGISTER_META_DATA("remoteaction_node", "Controls", "", /*Tags:*/
+        "buttons",
+        "sliders",
+    )
 
 public:
     Q_INVOKABLE explicit RemoteActionNode(AbstractSession* sess);
@@ -23,6 +26,10 @@ public:
     virtual QString remoteWidgetType() const override;
 
     virtual QWidget* widget() const override;
+
+    virtual Mode mode() const override {return AbstractNode::Mode::MODEL;}
+    virtual QAbstractItemModel* sourceModel() const override;
+    virtual bool createSourceSocket(const QString& name) override;
 
 private:
     RemoteActionNodePrivate* d_ptr;

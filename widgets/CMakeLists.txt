@@ -43,7 +43,6 @@ SET(libnodewidgets_SRCS
     range.cpp
     lcdmeter.cpp
     controls.cpp
-    controlschooser.cpp
     curvechart.cpp
     sequence.cpp
     monitor.cpp
@@ -74,7 +73,6 @@ QT5_WRAP_UI(libnodewidgets_SRCS
     acquisition.ui
     lcdmeter.ui
     controls.ui
-    controlschooser.ui
     deduplicate.ui
     sequence.ui
     chrono.ui
