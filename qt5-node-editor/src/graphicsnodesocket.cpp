@@ -11,8 +11,6 @@
 
 #include <algorithm>
 
-#include "graphicsbezieredge.hpp"
-
 #include "graphicsnode.hpp"
 
 #include "graphicsnodesocket_p.h"
@@ -24,7 +22,6 @@
 #define BRUSH_COLOR_SINK      QColor("#FF0077FF")
 #define BRUSH_COLOR_SOURCE    QColor("#FFFF7700")
 
-#include "graphicsbezieredge_p.h"
 
 GraphicsNodeSocket::
 GraphicsNodeSocket(const QModelIndex& index, SocketType socket_type, GraphicsNode *parent)
@@ -203,21 +200,6 @@ paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * 
 #endif
 }
 
-
-void SocketGraphicsItem::
-mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    QGraphicsItem::mouseMoveEvent(event);
-}
-
-
-void SocketGraphicsItem::
-mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    QGraphicsItem::mouseReleaseEvent(event);
-}
-
-
 bool GraphicsNodeSocketPrivate::
 isInSocketCircle(const QPointF &p) const
 {
@@ -225,13 +207,6 @@ isInSocketCircle(const QPointF &p) const
         && p.x() <=  _circle_radius
         && p.y() >= -_circle_radius
         && p.y() <=  _circle_radius;
-}
-
-
-void SocketGraphicsItem::
-mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    QGraphicsItem::mousePressEvent(event);
 }
 
 /**
@@ -279,5 +254,3 @@ index() const
 {
     return d_ptr->m_PersistentIndex;
 }
-
-

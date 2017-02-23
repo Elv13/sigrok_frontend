@@ -70,13 +70,6 @@ public:
     virtual int type() const override;
 
     GraphicsNodeSocketPrivate* d_ptr;
-
-protected:
-    // event handling
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-
 };
 
 #endif

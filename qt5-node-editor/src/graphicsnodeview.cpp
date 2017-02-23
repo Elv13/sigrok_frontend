@@ -204,13 +204,21 @@ mouseMoveEvent(QMouseEvent *event)
 	// if the left mouse button was pressed and we actually have a mode and
 	// temporary edge already set
 	if (_drag_event && (event->buttons() & Qt::LeftButton)) {
-
-		// set start/stop (ignored if the sockets are set)
-		_drag_event->e->d_ptr->setStart(mapToScene(event->pos()));
-		_drag_event->e->d_ptr->setStop (mapToScene(event->pos()));
-
 		// update visual feedback
 		auto sock = socket_at(event->pos());
+
+		// set start/stop (ignored if the sockets are set)
+		_drag_event->e->d_ptr->setStart(
+			mapToScene(event->pos()),
+			_drag_event->mode == EdgeDragEvent::to_sink,
+			_drag_event->mode == EdgeDragEvent::to_source
+		);
+		_drag_event->e->d_ptr->setStop(
+			mapToScene(event->pos()),
+			_drag_event->mode == EdgeDragEvent::to_sink,
+			_drag_event->mode == EdgeDragEvent::to_source
+		);
+
 		if (!sock) {
 			viewport()->setCursor(Qt::ClosedHandCursor);
 		}

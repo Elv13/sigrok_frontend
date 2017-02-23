@@ -1,18 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 
 #include "graphicsbezieredge.hpp"
-#include <algorithm>
 #include <QPainter>
-#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPathItem>
-#include <QMetaProperty>
 
 #include <QtCore/QDebug>
 
-#include "graphicsnode.hpp"
-#include "graphicsnodesocket.hpp"
-
-#include "graphicsnodesocket_p.h"
 #include "graphicsbezieredge_p.h"
 
 #include "qreactiveproxymodel.h"
@@ -26,10 +19,9 @@ public:
 
     virtual int type() const override;
 
-    virtual void updatePath() = 0;
+    virtual void updatePath(bool isSrcDragging = false, bool isSinkDragging = false) = 0;
 
 protected:
-    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     GraphicsDirectedEdgePrivate* d_ptr;
 };
 
@@ -41,7 +33,7 @@ public:
 
     virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0) override;
     virtual int type() const override;
-    virtual void updatePath() override;
+    virtual void updatePath(bool isSrcDragging, bool isSinkDragging) override;
 };
 
 GraphicsDirectedEdge::
@@ -94,27 +86,19 @@ GraphicsDirectedEdge::
     delete d_ptr;
 }
 
-
-void GraphicsEdgeItem::
-mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    //FIXME currently dead code, need to be implemented
-    QGraphicsPathItem::mousePressEvent(event);
-}
-
 void GraphicsDirectedEdgePrivate::
-setStart(QPointF p)
+setStart(QPointF p, bool isSrcDragging, bool isSinkDragging)
 {
     _start = p;
-    m_pGrpahicsItem->updatePath();
+    m_pGrpahicsItem->updatePath(isSrcDragging, isSinkDragging);
 }
 
 
 void GraphicsDirectedEdgePrivate::
-setStop(QPointF p)
+setStop(QPointF p, bool isSrcDragging, bool isSinkDragging)
 {
     _stop = p;
-    m_pGrpahicsItem->updatePath();
+    m_pGrpahicsItem->updatePath(isSrcDragging, isSinkDragging);
 }
 
 GraphicsBezierEdge::GraphicsBezierEdge(QNodeEditorEdgeModel* m, const QModelIndex& index, qreal factor)
@@ -122,7 +106,7 @@ GraphicsBezierEdge::GraphicsBezierEdge(QNodeEditorEdgeModel* m, const QModelInde
 {}
 
 void GraphicsBezierItem::
-updatePath()
+updatePath(bool isSrcDragging, bool isSinkDragging)
 {
     Q_ASSERT(d_ptr->m_Index.isValid());
 
@@ -134,9 +118,11 @@ updatePath()
     // compute anchor point offsets
     const qreal min_dist = 0.; //FIXME this is dead code? can the code below ever get negative?
 
-    QPointF c1 = srcI.canConvert<QPointF>() ? srcI.toPointF() : d_ptr->_start;
+    QPointF c1 = srcI.canConvert<QPointF>() && (!isSinkDragging)
+        ? srcI.toPointF() : d_ptr->_start;
 
-    QPointF c2 = sinkI.canConvert<QPointF>() ? sinkI.toPointF() : d_ptr->_stop;
+    QPointF c2 = sinkI.canConvert<QPointF>() && (!isSrcDragging)
+        ? sinkI.toPointF() : d_ptr->_stop;
 
     const qreal dist = (c1.x() <= c2.x()) ?
         std::max(min_dist, (c2.x() - c1.x()) * d_ptr->_factor):

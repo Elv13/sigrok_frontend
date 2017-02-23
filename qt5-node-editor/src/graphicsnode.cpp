@@ -20,7 +20,6 @@
 
 #include "graphicsnode_p.h"
 
-#include "graphicsbezieredge.hpp"
 #include "graphicsnodesocket.hpp"
 #include "graphicsnodesocket_p.h"
 

@@ -32,8 +32,8 @@ public:
 
     // Helpers
 
-    void setStart(QPointF p);
-    void setStop(QPointF p);
+    void setStart(QPointF p, bool isSrcDragging = false, bool isSinkDragging = false);
+    void setStop(QPointF p, bool isSrcDragging = false, bool isSinkDragging = false);
 };
 
 #endif
