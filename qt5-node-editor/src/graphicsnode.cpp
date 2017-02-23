@@ -492,14 +492,23 @@ setSize(const QPointF size)
 void GraphicsNode::
 setSize(const QSizeF size)
 {
+    const auto old = d_ptr->m_Size;
+
     d_ptr->m_Size = {
         std::max(d_ptr->m_MinSize.width() , size.width ()),
         std::max(d_ptr->m_MinSize.height(), size.height())
     };
 
+    if (old == d_ptr->m_Size)
+        return;
+
     d_ptr->_changed = true;
     d_ptr->m_pGraphicsItem->prepareGeometryChange();
     d_ptr->updateGeometry();
+
+    auto m = const_cast<QAbstractItemModel*>(d_ptr->m_Index.model());
+
+    m->setData(d_ptr->m_Index, rect(), Qt::SizeHintRole);
 }
 
 void GraphicsNode::
