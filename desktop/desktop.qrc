@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="pref">
+    <file>tutorial4ui.rc</file>
+  </qresource>
+</RCC>

@@ -40,6 +40,7 @@
 #include "nodes/lcdmeternode.h"
 #include "nodes/columnnode.h"
 #include "nodes/colornode.h"
+#include "nodes/autorangenode.h"
 #include "nodes/mementonode.h"
 #include "nodes/tailnode.h"
 #include "nodes/headnode.h"
@@ -53,6 +54,11 @@
 #include "nodes/multiplexernode.h"
 #include "nodes/remoteaction.h"
 #include "nodes/deduplicatenode.h"
+
+// Optional widgets
+#ifdef WITH_QWT
+ #include "nodes/scalenode.h"
+#endif
 
 #include "widgets/devicelist.h"
 #include "widgets/charttype.h"
@@ -338,12 +344,11 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<TimerNode>            (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<SequenceNode>         (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<MonitorNode>          (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
+    sess->registerType<AutoRangeNode>        (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
-
-
 #ifdef WITH_QWT
-
+    sess->registerType<ScaleNode>            (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("bookmark-new")          ));
 #endif
 
     //DUMMY
@@ -357,6 +362,8 @@ Session* MainWindow::addSession(const QString& name)
 //
 //     sess->registerType<ColorNode> (QStringLiteral("Rate watchdog")   , QStringLiteral("Sinks")    , QLatin1String("") , QIcon::fromTheme( QStringLiteral("mail-forward")     ));
 //     sess->registerType<ColorNode> (QStringLiteral("Unit filter")     , QStringLiteral("Filters")  , QLatin1String("") , QIcon::fromTheme( QStringLiteral("kt-remove-filters")));
+    //COUNTER NODE
+    //ARITHMETIC NODE
 
     return sess;
 }

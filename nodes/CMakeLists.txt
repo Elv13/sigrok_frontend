@@ -47,7 +47,15 @@ SET(libnodes_SRCS
     manualacquisitionnode.cpp
     sequencenode.cpp
     monitornode.cpp
+    autorangenode.cpp
 )
+
+if (QWT_FOUND)
+    SET(libnodes_SRCS
+        ${libnodes_SRCS}
+        scalenode.cpp
+    )
+endif()
 
 if(NOT DISABLE_SIGROK)
     SET(libnodes_SRCS
@@ -69,6 +77,12 @@ TARGET_LINK_LIBRARIES( nodes
     KF5::WidgetsAddons
 #     KChart
 )
+
+if (QWT_FOUND)
+    TARGET_LINK_LIBRARIES(nodes
+        ${QWT_LIBRARY}
+    )
+endif()
 
 if(NOT DISABLE_SIGROK)
     TARGET_LINK_LIBRARIES( nodes

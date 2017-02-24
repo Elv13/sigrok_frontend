@@ -11,7 +11,7 @@ class Q_DECL_EXPORT ColumnNode : public ProxyNode
 {
     Q_OBJECT
 
-    REGISTER_META_DATA("column_node", "Column", "", /*Tags:*/ "")
+    REGISTER_META_DATA("column_node", "Column filter", "", /*Tags:*/ "")
 public:
     Q_PROPERTY(QAbstractItemModel* filteredModel READ filteredModel NOTIFY filteredModelChanged USER true)
 

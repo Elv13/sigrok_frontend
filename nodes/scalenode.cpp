@@ -1,6 +1,6 @@
-#include "meternode.h"
+#include "scalenode.h"
 
-#include "widgets/current.h"
+#include "qwt6/qwt_thermo.h"
 
 #include <QtCore/QDebug>
 
@@ -18,11 +18,11 @@
 
 #include "columnserializationadapter.h"
 
-class MeterNodePrivate : public QObject
+class ScaleNodePrivate : public QObject
 {
     Q_OBJECT
 public:
-    Current* m_pCurrent {new Current(nullptr)};
+    QwtThermo* m_pCurrent {new QwtThermo(nullptr)};
     Meter* m_pMeterW {new Meter()};
     MeterProxy* m_pCheckProxy {new MeterProxy(this)};
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
@@ -35,7 +35,7 @@ public Q_SLOTS:
     void slotRowsInserted();
 };
 
-MeterNode::MeterNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new MeterNodePrivate())
+ScaleNode::ScaleNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new ScaleNodePrivate())
 {
     d_ptr->m_pCheckProxy->setSourceModel(d_ptr->m_pColumnProxy);
 
@@ -45,67 +45,81 @@ MeterNode::MeterNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new MeterNo
 
     d_ptr->m_pMeterW->setModel(d_ptr->m_pCheckProxy);
 
-    QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &MeterNodePrivate::slotModelChanged);
-    QObject::connect(d_ptr->m_pCheckProxy, &MeterProxy::columnEnabled, d_ptr, &MeterNodePrivate::slotColumnEnabled);
+    QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &ScaleNodePrivate::slotModelChanged);
+    QObject::connect(d_ptr->m_pCheckProxy, &MeterProxy::columnEnabled, d_ptr, &ScaleNodePrivate::slotColumnEnabled);
+
+    d_ptr->m_pCurrent->setOriginMode( QwtThermo::OriginMode::OriginCustom );
+    d_ptr->m_pCurrent->setOrigin(0.0);
+
 }
 
-MeterNode::~MeterNode()
+ScaleNode::~ScaleNode()
 {
     delete d_ptr;
 }
 
-void MeterNode::write(QJsonObject &parent) const
+void ScaleNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
     d_ptr->m_Serializer.write(parent);
 }
 
-void MeterNode::read(const QJsonObject &parent)
+void ScaleNode::read(const QJsonObject &parent)
 {
     d_ptr->m_Serializer.read(parent);
 }
 
-QWidget* MeterNode::widget() const
+QWidget* ScaleNode::widget() const
 {
     return d_ptr->m_pMeterW;
 }
 
-void MeterNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
+void ScaleNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     m_pSource = newModel;
     m_pColumnProxy->setSourceModel(newModel);
-    m_pCurrent->setModel(newModel);
+//     m_pCurrent->setModel(newModel);
 
     if (old) {
         QObject::disconnect(old, &QAbstractItemModel::rowsInserted,
-                     this, &MeterNodePrivate::slotRowsInserted);
+                     this, &ScaleNodePrivate::slotRowsInserted);
     }
 
     QObject::connect(newModel, &QAbstractItemModel::rowsInserted,
-                     this, &MeterNodePrivate::slotRowsInserted);
+                     this, &ScaleNodePrivate::slotRowsInserted);
 }
 
-void MeterNodePrivate::slotColumnEnabled(int col, bool)
+void ScaleNodePrivate::slotColumnEnabled(int col, bool)
 {
     Q_UNUSED(col) //FIXME
 }
 
-void MeterNodePrivate::slotRowsInserted()
+void ScaleNodePrivate::slotRowsInserted()
 {
     const int main = m_pCheckProxy->mainColumn();
     const auto idx = m_pSource->index(m_pSource->rowCount()-1,main);
 
-    m_pCurrent->setText(
-        idx.data().toString()
+    m_pCurrent->setValue(
+        idx.data().toDouble()
     );
 
 }
 
-QString MeterNode::remoteWidgetType() const
+QString ScaleNode::remoteWidgetType() const
 {
     return id();
 }
 
+void ScaleNode::setLowerLimit(qreal v)
+{
+    d_ptr->m_pCurrent->setLowerBound(v);
+}
 
-#include "meternode.moc"
+void ScaleNode::setUpperLimit(qreal v)
+{
+    d_ptr->m_pCurrent->setUpperBound(v);
+}
+
+
+#include "scalenode.moc"
