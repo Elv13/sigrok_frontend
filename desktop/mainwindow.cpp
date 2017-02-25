@@ -57,6 +57,7 @@
 
 // Optional widgets
 #ifdef WITH_QWT
+ #include "nodes/plotnode.h"
  #include "nodes/scalenode.h"
 #endif
 
@@ -348,6 +349,7 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
 #ifdef WITH_QWT
+    sess->registerType<QwtPlotNode>          (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("document-edit")         ));
     sess->registerType<ScaleNode>            (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("bookmark-new")          ));
 #endif
 

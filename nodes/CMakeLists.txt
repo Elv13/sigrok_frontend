@@ -54,6 +54,7 @@ if (QWT_FOUND)
     SET(libnodes_SRCS
         ${libnodes_SRCS}
         scalenode.cpp
+            plotnode.cpp
     )
 endif()
 

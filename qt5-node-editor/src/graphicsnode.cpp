@@ -757,7 +757,7 @@ updateSizeHints() {
         };
 
         // Will cause the socket and edges to be updated
-        //FIXME Q_EMIT m_pModel->dataChanged(m_Index, m_Index);
+        //FIXME m_pModel->setData(m_Index, q_ptr->rect(), Qt::SizeHintRole);
     }
 }
 
