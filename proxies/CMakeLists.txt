@@ -29,6 +29,7 @@ SET(libextraproxies_SRCS
     filtertoplevelproxy.cpp
     rowsdeletionproxy.cpp
     deduplicateproxy.cpp
+    vectorizingproxy.cpp
 )
 
 ADD_LIBRARY( extraproxies STATIC ${libextraproxies_SRCS} )
