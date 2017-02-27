@@ -137,7 +137,6 @@ slotRowsInserted(const QModelIndex &parent, int first, int last)
                 QVector<double>& vector = *dtptr.get();
                 const auto idx = q_ptr->sourceModel()->index(i,j);
                 vector[i] = idx.data().toDouble();
-                qDebug() << i << j << vector[i] << idx << idx.data();
             }
         }
         m_lIds[i] = i;

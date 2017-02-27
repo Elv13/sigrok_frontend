@@ -75,7 +75,15 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
         if (analog->channels().size() > 0) {
 
             auto chan     = analog->channels()[0];
-            auto quantity = analog->mq();
+
+
+            const sigrok::Quantity* quantity = nullptr;
+
+            try {
+                quantity = analog->mq();
+            }
+            catch(const sigrok::Error& e) {}
+
             auto unit     = analog->unit();
 
             void* data = analog->data_pointer();
@@ -97,8 +105,8 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
                         ).time_since_epoch().count(),
                         unit->id(),
                         QString::fromStdString(unit->name()),
-                        quantity->id(),
-                        QString::fromStdString(quantity->name()),
+                        quantity ? quantity->id() : 0,
+                        quantity ? QString::fromStdString(quantity->name()) : QString(),
                         {},
                     };
                     self->endInsertRows();
@@ -115,8 +123,8 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
                         ).time_since_epoch().count(),
                         unit->id(),
                         QString::fromStdString(unit->name()),
-                        quantity->id(),
-                        QString::fromStdString(quantity->name()),
+                        quantity ? quantity->id() : 0,
+                        quantity ? QString::fromStdString(quantity->name()) : QString(),
                         {},
                     };
             }
