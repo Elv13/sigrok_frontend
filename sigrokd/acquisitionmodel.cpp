@@ -20,7 +20,9 @@ struct Row {
     unsigned long long m_TimeStamp;
     QVector<Chan*> m_lChans;
     qint64 m_Epoch;
+    int m_UnitId;
     QString m_Unit;
+    int m_QuantityId;
     QString m_Quantity;
     QVariant m_Id;
 
@@ -73,8 +75,8 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
         if (analog->channels().size() > 0) {
 
             auto chan     = analog->channels()[0];
-            auto quantity = QString::fromStdString(analog->mq()->name());
-            auto unit     = QString::fromStdString(analog->unit()->name());
+            auto quantity = analog->mq();
+            auto unit     = analog->unit();
 
             void* data = analog->data_pointer();
             float test = *(float*)data;
@@ -93,8 +95,10 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
                         std::chrono::time_point_cast<std::chrono::milliseconds>(
                             std::chrono::system_clock::now()
                         ).time_since_epoch().count(),
-                        unit,
-                        quantity,
+                        unit->id(),
+                        QString::fromStdString(unit->name()),
+                        quantity->id(),
+                        QString::fromStdString(quantity->name()),
                         {},
                     };
                     self->endInsertRows();
@@ -109,8 +113,10 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
                         std::chrono::time_point_cast<std::chrono::milliseconds>(
                             std::chrono::system_clock::now()
                         ).time_since_epoch().count(),
-                        unit,
-                        quantity,
+                        unit->id(),
+                        QString::fromStdString(unit->name()),
+                        quantity->id(),
+                        QString::fromStdString(quantity->name()),
                         {},
                     };
             }
@@ -255,6 +261,7 @@ QVariant AcquisitionModel::data(const QModelIndex& idx, int role) const
                 case (int) AcquisitionModel::Role::CHANNEL_ENABLED:
                     return true;
                 case (int) AcquisitionModel::Role::UNIT:
+                    return r->m_UnitId;
                 case (int) AcquisitionModel::Role::UNIT_NAME:
                     return r->m_Unit;
                 case (int) AcquisitionModel::Role::QUANTITY:

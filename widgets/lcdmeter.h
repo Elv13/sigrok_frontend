@@ -12,12 +12,18 @@ class Q_DECL_EXPORT LCDMeter : public QWidget
 public:
     explicit LCDMeter(QWidget* parent = nullptr);
 
-    void setModel(const QAbstractItemModel* m);
+    void setModel(QAbstractItemModel* m);
     void setValue(float v);
     void setValue(const QModelIndex& idx);
 
     virtual ~LCDMeter();
 
+private Q_SLOTS:
+    void applyValue();
+    void applyValueChange(const QModelIndex&, const QModelIndex&);
+
 private:
     QLCDNumber* m_pValue;
+    bool m_IsColored {false};
+    QAbstractItemModel* m_pModel {nullptr};
 };
