@@ -89,6 +89,19 @@ void CurveChart::paintEvent(QPaintEvent *event)
         QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform
     );
 
+    auto addBgRect = [](QPainter& p, const QRect& r, int start, int end, const QColor& col) {
+        p.save();
+        p.setPen({});
+        p.setBrush(col);
+        p.drawRect(
+            r.x()+start,
+            r.y(),
+            end-start,
+            r.height()
+        );
+        p.restore();
+    };
+
     static int dpiX = physicalDpiX();
 
     static int lineSize = 2*(dpiX/96);
@@ -103,13 +116,19 @@ void CurveChart::paintEvent(QPaintEvent *event)
 
     float newMin(99999999999999999), newMax(0);
 
+    // Handle the background color
+    int sectionStart = -1;
+    QColor sectionColor;
+
+    //TODO cache the curve/ranges for append only models
     for (int j = 1; j < m_pModel->columnCount();j++) {
         QPainterPath path;
 
         path.moveTo(0, height+lineSize);
 
         for (qreal i = 0; i < rc; i++) {
-            const float val = m_pModel->index(i, j).data().toFloat();
+            const auto  idx = m_pModel->index(i, j);
+            const float val = idx.data().toFloat();
 
             // update the range
             newMin = std::min(newMin, val);
@@ -126,7 +145,34 @@ void CurveChart::paintEvent(QPaintEvent *event)
                 {i*dx-dx/2, height - (val*height)/range},
                 {i*dx     , height - (val*height)/range}
             );
+
+            const auto bg = idx.data(Qt::BackgroundRole);
+            if (bg.canConvert<QColor>()) {
+                const auto col = qvariant_cast<QColor>(bg);
+                if (sectionStart == -1) {
+                    sectionStart = i*dx;
+                    sectionColor = col;
+                }
+                else if (col != sectionColor) {
+                    addBgRect(painter, rect, sectionStart, (i*dx), sectionColor);
+
+                    sectionStart = i*dx;
+                    sectionColor = col;
+                }
+            }
+            else {
+                addBgRect(painter, rect, sectionStart, (i*dx), sectionColor);
+
+                sectionStart = -1;
+                sectionColor = QColor();
+            }
         }
+
+        if (sectionStart >= 0)
+            addBgRect(
+                painter, rect, sectionStart, rect.width()+rect.x(), sectionColor
+            );
+
         painter.drawPath(path);
     }
 
