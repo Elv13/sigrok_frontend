@@ -2,8 +2,10 @@
 
 #include <QtWidgets/QAction>
 
-#include <KXmlGuiWindow>
-#include <KActionCollection>
+#ifdef WITH_XMLGUI
+ #include <KXmlGuiWindow>
+ #include <KActionCollection>
+#endif
 
 class ActionCollectionPrivate : public QObject
 {
@@ -36,37 +38,47 @@ ActionCollection::ActionCollection(KXmlGuiWindow* parent) : QObject(parent),
     d_ptr->m_ZoomIn = new QAction(parent);
     d_ptr->m_ZoomIn->setText(tr("Zoom-In"));
     d_ptr->m_ZoomIn->setIcon(QIcon::fromTheme(QStringLiteral("zoom-in")));
+#ifdef WITH_XMLGUI
     parent->actionCollection()->addAction(QStringLiteral("zoom-in"), d_ptr->m_ZoomIn);
     parent->actionCollection()->setDefaultShortcuts(d_ptr->m_ZoomIn, {
         Qt::CTRL + Qt::Key_Plus,
         Qt::CTRL + Qt::Key_Equal
     });
+#endif
     connect(d_ptr->m_ZoomIn, SELF::slotZoonIn);
 
     d_ptr->m_ZoomOut = new QAction(parent);
     d_ptr->m_ZoomOut->setText(tr("Zoom-Out"));
     d_ptr->m_ZoomOut->setIcon(QIcon::fromTheme(QStringLiteral("zoom-out")));
+#ifdef WITH_XMLGUI
     parent->actionCollection()->addAction(QStringLiteral("zoom-out"), d_ptr->m_ZoomOut);
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_ZoomOut, Qt::CTRL + Qt::Key_Minus);
+#endif
     connect(d_ptr->m_ZoomOut, SELF::slotZoonOut);
 
     d_ptr->m_ZoomFit = new QAction(parent);
     d_ptr->m_ZoomFit->setText(tr("Fit screen"));
     d_ptr->m_ZoomFit->setIcon(QIcon::fromTheme(QStringLiteral("zoom-fit-best")));
+#ifdef WITH_XMLGUI
     parent->actionCollection()->addAction(QStringLiteral("zoom-fit"), d_ptr->m_ZoomFit);
+#endif
     connect(d_ptr->m_ZoomFit, SELF::slotZoonFit);
 
     d_ptr->m_ZoomReset = new QAction(parent);
     d_ptr->m_ZoomReset->setText(tr("Reset zoom"));
     d_ptr->m_ZoomReset->setIcon(QIcon::fromTheme(QStringLiteral("zoom-page")));
+#ifdef WITH_XMLGUI
     parent->actionCollection()->addAction(QStringLiteral("zoom-reset"), d_ptr->m_ZoomReset);
+#endif
     connect(d_ptr->m_ZoomReset, SELF::slotZoonReset);
 
     d_ptr->m_pPaste = new QAction(parent);
     d_ptr->m_pPaste->setText(tr("Paste"));
     d_ptr->m_pPaste->setIcon(QIcon::fromTheme(QStringLiteral("edit-paste")));
+#ifdef WITH_XMLGUI
     parent->actionCollection()->addAction(QStringLiteral("paste"), d_ptr->m_pPaste);
     parent->actionCollection()->setDefaultShortcut(d_ptr->m_pPaste, Qt::CTRL + Qt::Key_V);
+#endif
     connect(d_ptr->m_pPaste, SELF::slotPaste);
 #undef SELF
 }

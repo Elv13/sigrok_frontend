@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(m_pPageModelReplica, &QAbstractItemModel::rowsAboutToBeRemoved, [this](const QModelIndex& tl, int first, int last) {
         for (int i = first; i <= last; i++) {
-            const auto uid = PageManager::instance()->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
+            const auto uid = m_pPageModelReplica->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
             //FIXME Q_ASSERT(!uid.isEmpty());
 
             if (m_lDocks.contains(uid)) {

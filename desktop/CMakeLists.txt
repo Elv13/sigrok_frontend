@@ -49,6 +49,8 @@ QT5_WRAP_UI(desktop_SRCS
     toolbox.ui
 )
 
+add_definitions(-DWITH_XMLGUI)
+
 kconfig_add_kcfg_files(desktop_SRCS ../data/tutorial4Settings.kcfgc)
 
 ADD_LIBRARY( desktop STATIC ${desktop_SRCS} )

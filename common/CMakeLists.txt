@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+
 ADD_DEFINITIONS("-std=c++14")
 
 PROJECT(libcommon)
@@ -19,9 +20,13 @@ find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     RemoteObjects
 )
 
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
+find_package(KF5 ${KF5_MIN_VERSION} COMPONENTS
     XmlGui
 )
+
+if (KF5XmlGui_FOUND)
+    add_definitions(-DWITH_XMLGUI)
+endif()
 
 SET(libcommon_SRCS
     pagemanager.cpp
@@ -55,9 +60,14 @@ qt5_generate_repc(libcommon_SRCS
 ADD_LIBRARY( common STATIC ${libcommon_SRCS} )
 
 TARGET_LINK_LIBRARIES( common
-    KF5::XmlGui
     Qt5::Core
     Qt5::Widgets
     Qt5::Gui
     Qt5::RemoteObjects
 )
+
+if (KF5XmlGui_FOUND)
+    TARGET_LINK_LIBRARIES( common
+        KF5::XmlGui
+    )
+endif()

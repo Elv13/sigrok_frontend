@@ -2,10 +2,15 @@
 
 #include <QtCore/QObject>
 
-class KXmlGuiWindow;
+#ifdef WITH_XMLGUI
+ class KXmlGuiWindow;
+ class Session;
+#else
+ #include <QtWidgets/QMainWindow>
+ typedef QMainWindow KXmlGuiWindow;
+#endif
 
 class GraphicsNode;
-class Session;
 
 class QAction;
 
@@ -25,11 +30,13 @@ public:
     QAction* deleteNode();
     QAction* rename();
 
+#ifdef WITH_XMLGUI
     GraphicsNode* currentNode() const;
 
 public Q_SLOTS:
     void sessionChanged(Session* s);
     void currentChanged(GraphicsNode* n);
+#endif
 
 private:
     SelectedActionCollectionPrivate* d_ptr;

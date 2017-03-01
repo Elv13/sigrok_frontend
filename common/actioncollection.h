@@ -2,8 +2,14 @@
 
 #include <QtCore/QObject>
 
+#ifdef WITH_XMLGUI
+ class KXmlGuiWindow;
+#else
+ #include <QtWidgets/QMainWindow>
+ typedef QMainWindow KXmlGuiWindow;
+#endif
+
 class ActionCollectionPrivate;
-class KXmlGuiWindow;
 
 class QAction;
 
