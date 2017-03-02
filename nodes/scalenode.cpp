@@ -4,6 +4,8 @@
 
 #include <QtCore/QDebug>
 
+#include "remotemanager.h"
+
 #include <QtWidgets/QScrollBar>
 #include "widgets/meter.h"
 
@@ -18,6 +20,8 @@
 
 #include "columnserializationadapter.h"
 
+#include "autorange_replica.h"
+
 class ScaleNodePrivate : public QObject
 {
     Q_OBJECT
@@ -28,6 +32,8 @@ public:
     ColumnProxy* m_pColumnProxy {new ColumnProxy()};
     QAbstractItemModel* m_pSource {nullptr};
     ColumnSerializationAdapter m_Serializer {m_pCheckProxy, {1,2}, this};
+    AutoRangeReplica* m_pReplica {nullptr};
+    mutable QString m_Id;
 
 public Q_SLOTS:
     void slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old);
@@ -106,20 +112,39 @@ void ScaleNodePrivate::slotRowsInserted()
 
 }
 
-QString ScaleNode::remoteWidgetType() const
-{
-    return id();
-}
-
 void ScaleNode::setLowerLimit(qreal v)
 {
     d_ptr->m_pCurrent->setLowerBound(v);
+    if (d_ptr->m_pReplica)
+        d_ptr->m_pReplica->setMinimum(v);
 }
 
 void ScaleNode::setUpperLimit(qreal v)
 {
     d_ptr->m_pCurrent->setUpperBound(v);
+    if (d_ptr->m_pReplica)
+        d_ptr->m_pReplica->setMaximum(v);
 }
 
+QString ScaleNode::remoteObjectName() const
+{
+    if (!d_ptr->m_pReplica) {
+        static int count = 1;
+        d_ptr->m_Id = id()+QString::number(count++);
+
+        d_ptr->m_pReplica = new AutoRangeReplica();
+        d_ptr->m_pReplica->setMinimum(0);
+        d_ptr->m_pReplica->setMaximum(1);
+
+        RemoteManager::instance()->addObject(d_ptr->m_pReplica, d_ptr->m_Id);
+    }
+
+    return d_ptr->m_Id;
+}
+
+QString ScaleNode::remoteWidgetType() const
+{
+    return id();
+}
 
 #include "scalenode.moc"

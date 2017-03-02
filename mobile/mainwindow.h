@@ -11,7 +11,8 @@ class QRemoteObjectNode;
 struct RemoteWidget
 {
     QString m_Type;
-    QString m_Name;
+    QString m_ModelName;
+    QString m_ObjectName;
     QString m_Uid;
     QAbstractItemModel* m_pModel;
 };

@@ -1,0 +1,7 @@
+#include <QtCore>
+
+class AutoRange
+{
+    PROP(qreal minimum READWRITE);
+    PROP(qreal maximum READWRITE);
+};

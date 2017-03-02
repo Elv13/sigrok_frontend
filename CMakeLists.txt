@@ -9,6 +9,13 @@ IF(POLICY CMP0063)
    CMAKE_POLICY(SET CMP0063 NEW)
 ENDIF(POLICY CMP0063)
 
+# For the mobile build
+if (BUILD_MOBILE)
+    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/local/lib /libs/armeabi-v7a/)
+    set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /usr/local/qwt-6.1.3/include/)
+    include_directories(/usr/local/qwt-6.1.3/include/) #FIXME
+endif()
+
 set(QT_MIN_VERSION "5.3.0")
 set(KF5_MIN_VERSION "5.2.0")
 

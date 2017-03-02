@@ -21,6 +21,15 @@ find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Network
 )
 
+
+if (QWT_FOUND)
+    find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+        Svg
+        OpenGL
+        Concurrent
+    )
+endif()
+
 SET(mobile_SRCS
     mainwindow.cpp
 )
@@ -44,3 +53,12 @@ TARGET_LINK_LIBRARIES( mobile
     common
     nodewidgets
 )
+
+if (QWT_FOUND)
+    TARGET_LINK_LIBRARIES(mobile
+        ${QWT_LIBRARY}
+        Qt5::Svg
+        Qt5::OpenGL
+        Qt5::Concurrent
+    )
+endif()

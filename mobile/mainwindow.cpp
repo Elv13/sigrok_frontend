@@ -15,6 +15,10 @@
 #include "widgets/meter.h"
 #include "common/pagemanager.h"
 
+#ifdef WITH_QWT
+ #include "qwt_thermo.h"
+#endif
+
 #include "meterdata_replica.h"
 
 #include "qrc_mobile.cpp"
@@ -104,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::addWidget(RemoteWidget wdg)
 {
-    static QHash<QString, std::function<QWidget*(QAbstractItemModel*)> > t {
+    static QHash<QString, std::function<QWidget*(QAbstractItemModel*)> > tm {
         {"lcdmeter_node", [this](QAbstractItemModel* model) {
             auto lcdw = new LCDMeter(this);
             lcdw->setModel(model);
@@ -132,10 +136,29 @@ void MainWindow::addWidget(RemoteWidget wdg)
         }},
     };
 
-    if (t.contains(wdg.m_Type)) {
-        auto w = t[wdg.m_Type](wdg.m_pModel);
-        auto dock = new QDockWidget(wdg.m_Name, this);
+    static QHash<QString, std::function<QWidget*(QObject*)> > to {
+        {"scale_node", [this](QObject* obj) {
+            auto scale = new QwtThermo(this);
+            scale->setLowerBound(1);
+            scale->setUpperBound(10);
+            //lcdw->setModel(model);
+            return scale;
+        }},
+    };
+
+    if (tm.contains(wdg.m_Type)) {
+        auto w = tm[wdg.m_Type](wdg.m_pModel);
+        auto dock = new QDockWidget(wdg.m_ModelName, this);
 //         dock->setTitleBarWidget(createTitlebar(dock));
+
+        dock->setWidget(w);
+
+        addDockWidget(Qt::LeftDockWidgetArea, dock);
+        m_lDocks[wdg.m_Uid] = dock;
+    }
+    else if (to.contains(wdg.m_Type)) {
+        auto w = to[wdg.m_Type](wdg.m_pModel);
+        auto dock = new QDockWidget(wdg.m_ObjectName, this);
 
         dock->setWidget(w);
 
@@ -149,21 +172,24 @@ void MainWindow::createSection(const QPersistentModelIndex& idx)
     if (m_hLoaded[idx])
         return;
 
-    const QString name = idx.data(PageManager::Role::REMOTE_MODEL_NAME ).toString();
-    const QString type = idx.data(PageManager::Role::REMOTE_WIDGET_TYPE).toString();
-    const QString uid  = idx.data(PageManager::Role::REMOTE_OBJECT_UID ).toString();
+    const QString name = idx.data(PageManager::Role::REMOTE_MODEL_NAME  ).toString();
+    const QString obj  = idx.data(PageManager::Role::REMOTE_OBJECT_NAME ).toString();
+    const QString type = idx.data(PageManager::Role::REMOTE_WIDGET_TYPE ).toString();
+    const QString uid  = idx.data(PageManager::Role::REMOTE_OBJECT_UID  ).toString();
 
-    if (name.isEmpty() || type.isEmpty() || uid.isEmpty())
+    if ((name.isEmpty() && obj.isEmpty()) || type.isEmpty() || uid.isEmpty())
         return;
 
     auto m = registry->acquireModel(name);
 
-    if (!m)
+
+    if (!(m||obj.size()))
         return;
 
     addWidget({
         type,
         name,
+        obj,
         uid,
         m
     });

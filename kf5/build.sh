@@ -40,3 +40,19 @@ build_framework kwidgetsaddons || exit
 #build_framework kconfigwidgets || exit
 # build_framework ki18n || exit
 # build_framework kxmlgui
+
+### QWT
+
+cd build
+unzip ../qwt-6.1.3.zip
+cd qwt-6.1.3
+export CXX=/android-ndk-r10e/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-g++
+sed 's/#QWT_CONFIG     += QwtDesigner/#/' -i qwtconfig.pri
+
+# Disable printing support
+echo 'DEFINES += QT_NO_PRINTER=1' >> qwtconfig.pri
+sed 's/Qt5PrintSupport//' -i src/src.pro
+/usr/local/Qt-5.7.1/bin/qmake  -r -spec android-g++ CONFIG+=debug QT_INSTALL_PREFIX=$PWD/../
+sed 's/-lQt5PrintSupport//' -i src/MakeFile
+
+make -j8

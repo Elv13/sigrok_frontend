@@ -56,6 +56,10 @@ qt5_generate_repc(libcommon_SRCS
     repc/device.rep
     REPLICA
 )
+qt5_generate_repc(libcommon_SRCS
+    repc/autorange.rep
+    REPLICA
+)
 
 ADD_LIBRARY( common STATIC ${libcommon_SRCS} )
 

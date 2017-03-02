@@ -26,9 +26,10 @@ public:
     virtual void write(QJsonObject &parent) const override;
     virtual void read(const QJsonObject &parent) override;
 
-    virtual QString remoteWidgetType() const override;
-
     virtual QWidget* widget() const override;
+
+    virtual QString remoteObjectName() const override;
+    virtual QString remoteWidgetType() const override;
 
     void setLowerLimit(qreal v);
     void setUpperLimit(qreal v);
