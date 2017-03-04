@@ -6,9 +6,14 @@
 
 #include "mainwindow.h"
 
+#include <QStyleFactory>
+
 int main (int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    if (QStyleFactory::keys().indexOf("Android") != -1)
+        app.setStyle(QStyleFactory::create("Android"));
 
 //     KLocalizedString::setApplicationDomain("org.sigrok");
 

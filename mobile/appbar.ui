@@ -39,6 +39,9 @@
      <property name="text">
       <string>Edit</string>
      </property>
+     <property name="icon">
+      <iconset theme="document-edit"/>
+     </property>
      <property name="checkable">
       <bool>true</bool>
      </property>
@@ -48,6 +51,9 @@
     <widget class="QToolButton" name="toolButton_2">
      <property name="text">
       <string>Menu</string>
+     </property>
+     <property name="icon">
+      <iconset theme="application-menu"/>
      </property>
     </widget>
    </item>

@@ -48,7 +48,7 @@ private:
 
     void addWidget(RemoteWidget wdg);
     void initStyle();
-    QWidget* createTitlebar(QWidget* parent);
+    QWidget* createTitlebar(QWidget* parent, MainWindow*);
 };
 
 #endif // MAINWINDOW_H

@@ -44,6 +44,10 @@ QT5_ADD_RESOURCES(mobile_SRCS
     mobile.qrc
 )
 
+QT5_ADD_RESOURCES(mobile_SRCS
+    icons/icons.qrc
+)
+
 ADD_LIBRARY( mobile STATIC ${mobile_SRCS} )
 
 TARGET_LINK_LIBRARIES( mobile

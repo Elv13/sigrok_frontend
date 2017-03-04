@@ -88,6 +88,8 @@ QString TableNode::remoteModelName() const
         RemoteManager::instance()->addModel(d_ptr->m_pRemoteModel, {
             Qt::DisplayRole,
             Qt::EditRole,
+            Qt::BackgroundRole,
+            Qt::ForegroundRole,
         }, d_ptr->m_Id);
     }
 

@@ -1,0 +1,27 @@
+
+
+QLabel {
+    /*padding: 0.0em 0.0em 0.0em em;*/
+    color: qlineargradient( x1:0 y1:0, x2:0 y2:2, stop:0 #FFF300, stop:1 #C2B900);
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:2, stop:0 #FFF300, stop:1 #C2B900);
+}
+
+.docktitlebar {
+    color: qlineargradient( x1:0 y1:0, x2:0 y2:2, stop:0 #FFF300, stop:1 #C2B900);
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:2, stop:0 #FFF300, stop:1 #C2B900);
+/*    height: 1em;
+    min-height: 1em;
+    min-height: 1em;*/
+    margin: 0em 0em 0em 0em;
+    padding: 0.4em 0.4em 0.4em 0.4em;
+    border: 0px;
+}
+
+/*#myLabel {
+    padding: 0em 0em 0em 0em;
+    background: transparent;
+}*/
+
+QLabel[accessibleName="dragLabel"] {
+   /*background-color: red;*/
+}

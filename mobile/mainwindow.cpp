@@ -22,13 +22,145 @@
 #include "meterdata_replica.h"
 
 #include "qrc_mobile.cpp"
+// #include "qrc_icons.cpp"
 
-QWidget* MainWindow::createTitlebar(QWidget* parent)
+#include <QtWidgets/QDialogButtonBox>
+
+#include "Qt-Color-Widgets/include/ColorWheel"
+
+class DockTitleBar : public QLabel
 {
-    auto ret = new QWidget(parent);
+    Q_OBJECT
+
+    Q_PROPERTY(QString class READ cssClass)
+
+public:
+    explicit DockTitleBar(QWidget* parent, MainWindow* mw) :
+        QLabel(QString(), parent), m_pMainWindow(mw){}
+    QString cssClass() { return QString("docktitlebar"); }
+
+    MainWindow* m_pMainWindow;
+    color_widgets::ColorWheel* m_pColorWheel {nullptr};
+    QWidget* m_pDialog;
+    bool m_IsBg {false};
+    QCheckBox* m_pMain;
+
+    void selectColor(const QColor& base);
+
+public Q_SLOTS:
+    void slotMain(bool);
+    void slotBg();
+    void slotFg();
+    void okClicked();
+    void cancelClicked();
+};
+
+void DockTitleBar::selectColor(const QColor& base)
+{
+    m_pColorWheel = new color_widgets::ColorWheel(this);
+    m_pColorWheel->setColor(base);
+    auto m_pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,this);
+
+    m_pDialog = new QWidget(m_pMainWindow);
+    m_pDialog->resize(m_pMainWindow->width(), m_pMainWindow->height());
+    auto l = new QVBoxLayout(m_pDialog);
+    l->addWidget(m_pColorWheel);
+    l->addWidget(m_pButtonBox);
+
+    connect(m_pButtonBox, &QDialogButtonBox::accepted, this, &DockTitleBar::okClicked);
+    connect(m_pButtonBox, &QDialogButtonBox::rejected, this, &DockTitleBar::cancelClicked);
+    m_pDialog->show();
+}
+
+void DockTitleBar::okClicked()
+{
+    auto col = m_pColorWheel->color();
+
+    auto p = parentWidget()->palette();
+
+    if (m_IsBg)
+        p.setColor(QPalette::Base, col);
+    else
+        p.setColor(QPalette::WindowText, col);
+
+    parentWidget()->setPalette(p);
+
+    cancelClicked();
+}
+
+void DockTitleBar::cancelClicked()
+{
+    m_pDialog->setVisible(false);
+    delete m_pColorWheel;
+    delete m_pDialog;
+
+}
+
+void DockTitleBar::slotMain(bool v)
+{
+    if (auto dock = qobject_cast<QDockWidget*>(parentWidget())) {
+        if (!v) {
+            dock->setParent(m_pMainWindow);
+            dock->QObject::setParent(m_pMainWindow);
+        }
+
+        if (v) {
+            // Remove the existing
+            if (m_pMainWindow->centralWidget()
+                && m_pMainWindow->centralWidget()->layout()
+                && m_pMainWindow->centralWidget()->layout()->count()
+                && m_pMainWindow->centralWidget()->layout()->itemAt(0)->widget()
+            )
+                if (auto dock = qobject_cast<QDockWidget*>(
+                    m_pMainWindow->centralWidget()->layout()->itemAt(0)->widget())
+                ) {
+                    qvariant_cast<DockTitleBar*>(
+                        dock->property("editTitlebar")
+                    )->m_pMain->setChecked(false);
+                }
+
+            auto w = new QWidget(m_pMainWindow);
+            auto l = new QHBoxLayout(w);
+            l->setContentsMargins(0,0,0,0);
+            l->addWidget(dock);
+            m_pMainWindow->setCentralWidget(w);
+        }
+        else {
+            m_pMainWindow->centralWidget()->layout()->removeWidget(dock);
+            m_pMainWindow->setCentralWidget(nullptr);
+            m_pMainWindow->addDockWidget(Qt::LeftDockWidgetArea, dock);
+        }
+    }
+}
+
+void DockTitleBar::slotBg()
+{
+    m_IsBg = true;
+    auto p = parentWidget()->palette();
+
+    selectColor(p.color(QPalette::Base));
+}
+
+void DockTitleBar::slotFg()
+{
+    m_IsBg = false;
+    auto p = parentWidget()->palette();
+
+    selectColor(p.color(QPalette::WindowText));
+}
+
+QWidget* MainWindow::createTitlebar(QWidget* parent, MainWindow* mw)
+{
+    static const QResource tss(":/css/docktilebar.css");
+    static QByteArray editCss = QByteArray((char*)tss.data(),tss.size());
+
+    auto ret = new DockTitleBar(parent, mw);
 
     auto ui2 = new Ui_Titlebar();
     ui2->setupUi(ret);
+    ret->m_pMain = ui2->m_pMain;
+    ret->setStyleSheet(editCss);
+    ret->setMinimumSize(0, 30);
 
     return ret;
 }
@@ -75,8 +207,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     registry->waitForRegistry(); //TODO remove
 
-    const bool ret1 = registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2224")));
-    const bool ret2 = registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2225")));
+    /*const bool ret1 = */registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2224")));
+    /*const bool ret2 = */registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2225")));
 
     m_pPageModelReplica = registry->acquireModel(QStringLiteral("PageManager"));
 
@@ -92,7 +224,7 @@ MainWindow::MainWindow(QWidget *parent) :
         slotPageInserted({}, 0, m_pPageModelReplica->rowCount()-1);
     });
 
-    connect(m_pPageModelReplica, &QAbstractItemModel::rowsAboutToBeRemoved, [this](const QModelIndex& tl, int first, int last) {
+    connect(m_pPageModelReplica, &QAbstractItemModel::rowsAboutToBeRemoved, [this](const QModelIndex&, int first, int last) {
         for (int i = first; i <= last; i++) {
             const auto uid = m_pPageModelReplica->index(i, 0).data(PageManager::Role::REMOTE_OBJECT_UID).toString();
             //FIXME Q_ASSERT(!uid.isEmpty());
@@ -103,7 +235,6 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
     });
-
 }
 
 void MainWindow::addWidget(RemoteWidget wdg)
@@ -138,18 +269,27 @@ void MainWindow::addWidget(RemoteWidget wdg)
 
     static QHash<QString, std::function<QWidget*(QObject*)> > to {
         {"scale_node", [this](QObject* obj) {
-            auto scale = new QwtThermo(this);
+            auto w = new QWidget(this);
+            auto l = new QHBoxLayout(w);
+            auto scale = new QwtThermo(w);
+            l->addWidget(scale);
+            l->addStretch();
             scale->setLowerBound(1);
             scale->setUpperBound(10);
             //lcdw->setModel(model);
-            return scale;
+            return w;
         }},
     };
 
     if (tm.contains(wdg.m_Type)) {
         auto w = tm[wdg.m_Type](wdg.m_pModel);
         auto dock = new QDockWidget(wdg.m_ModelName, this);
-//         dock->setTitleBarWidget(createTitlebar(dock));
+
+        dock->setProperty("normalTitlebar", QVariant::fromValue(new QWidget(this)));
+        dock->setProperty("editTitlebar", QVariant::fromValue(createTitlebar(dock, this)));
+        dock->setTitleBarWidget(qvariant_cast<QWidget*>(
+            dock->property("normalTitlebar"))
+        );
 
         dock->setWidget(w);
 
@@ -159,6 +299,12 @@ void MainWindow::addWidget(RemoteWidget wdg)
     else if (to.contains(wdg.m_Type)) {
         auto w = to[wdg.m_Type](wdg.m_pModel);
         auto dock = new QDockWidget(wdg.m_ObjectName, this);
+
+        dock->setProperty("normalTitlebar", QVariant::fromValue(new QWidget(this)));
+        dock->setProperty("editTitlebar", QVariant::fromValue(createTitlebar(dock, this)));
+        dock->setTitleBarWidget(qvariant_cast<QWidget*>(
+            dock->property("normalTitlebar"))
+        );
 
         dock->setWidget(w);
 
@@ -226,8 +372,9 @@ void MainWindow::enableEditMode(bool edit)
                 QDockWidget::DockWidgetMovable : QDockWidget::NoDockWidgetFeatures
             );
             if (dock->titleBarWidget()) {
-//                 dock->titleBarWidget()->setMaximumSize(9999999, edit ? 99999999 : 0);
-                //dock->titleBarWidget()->setVisible(edit);
+                dock->setTitleBarWidget(qvariant_cast<QWidget*>(
+                    dock->property(edit ? "editTitlebar" : "normalTitlebar"))
+                );
             }
         }
     }
@@ -238,3 +385,4 @@ MainWindow::~MainWindow()
     //delete ui;
 }
 
+#include <mainwindow.moc>

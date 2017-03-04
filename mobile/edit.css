@@ -1,22 +1,7 @@
 QMainWindow::separator {
+    background-image: url(:/images/assets/resize.svg);
     width:1em;
     height: 1em;
-    background:red;
+    background: qlineargradient( x1:0 y1:0, x2:0 y2:2, stop:0 #000000, stop:1 #555555);
     padding:0.5em;
-}
-
-QDockWidget::title {
-    text-align: left; /* align the text to the left */
-    background: blue;
-    padding-left: 5px;
-    height: 1em;
-    padding: 0.5em;
-}
-
-QDockWidget::close-button, QDockWidget::float-button {
-    border: 10pt solid green;
-    height: 1em;
-    width: 1em;
-    background: darkgray;
-    padding: 10pt;
 }

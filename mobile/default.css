@@ -10,4 +10,5 @@
 QDockWidget::title {
     height: 0px;
     padding: 0px;
+    max-height:0px;
 }

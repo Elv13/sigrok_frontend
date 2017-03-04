@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>16</height>
+    <width>471</width>
+    <height>30</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>30</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -40,15 +46,21 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="myLabel">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="accessibleName">
+      <string>dragLabel</string>
+     </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Drag to move&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
@@ -66,6 +78,33 @@
     </spacer>
    </item>
    <item>
+    <widget class="QCheckBox" name="m_pMain">
+     <property name="text">
+      <string>Central</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="m_pFg">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset theme="color-picker"/>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="m_pBg">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset theme="color-fill"/>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QToolButton" name="toolButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Ignored">
@@ -81,5 +120,59 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_pMain</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Titlebar</receiver>
+   <slot>slotMain(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>285</x>
+     <y>29</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pFg</sender>
+   <signal>clicked()</signal>
+   <receiver>Titlebar</receiver>
+   <slot>slotFg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>363</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pBg</sender>
+   <signal>clicked()</signal>
+   <receiver>Titlebar</receiver>
+   <slot>slotBg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>420</x>
+     <y>18</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>31</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotMain(bool)</slot>
+  <slot>slotBg()</slot>
+  <slot>slotFg()</slot>
+ </slots>
 </ui>
