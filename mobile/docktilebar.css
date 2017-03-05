@@ -25,3 +25,22 @@ QLabel {
 QLabel[accessibleName="dragLabel"] {
    /*background-color: red;*/
 }
+
+
+QToolButton {
+    icon-size: 48px;
+    border: 0px;
+    background: transparent;
+    min-width:70;
+    margin:0px;
+    padding:0px;
+}
+
+QToolButton:pressed {
+    background-color: red;
+}
+
+QCheckBox {
+    background: transparent;
+    color: black;
+}

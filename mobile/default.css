@@ -12,3 +12,45 @@ QDockWidget::title {
     padding: 0px;
     max-height:0px;
 }
+
+QToolButton {
+    icon-size: 48px;
+    border: 0px;
+    background: transparent;
+    min-width:70;
+}
+
+QToolButton:pressed {
+    background-color: red;
+}
+
+QToolButton:selected {
+    background-color: red;
+}
+
+QTabBar::tab:selected {
+    border-top: 0.2em;
+    border-top-color: #0099CC;
+    border-style: solid;
+    border-right: 0.0em;
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    background:#303030;
+    border-left: 0.05em;
+    border-left-color:#383838;
+    border-style: solid;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
+
+QTabBar::tab:!selected {
+    margin-top: 2px;
+    background:#303030;
+    border-left: 0.05em;
+    border-left-color:#383838;
+    border-style: solid;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    padding-top: 0.9em;
+    padding-bottom: 0.7em;
+}

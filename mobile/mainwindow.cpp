@@ -22,7 +22,6 @@
 #include "meterdata_replica.h"
 
 #include "qrc_mobile.cpp"
-// #include "qrc_icons.cpp"
 
 #include <QtWidgets/QDialogButtonBox>
 
@@ -200,6 +199,10 @@ MainWindow::MainWindow(QWidget *parent) :
     auto apw = new QWidget(tb);
     auto ui2 = new Ui_AppBar();
     ui2->setupUi(apw);
+
+    QIcon::setThemeName("breeze-dark");
+//     ui2->m_pEdit->setIconSize(QSize(96,96));
+
     tb->addWidget(apw);
     connect(ui2->m_pEdit, &QToolButton::toggled, this, &MainWindow::enableEditMode);
 
@@ -364,6 +367,7 @@ void MainWindow::enableEditMode(bool edit)
     static QByteArray normalCss((char*)ss.data(),ss.size());
     static QByteArray editCss = normalCss+QByteArray((char*)ess.data(),ess.size());
 
+    qDebug() << normalCss;
     setStyleSheet(edit ? editCss : normalCss);
 
     Q_FOREACH(QDockWidget* dock, m_lDocks) {

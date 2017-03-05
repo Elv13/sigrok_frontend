@@ -56,6 +56,7 @@ add_subdirectory(common)
 
 if (BUILD_MOBILE)
     set(DISABLE_SIGROK 1)
+    add_definitions(-DPACKED_ICONS=1)
 endif()
 
 if (QWT_FOUND)

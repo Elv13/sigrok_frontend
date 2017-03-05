@@ -8,6 +8,10 @@
 
 #include <QStyleFactory>
 
+#ifdef PACKED_ICONS
+ #include "qrc_icons.cpp"
+#endif
+
 int main (int argc, char *argv[])
 {
     QApplication app(argc, argv);
