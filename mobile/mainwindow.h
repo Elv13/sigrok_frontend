@@ -7,6 +7,7 @@
 
 // class RemoteWidgetsReplica;
 class QRemoteObjectNode;
+class QQuickWidget;
 
 struct RemoteWidget
 {
@@ -30,6 +31,8 @@ public:
     ~MainWindow();
 
 //     RemoteWidgetsReplica* rw;
+//     QQuickView* m_pPaneView{nullptr};
+    QQuickWidget* m_pPaneWidget{nullptr};
 
 private Q_SLOTS:
     void slotPageInserted(const QModelIndex&, int start, int end);
@@ -38,6 +41,7 @@ private Q_SLOTS:
 //     void setMainLabel(float value);
 //     void reloadremotewidgets();
 //     void buttonPressed();
+    void beginLeftPaneDrag();
 
 private:
 //     Ui::MainWindow *ui;

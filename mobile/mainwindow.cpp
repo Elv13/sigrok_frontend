@@ -7,6 +7,7 @@
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QTableView>
 #include <QtCore/QFile>
+#include <QtGui/QMouseEvent>
 #include <QRemoteObjectNode>
 #include <QAbstractItemModelReplica>
 #include "widgets/lcdmeter.h"
@@ -14,6 +15,9 @@
 #include "widgets/curvechart.h"
 #include "widgets/meter.h"
 #include "common/pagemanager.h"
+
+#include <QQuickWidget>
+#include <QQuickStyle>
 
 #ifdef WITH_QWT
  #include "qwt_thermo.h"
@@ -26,6 +30,65 @@
 #include <QtWidgets/QDialogButtonBox>
 
 #include "Qt-Color-Widgets/include/ColorWheel"
+
+class PaneEventFilter : public QObject
+{
+    Q_OBJECT
+public:
+    explicit PaneEventFilter(MainWindow* mw);
+
+    virtual bool eventFilter(QObject *object, QEvent *event) override;
+
+    enum class State {
+        IDLE,
+        LOCKED,
+        DRAGGING
+    };
+
+    State m_S {State::DRAGGING};
+
+private:
+    MainWindow* m_pMainWindow;
+};
+
+PaneEventFilter::PaneEventFilter(MainWindow* mw) : QObject(mw), m_pMainWindow(mw)
+{}
+
+bool PaneEventFilter::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::MouseMove && m_S == State::DRAGGING) {
+        QMouseEvent* e = static_cast<QMouseEvent*>(event);
+
+        const int xPos = (-m_pMainWindow->m_pPaneWidget->width()) + e->pos().x();
+
+        if (xPos <= 0)
+            m_pMainWindow->m_pPaneWidget->move( xPos, 0 );
+
+        e->accept();
+        return true;
+    }
+    else if (event->type() == QEvent::MouseButtonRelease && m_S == State::DRAGGING) {
+        m_pMainWindow->m_pPaneWidget->move(0, 0 );
+        m_S = State::LOCKED;
+
+        event->accept();
+        return true;
+    }
+    else if (event->type() == QEvent::MouseButtonPress && m_S == State::LOCKED) {
+        QMouseEvent* e = static_cast<QMouseEvent*>(event);
+        if (e->pos().x() > m_pMainWindow->m_pPaneWidget->width()) {
+            QApplication::instance()->removeEventFilter(this);
+            m_S = State::IDLE;
+            m_pMainWindow->m_pPaneWidget->hide();
+            this->deleteLater();
+
+            e->accept();
+            return true;
+        }
+    }
+
+    return false;
+}
 
 class DockTitleBar : public QLabel
 {
@@ -42,7 +105,7 @@ public:
     color_widgets::ColorWheel* m_pColorWheel {nullptr};
     QWidget* m_pDialog;
     bool m_IsBg {false};
-    QCheckBox* m_pMain;
+    QToolButton* m_pMain;
 
     void selectColor(const QColor& base);
 
@@ -157,6 +220,7 @@ QWidget* MainWindow::createTitlebar(QWidget* parent, MainWindow* mw)
 
     auto ui2 = new Ui_Titlebar();
     ui2->setupUi(ret);
+    ui2->label_2->setPixmap(QIcon::fromTheme("application-menu").pixmap(256,256));
     ret->m_pMain = ui2->m_pMain;
     ret->setStyleSheet(editCss);
     ret->setMinimumSize(0, 30);
@@ -166,6 +230,7 @@ QWidget* MainWindow::createTitlebar(QWidget* parent, MainWindow* mw)
 
 void MainWindow::initStyle()
 {
+    QQuickStyle::setStyle("Material");
 
     // Use a dark material color theme
     QPalette p = QApplication::palette();
@@ -199,9 +264,9 @@ MainWindow::MainWindow(QWidget *parent) :
     auto apw = new QWidget(tb);
     auto ui2 = new Ui_AppBar();
     ui2->setupUi(apw);
+    connect(ui2->m_pMenu, &QToolButton::pressed, this, &MainWindow::beginLeftPaneDrag);
 
     QIcon::setThemeName("breeze-dark");
-//     ui2->m_pEdit->setIconSize(QSize(96,96));
 
     tb->addWidget(apw);
     connect(ui2->m_pEdit, &QToolButton::toggled, this, &MainWindow::enableEditMode);
@@ -238,6 +303,7 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
     });
+
 }
 
 void MainWindow::addWidget(RemoteWidget wdg)
@@ -294,6 +360,8 @@ void MainWindow::addWidget(RemoteWidget wdg)
             dock->property("normalTitlebar"))
         );
 
+        w->setMinimumSize(30,30);
+        w->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         dock->setWidget(w);
 
         addDockWidget(Qt::LeftDockWidgetArea, dock);
@@ -346,6 +414,28 @@ void MainWindow::createSection(const QPersistentModelIndex& idx)
     m_hLoaded[idx] = true;
 }
 
+void MainWindow::beginLeftPaneDrag()
+{
+
+    if (!m_pPaneWidget) {
+        m_pPaneWidget = new QQuickWidget(this);
+        m_pPaneWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+        qDebug() << "====================";
+        m_pPaneWidget->setSource(QUrl("qrc:/qml/qml/leftpane.qml"));
+        qDebug() << "====================";
+        m_pPaneWidget->setMinimumSize(200, 200);
+        m_pPaneWidget->resize(
+            std::min((int)(width()*0.66), (int)(width()*0.66)), height()
+        );
+    }
+
+    m_pPaneWidget->move(-m_pPaneWidget->width(), 0);
+    m_pPaneWidget->raise();
+    m_pPaneWidget->show();
+
+    installEventFilter(new PaneEventFilter(this));
+}
+
 void MainWindow::slotPageInserted(const QModelIndex&, int start, int end)
 {
     for (int i = start; i <= end; i++) {
@@ -367,7 +457,6 @@ void MainWindow::enableEditMode(bool edit)
     static QByteArray normalCss((char*)ss.data(),ss.size());
     static QByteArray editCss = normalCss+QByteArray((char*)ess.data(),ess.size());
 
-    qDebug() << normalCss;
     setStyleSheet(edit ? editCss : normalCss);
 
     Q_FOREACH(QDockWidget* dock, m_lDocks) {

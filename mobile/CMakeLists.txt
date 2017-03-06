@@ -27,6 +27,9 @@ if (QWT_FOUND)
         Svg
         OpenGL
         Concurrent
+        Quick
+        QuickWidgets
+        QuickControls2
     )
 endif()
 
@@ -53,7 +56,10 @@ ADD_LIBRARY( mobile STATIC ${mobile_SRCS} )
 TARGET_LINK_LIBRARIES( mobile
     Qt5::Widgets
     Qt5::Gui
+    Qt5::Quick
+    Qt5::QuickWidgets
     Qt5::Network
+    Qt5::QuickControls2
     common
     nodewidgets
 )
