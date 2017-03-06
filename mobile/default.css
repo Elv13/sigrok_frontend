@@ -1,7 +1,4 @@
 
-
-
-
 /*QTableView::item {
     font-size: 14pt;
     padding: 0.5em;
@@ -17,7 +14,7 @@ QToolButton {
     icon-size: 48px;
     border: 0px;
     background: transparent;
-    min-width:70;
+/*     min-width:70; */
 }
 
 QToolButton:pressed {
@@ -53,4 +50,10 @@ QTabBar::tab:!selected {
     padding-right: 0.3em;
     padding-top: 0.9em;
     padding-bottom: 0.7em;
+}
+
+QToolBar::handle {
+    display: none;
+    width:0px;
+    height:0px;
 }

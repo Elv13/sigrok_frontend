@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QGuiApplication>
 #include <QCommandLineParser>
 
 #include <KAboutData>
@@ -14,6 +15,8 @@
 
 int main (int argc, char *argv[])
 {
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
     QApplication app(argc, argv);
 
     if (QStyleFactory::keys().indexOf("Android") != -1)

@@ -4,6 +4,9 @@
     <file>edit.css</file>
     <file>default.css</file>
   </qresource>
+  <qresource prefix="qml">
+    <file>qml/leftpane.qml</file>
+  </qresource>
   <qresource prefix="images">
     <file>assets/resize.svg</file>
   </qresource>
