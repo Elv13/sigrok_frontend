@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QGuiApplication>
 #include <QCommandLineParser>
-
+#include <stdlib.h>
 #include <KAboutData>
 // #include <KLocalizedString>
 
@@ -9,12 +9,20 @@
 
 #include <QStyleFactory>
 
+#include <QtQuick/QQuickWindow>
+
 #ifdef PACKED_ICONS
  #include "qrc_icons.cpp"
 #endif
 
 int main (int argc, char *argv[])
 {
+    // As of Qt5.8.1, it crash when using EGL
+#ifdef PACKED_ICONS
+    setenv("QMLSCENE_DEVICE", "softwarecontext", 1);
+    QQuickWindow::setSceneGraphBackend(QSGRendererInterface::Software);
+#endif
+
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QApplication app(argc, argv);

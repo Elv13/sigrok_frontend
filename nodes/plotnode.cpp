@@ -1,15 +1,12 @@
 #include "plotnode.h"
 
-#include <qwt6/qwt_plot_curve.h>
-#include <qwt6/qwt_plot.h>
-#include <qwt6/qwt_plot_grid.h>
-
 #include "common/pagemanager.h"
 #include "common/abstractsession.h"
 
 #include "proxies/vectorizingproxy.h"
 
 #include "remotemanager.h"
+#include "widgets/plot.h"
 
 #include <QtCore/QTimer>
 #include <QtCore/QIdentityProxyModel>
@@ -18,10 +15,7 @@ class QwtPlotNodePrivate : public QObject
 {
     Q_OBJECT
 public:
-    QwtPlotCurve* m_pCurve {new QwtPlotCurve};
-    QwtPlot* m_pPlotter {new QwtPlot()};
-    QwtPlotGrid* m_pGrid {new QwtPlotGrid()};
-    VectorizingProxy* m_pCache {new VectorizingProxy(this)};
+    Plot* m_pPlot {new Plot()};
     mutable QIdentityProxyModel* m_pRemoteModel {nullptr};
     mutable QString m_Id;
 
@@ -35,15 +29,8 @@ QwtPlotNode::QwtPlotNode(AbstractSession* sess) : ProxyNode(sess), d_ptr(new Qwt
 {
     d_ptr->q_ptr = this;
 
-    d_ptr->m_pCache->setColumns({1});
-//     d_ptr->m_pPlotter->attach(d_ptr->m_pCurve);
-    d_ptr->m_pCurve->attach(d_ptr->m_pPlotter);
-    d_ptr->m_pGrid->attach(d_ptr->m_pPlotter);
-
-    d_ptr->m_pCurve->setPen (Qt::yellow, 2, Qt::SolidLine);
-
     QTimer::singleShot(0, [this](){
-        session()->pages()->addPage(this, d_ptr->m_pPlotter, title(), uid());
+        session()->pages()->addPage(this, d_ptr->m_pPlot, title(), uid());
     });
 
     QObject::connect(this, &ProxyNode::modelChanged, d_ptr, &QwtPlotNodePrivate::slotModelChanged);
@@ -68,9 +55,12 @@ QWidget* QwtPlotNode::widget() const
 void QwtPlotNodePrivate::slotModelChanged(QAbstractItemModel* newModel, QAbstractItemModel* old)
 {
     Q_UNUSED(old)
-    m_pCache->setSourceModel(newModel);
 
-    q_ptr->replot();
+    m_pPlot->setModel(newModel);
+
+    if (m_pRemoteModel) {
+        m_pRemoteModel->setSourceModel(newModel);
+    }
 }
 
 QString QwtPlotNode::remoteModelName() const
@@ -99,11 +89,7 @@ QString QwtPlotNode::remoteWidgetType() const
 
 void QwtPlotNode::replot(bool)
 {
-    auto x = d_ptr->m_pCache->rowsVector();
-    auto y = d_ptr->m_pCache->sharedVectorData(1).get();
-
-    d_ptr->m_pCurve->setSamples(x.data(), y->data(), std::min(x.size(), y->size()));
-    d_ptr->m_pPlotter->replot();
+    d_ptr->m_pPlot->replot();
 }
 
 #include <plotnode.moc>

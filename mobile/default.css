@@ -1,8 +1,32 @@
 
-/*QTableView::item {
+QTableView::item {
     font-size: 14pt;
+    margin: 0.5em;
+    min-height: 1em;
     padding: 0.5em;
-}*/
+    height: 1em;
+}
+
+
+QHeaderView::section
+{
+    font-size: 14pt;
+    min-height: 1em;
+    padding: 0.5em;
+    height: 1em;
+    color: white;
+    background: #31363B;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #0099CC;
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+QHeaderView::section::horizontal
+{
+    max-height: 1em;
+}
 
 QDockWidget::title {
     height: 0px;
@@ -56,4 +80,36 @@ QToolBar::handle {
     display: none;
     width:0px;
     height:0px;
+}
+
+QMainWindow::separator {
+    width:0em;
+    height: 0em;
+}
+
+QScrollBar:horizontal {
+    border: 0px;
+    background: #32CC99;
+    height: 45px;
+    margin: 3px 1px 3px 1px;
+}
+QScrollBar::handle:horizontal {
+    background: #151515;
+    min-width: 20px;
+}
+
+QScrollBar::add-line,QScrollBar::sub-line {
+    border: none;
+    background: none;
+}
+
+QScrollBar:vertical {
+    border: 0px;
+    background: #303030;
+    width: 45px;
+    margin: 1px 3px 1px 3px;
+}
+QScrollBar::handle:vertical {
+    background: #151515;
+    min-height: 20px;
 }

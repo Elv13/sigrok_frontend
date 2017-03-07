@@ -52,7 +52,9 @@ sed 's/#QWT_CONFIG     += QwtDesigner/#/' -i qwtconfig.pri
 # Disable printing support
 echo 'DEFINES += QT_NO_PRINTER=1' >> qwtconfig.pri
 sed 's/Qt5PrintSupport//' -i src/src.pro
-/usr/local/Qt-5.7.1/bin/qmake  -r -spec android-g++ CONFIG+=debug QT_INSTALL_PREFIX=$PWD/../
-sed 's/-lQt5PrintSupport//' -i src/MakeFile
+/usr/local/Qt-5.8.1/bin/qmake  -r -spec android-g++ CONFIG+=debug QT_INSTALL_PREFIX=$PWD/../
+sed 's/-lQt5PrintSupport//' -i src/Makefile
 
 make -j8
+make install
+ln -s /usr/local/qwt-6.1.3/include/ /usr/local/qwt-6.1.3/include/qwt6

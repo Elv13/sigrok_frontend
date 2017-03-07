@@ -63,13 +63,13 @@ struct ConnectionHolder
         const auto v2 = destination.data(Qt::EditRole);
 
 
-        if (QByteArray(v1.typeName()).right(1) == QChar('*')) {
+        if (QByteArray(v1.typeName()).right(1)[0] == '*') {
             isPointer = true;
             pointerType = v1.userType();
             return;
         }
 
-        if (QByteArray(v2.typeName()).right(1) == QChar('*')) {
+        if (QByteArray(v2.typeName()).right(1)[0] == '*') {
             isPointer = true;
             pointerType = v2.userType();
             return;

@@ -60,7 +60,7 @@ QString RemoteActionNode::remoteModelName() const
         d_ptr->m_Id = QStringLiteral("remoteaction")+QString::number(count++);
 
     if (!d_ptr->m_IsRegistered)
-        RemoteManager::instance()->addModel(d_ptr->m_pModel, {
+        RemoteManager::instance()->addModel(d_ptr->m_pModel->clientModel(), {
             Qt::DisplayRole,
             Qt::EditRole,
         }, d_ptr->m_Id);

@@ -14,9 +14,11 @@
 #include "widgets/controls.h"
 #include "widgets/curvechart.h"
 #include "widgets/meter.h"
+#include "widgets/plot.h"
 #include "common/pagemanager.h"
 
 #include <QQuickWidget>
+#include <QQmlContext>
 #include <QQuickStyle>
 
 #ifdef WITH_QWT
@@ -271,18 +273,23 @@ MainWindow::MainWindow(QWidget *parent) :
     tb->addWidget(apw);
     connect(ui2->m_pEdit, &QToolButton::toggled, this, &MainWindow::enableEditMode);
 
-    registry = new QRemoteObjectNode(QUrl(QStringLiteral("tcp://10.10.10.136:2223")));
+    registry = new QRemoteObjectNode(QUrl(QStringLiteral("tcp://10.10.10.186:2223")));
 
     registry->waitForRegistry(); //TODO remove
 
-    /*const bool ret1 = */registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2224")));
-    /*const bool ret2 = */registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.136:2225")));
+    /*const bool ret1 = */registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.186:2224")));
+    /*const bool ret2 = */registry->connectToNode(QUrl(QStringLiteral("tcp://10.10.10.186:2225")));
 
     m_pPageModelReplica = registry->acquireModel(QStringLiteral("PageManager"));
 
     connect(m_pPageModelReplica, &QAbstractItemModel::dataChanged, [this](const QModelIndex& tl,const QModelIndex& br) {
-
         for (int i = tl.row(); i <= br.row(); i++) {
+            const QPersistentModelIndex idx = m_pPageModelReplica->index(i, 0);
+            createSection(idx);
+        }
+    });
+    connect(m_pPageModelReplica, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& par, int first, int last) {
+        for (int i = first; i <= last; i++) {
             const QPersistentModelIndex idx = m_pPageModelReplica->index(i, 0);
             createSection(idx);
         }
@@ -314,14 +321,29 @@ void MainWindow::addWidget(RemoteWidget wdg)
             lcdw->setModel(model);
             return lcdw;
         }},
+        {"qwtplot_node", [this](QAbstractItemModel* model) {
+            auto p = new Plot(this);
+            p->setModel(model);
+            return p;
+        }},
         {"table_node", [this](QAbstractItemModel* m) {
             auto tv = new QTableView(this);
+            tv->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+            tv->horizontalHeader()->setMaximumSize(9999, 50);
+            tv->horizontalHeader()->setDefaultSectionSize(30);
+            tv->horizontalHeader()->setStretchLastSection(true);
+            tv->verticalHeader()->setVisible(true);
+            tv->verticalHeader()->setMinimumSize(30,0);
+            tv->verticalHeader()->setDefaultSectionSize(30);
             tv->setModel(m);
             return tv;
         }},
         {"remoteaction_node", [this](QAbstractItemModel* model) {
-            auto ctrl = new Controls(this);
-            ctrl->setModel(model);
+            auto ctrl = new QQuickWidget(this);
+            ctrl->setResizeMode(QQuickWidget::SizeRootObjectToView);
+            ctrl->rootContext()->setContextProperty("controlModel", model);
+            ctrl->setSource(QUrl("qrc:/qml/qml/controls.qml"));
+
             return ctrl;
         }},
         {"meter_node", [this](QAbstractItemModel* model) {

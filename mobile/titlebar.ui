@@ -108,7 +108,8 @@
       <string>Central</string>
      </property>
      <property name="icon">
-      <iconset theme="snap-bounding-box-center"/>
+      <iconset theme="snap-bounding-box-center">
+       <normaloff>../../../.designer/backup</normaloff>../../../.designer/backup</iconset>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -128,7 +129,7 @@
      </property>
      <property name="icon">
       <iconset theme="color-picker">
-       <normaloff>.</normaloff>.</iconset>
+       <normaloff>../../../.designer/backup</normaloff>../../../.designer/backup</iconset>
      </property>
     </widget>
    </item>
@@ -145,7 +146,7 @@
      </property>
      <property name="icon">
       <iconset theme="color-fill">
-       <normaloff>.</normaloff>.</iconset>
+       <normaloff>../../../.designer/backup</normaloff>../../../.designer/backup</iconset>
      </property>
     </widget>
    </item>
@@ -162,7 +163,7 @@
      </property>
      <property name="icon">
       <iconset theme="tab-close">
-       <normaloff>.</normaloff>.</iconset>
+       <normaloff>../../../.designer/backup</normaloff>../../../.designer/backup</iconset>
      </property>
     </widget>
    </item>

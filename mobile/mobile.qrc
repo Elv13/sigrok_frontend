@@ -5,7 +5,11 @@
     <file>default.css</file>
   </qresource>
   <qresource prefix="qml">
+    <file>qml/controls.qml</file>
     <file>qml/leftpane.qml</file>
+  </qresource>
+  <qresource>
+    <file>qtquickcontrols2.conf</file>
   </qresource>
   <qresource prefix="images">
     <file>assets/resize.svg</file>

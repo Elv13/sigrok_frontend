@@ -18,6 +18,9 @@ include(../cmake/extrawarnings.cmake)
 find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
     Widgets
+    Quick
+    QuickWidgets
+    QuickControls2
     Network
 )
 
@@ -27,9 +30,6 @@ if (QWT_FOUND)
         Svg
         OpenGL
         Concurrent
-        Quick
-        QuickWidgets
-        QuickControls2
     )
 endif()
 

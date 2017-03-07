@@ -22,6 +22,19 @@ find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
     WidgetsAddons
 )
 
+if (QWT_FOUND)
+    find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+        Svg
+        OpenGL
+        Concurrent
+    )
+
+    if (BUILD_MOBILE)
+        set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/local/lib /libs/armeabi-v7a/)
+        set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /usr/local/qwt-6.1.3/include/)
+        include_directories(/usr/local/qwt-6.1.3/include/) #FIXME
+    endif()
+endif()
 set(CMAKE_AUTOMOC ON)
 
 # find_package(KChart "2.6.0" REQUIRED) #TODO make optional
@@ -46,6 +59,7 @@ SET(libnodewidgets_SRCS
     curvechart.cpp
     sequence.cpp
     monitor.cpp
+    plot.cpp
 )
 
 if (NOT BUILD_MOBILE)
@@ -95,3 +109,13 @@ TARGET_LINK_LIBRARIES( nodewidgets
     KF5::ItemModels
 #     KChart
 )
+
+if (QWT_FOUND)
+    TARGET_LINK_LIBRARIES(nodewidgets
+        ${QWT_LIBRARY}
+        Qt5::Svg
+        Qt5::OpenGL
+        Qt5::Concurrent
+    )
+endif()
+

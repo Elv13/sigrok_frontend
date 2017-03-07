@@ -59,11 +59,11 @@ QRemoteObjectHost* RemoteManager::host() const
 {
     if (!d_ptr->m_pHost) {
         if (!d_ptr->m_pReg)
-            d_ptr->m_pReg = new QRemoteObjectRegistryHost(QUrl(QStringLiteral("tcp://10.10.10.136:2223")));
+            d_ptr->m_pReg = new QRemoteObjectRegistryHost(QUrl(QStringLiteral("tcp://10.10.10.186:2223")));
 
         d_ptr->m_pHost = new QRemoteObjectHost(
-            QUrl(QStringLiteral("tcp://10.10.10.136:2224")),
-            QUrl(QStringLiteral("tcp://10.10.10.136:2223"))
+            QUrl(QStringLiteral("tcp://10.10.10.186:2224")),
+            QUrl(QStringLiteral("tcp://10.10.10.186:2223"))
         );
 
         // Export itself
