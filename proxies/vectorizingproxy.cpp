@@ -24,6 +24,7 @@ public:
 public Q_SLOTS:
     void slotLayoutChanged();
     void slotRowsInserted(const QModelIndex &parent, int first, int last);
+    void slotDataChanged(const QModelIndex &tl, const QModelIndex& br);
     void slotRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 };
 
@@ -31,6 +32,8 @@ VectorizingProxy::VectorizingProxy(QObject* parent) : QIdentityProxyModel(parent
     d_ptr(new VectorizingProxyPrivate)
 {
     d_ptr->q_ptr = this;
+    connect(this, &QAbstractItemModel::dataChanged,
+            d_ptr, &VectorizingProxyPrivate::slotDataChanged);
     connect(this, &QAbstractItemModel::rowsInserted,
             d_ptr, &VectorizingProxyPrivate::slotRowsInserted);
     connect(this, &QAbstractItemModel::rowsAboutToBeRemoved,
@@ -117,6 +120,28 @@ void VectorizingProxyPrivate::slotLayoutChanged()
 }
 
 void VectorizingProxyPrivate::
+slotDataChanged(const QModelIndex &tl, const QModelIndex& br)
+{
+    if (tl.parent() != br.parent())
+        return;
+
+    if (tl.row() > br.row())
+        return;
+
+    // Add the values
+    for (int i = tl.row(); i <= br.row(); i++) {
+        for (int j =0; j < m_lData.size(); j++) {
+            if (auto dtptr = m_lData[j]) {
+                QVector<double>& vector = *dtptr.get();
+                const auto idx = q_ptr->sourceModel()->index(i,j);
+                vector[i] = idx.data().toDouble();
+            }
+        }
+        m_lIds[i] = i;
+    }
+}
+
+void VectorizingProxyPrivate::
 slotRowsInserted(const QModelIndex &parent, int first, int last)
 {
     if (parent.isValid())
@@ -130,17 +155,7 @@ slotRowsInserted(const QModelIndex &parent, int first, int last)
     }
     m_lIds.resize(newSize);
 
-    // Add the values
-    for (int i = first; i <= last; i++) {
-        for (int j =0; j < m_lData.size(); j++) {
-            if (auto dtptr = m_lData[j]) {
-                QVector<double>& vector = *dtptr.get();
-                const auto idx = q_ptr->sourceModel()->index(i,j);
-                vector[i] = idx.data().toDouble();
-            }
-        }
-        m_lIds[i] = i;
-    }
+    slotDataChanged(q_ptr->index(first, 0), q_ptr->index(last, 0));
 }
 
 void VectorizingProxyPrivate::
