@@ -30,11 +30,13 @@ SET(libextraproxies_SRCS
     rowsdeletionproxy.cpp
     deduplicateproxy.cpp
     vectorizingproxy.cpp
+    xmlschemabuildermodel.cpp
 )
 
 ADD_LIBRARY( extraproxies STATIC ${libextraproxies_SRCS} )
 
 TARGET_LINK_LIBRARIES( extraproxies
     ${Qt5Core_LIBRARIES}
+    Qt5::Xml
 #     KChart
 )

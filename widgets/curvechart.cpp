@@ -28,6 +28,9 @@ void CurveChart::setModel(QAbstractItemModel* m)
 
     m_pModel = m;
 
+    if (!m)
+        return;
+
     connect(m_pModel, &QAbstractItemModel::rowsInserted,
         this, &CurveChart::slotRowsInserted);
 

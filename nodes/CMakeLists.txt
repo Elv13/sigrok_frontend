@@ -48,6 +48,7 @@ SET(libnodes_SRCS
     sequencenode.cpp
     monitornode.cpp
     autorangenode.cpp
+#     xmlnode.cpp
 )
 
 if (QWT_FOUND)
@@ -73,6 +74,7 @@ TARGET_LINK_LIBRARIES( nodes
     Qt5::Core
     Qt5::Widgets
     Qt5::Gui
+    Qt5::Xml
     Qt5::RemoteObjects
     KF5::ItemModels
     KF5::WidgetsAddons

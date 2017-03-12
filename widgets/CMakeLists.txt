@@ -60,6 +60,8 @@ SET(libnodewidgets_SRCS
     sequence.cpp
     monitor.cpp
     plot.cpp
+    xml.cpp
+    xmlimport.cpp
 )
 
 if (NOT BUILD_MOBILE)
@@ -91,6 +93,8 @@ QT5_WRAP_UI(libnodewidgets_SRCS
     sequence.ui
     chrono.ui
     monitor.ui
+    xml.ui
+    xmlimport.ui
 )
 
 # QT5_ADD_RESOURCES(libnodewidgets_SRCS

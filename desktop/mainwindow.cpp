@@ -52,6 +52,7 @@
 #include "nodes/remoteaction.h"
 #include "nodes/devicelistnode.h"
 #include "nodes/multiplexernode.h"
+// #include "nodes/xmlnode.h"
 #include "nodes/remoteaction.h"
 #include "nodes/deduplicatenode.h"
 
@@ -348,6 +349,7 @@ Session* MainWindow::addSession(const QString& name)
     sess->registerType<AutoRangeNode>        (QStringLiteral("Tools")         , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<ChronoNode>           (QStringLiteral("Metadata")      , QIcon::fromTheme( QStringLiteral("chronometer")           ));
     sess->registerType<DeviceListNode>       (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
+//     sess->registerType<XmlNode>              (QStringLiteral("Sources")       , QIcon::fromTheme( QStringLiteral("document-open")         ));
 #ifdef WITH_QWT
     sess->registerType<QwtPlotNode>          (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("document-edit")         ));
     sess->registerType<ScaleNode>            (QStringLiteral("Widgets")       , QIcon::fromTheme( QStringLiteral("bookmark-new")          ));
