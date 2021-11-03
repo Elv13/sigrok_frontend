@@ -160,7 +160,7 @@ QMainWindow* DesktopSerializer::getWindowWinId(const QString& uid) const
 {
     QString windowId;
 
-    for (const auto& e : qAsConst(elements())) {
+    for (const auto& e : elements()) {
         if (e[QStringLiteral("uid")].toString() == uid) {
             windowId = e[QStringLiteral("window")].toString();
             break;
@@ -191,7 +191,7 @@ void DesktopSerializer::reflow() const
     QMap<int, QMap<int, info_t>> docksByArea;
 
     // Sort each docks (per area)
-    for (const auto& e : qAsConst(elements())) {
+    for (const auto& e : elements()) {
         const auto  uid = e[QStringLiteral("uid")].toString();
         Q_ASSERT(!uid.isEmpty());
 

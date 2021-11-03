@@ -149,8 +149,6 @@ void AcquisitionModelPrivate::initialize(AcquisitionModel* self)
                 break;
             case SR_DF_LOGIC:
                 break;
-            case SR_DF_ANALOG_OLD:
-                break;
             case SR_DF_FRAME_BEGIN:
                 break;
             case SR_DF_FRAME_END:

@@ -177,10 +177,11 @@ void SequenceNode::write(QJsonObject &parent) const
 {
     AbstractNode::write(parent);
 
-    QJsonArray elements;
+    QJsonArray elements();
 
-    for (const auto& v : qAsConst(d_ptr->m_Model.stringList()))
-        elements.append(v);
+    const auto t = d_ptr->m_Model.stringList();
+//    for (const auto& v : qAsConst(t))
+//        elements << v;
 
     parent[QStringLiteral("elements")] = elements;
     parent[QStringLiteral("looping") ] = d_ptr->m_Looping;

@@ -1,0 +1,6 @@
+#include <QtCore>
+
+class Pages
+{
+    PROP(float mainValue = 0);
+};

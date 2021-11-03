@@ -1,4 +1,5 @@
 #include "current.h"
+#include <QAbstractItemModel>
 
 // #include "ratesink.h"
 #include "ui_current.h"

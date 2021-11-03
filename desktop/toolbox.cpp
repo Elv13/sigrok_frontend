@@ -6,6 +6,7 @@
 #include "delegates/categorizeddelegate.h"
 #include "delegates/autocompletiondelegate.h"
 
+#include <QAction>
 
 ToolBox::ToolBox(QWidget* parent) : QDockWidget(parent)
 {
